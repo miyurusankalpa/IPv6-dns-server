@@ -120,7 +120,12 @@ function proxy(question, response, cb, noa) {
 
 						test = { name: s3, type: 28,  class: 1,  ttl: 30,  address: addresses[0] };
 			}
-					
+			
+			var hw = check_for_highwinds_hostname(last_hostname);
+			if(hw) {
+				test = { name: last_hostname, type: 28,  class: 1,  ttl: 30,  address: '2001:4de0:ac19::1:b:1a' };
+			}
+			
 			if(msg.authority[0]) var authority=msg.authority[0].admin; else var authority = 'none';
 			
 			var cfl = check_for_cloudflare_a(authority);
@@ -175,6 +180,19 @@ function check_for_cloudfront_hostname(hostname){
 		
 	 if(dp1===0 && dp2==1) {
 		 		 console.log("cloudfront matched");
+		 var fixedhostname = sdomains.reverse().join(".");
+	return fixedhostname;
+	 } else return false;
+}
+function check_for_highwinds_hostname(hostname){
+	if(!hostname) return false;
+	 var sdomains = hostname.split(".");
+		 sdomains.reverse();
+		var dp1 = sdomains.indexOf("net");
+		var dp2 = sdomains.indexOf("hwcdn");
+		
+	 if(dp1===0 && dp2==1) {
+		 		 console.log("highwinds matched");
 		 var fixedhostname = sdomains.reverse().join(".");
 	return fixedhostname;
 	 } else return false;
