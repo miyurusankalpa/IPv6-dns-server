@@ -106,6 +106,20 @@ function proxy(question, response, cb, noa) {
 					response.answer.push(a);
 				}
 				
+			if(last_hostname==undefined) {
+				last_hostname = question.name;
+				var topdcheck = last_hostname.split(".");
+				if(topdcheck.length==2) {
+					last_hostname = 'www.'+last_hostname;
+					var cnames = dnsSync.resolve(last_hostname, 'CNAME');
+						if(cnames) {
+							last_hostname = cnames[0];
+							last_type=5;
+						}
+				}
+			}
+				
+			console.log('lh',last_hostname);
 			var ak = check_for_akamai_hostname(last_hostname);
 				if(ak) {
 						var addresses = dnsSync.resolve(ak, 'AAAA');
@@ -132,14 +146,24 @@ function proxy(question, response, cb, noa) {
 			if(cfl){
 				test = { name: last_hostname, type: 28,  class: 1,  ttl: 30,  address: '2606:4700::6810:ffff' };
 			}
+			
+			var fsta = check_for_fastly_a(authority);
+			if(!fsta) fsta = check_for_fastly_hostname(last_hostname);
+			if(fsta){
+				var v4addresses = dnsSync.resolve(last_hostname, 'A');
+				console.log(v4addresses);
+				var fv6 = fastlyv4tov6(v4addresses);
+				console.log(fv6);
+				test = { name: last_hostname, type: 28,  class: 1,  ttl: 30,  address: fv6 };
+			}
 			//var cfr = check_for_cloudfront_a(authority);
-			/*var cfr = check_for_cloudfront_hostname(last_hostname);
+			var cfr = check_for_cloudfront_hostname(last_hostname);
 			if(cfr){
 				//Mozilla cloudfront domain
 				var addresses = dnsSync.resolve('balrog-cloudfront.prod.mozaws.net', 'AAAA');
 
 				test = { name: last_hostname, type: 28,  class: 1,  ttl: 30,  address: addresses[0] };
-			}*/
+			}
 			
 			if((last_type===5) && (test)){ //cname
 				response.answer.push(test);
@@ -219,6 +243,20 @@ function check_for_s3_hostname(hostname){
 	return fixedhostname;
 	 } else return false;
 }
+function check_for_fastly_hostname(hostname){
+	if(!hostname) return false;
+	 var sdomains = hostname.split(".");
+		 sdomains.reverse();
+		var dp1 = sdomains.indexOf("net");
+		var dp2 = sdomains.indexOf("fastly");
+		var	dp3 = sdomains.indexOf("fastlylb");
+			
+	 if(dp1===0 && ( dp2==1 || dp3 ==1)) {
+		 	console.log("fastly matched");
+		 var fixedhostname = sdomains.reverse().join(".");
+	return fixedhostname;
+	 } else return false;
+}
 function check_for_cloudflare_a(authority){
 	console.log('a',authority);
 	if(!authority) return false;
@@ -228,6 +266,29 @@ function check_for_cloudfront_a(authority){
 	console.log('a',authority);
 	if(!authority) return false;
 	if(authority=='awsdns-hostmaster.amazon.com') {  console.log("cloudfront matched"); return true; } else return false;
+}
+function check_for_fastly_a(authority){
+	console.log('a',authority);
+	if(!authority) return false;
+	if(authority=='hostmaster.fastly.com') {  console.log("fastly matched"); return true; } else return false;
+}
+function fastlyv4tov6(ipv4){
+	console.log('f',ipv4);
+	if(!ipv4[0]) return false;
+
+	var hextects = ipv4[0].split(".");
+	console.log(hextects[3]);
+	
+	var fastly_range = '2a04:4e42::'; //anycasted range
+	
+	if(ipv4.length==1){
+		return fastly_range+hextects[3];
+	} else {
+		var v6hex = ((hextects[2]%64) * 256 + (hextects[3]*1)); //huge thanks @tambry for this expression
+		return fastly_range+v6hex;
+	}
+		
+	console.log(hextects[1]);
 }
 /*async function check_for_cloudflare_ip(ipv4){
 	if(!ipv4) return false;
