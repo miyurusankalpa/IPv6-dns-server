@@ -1,9 +1,14 @@
 'use strict';
 
-var dns_resolver = '2001:4860:4860::8888';
+//use a EDNS enabled DNS resolver for best results
+//var dns_resolver = '2001:4860:4860::8888';
+var dns_resolver = '8.8.8.8';
 
 let dns = require('native-dns');
 let async = require('async');
+var dnsSync = require('dns-sync');
+//const maxmind = require('maxmind');
+
 const { Resolver } = require('dns');
 const resolver = new Resolver();
 
@@ -33,12 +38,12 @@ function handleRequest(request, response) {
 	console.log('questions', request.question);
 
 	let f = [];
-
+	
 	request.question.forEach(question => {
+
+		if(question.type==1) { //ipv4 request
 		
-		//ipv4 request
-		if(question.type==1) {
-			resolver.resolve6(question.name, function(err, v6) {
+			/*resolver.resolve6(question.name, function(err, v6) {
 				if (err) console.log(err.stack);
 				console.log(v6);
 				if ((v6 === undefined || v6.length == 0)) {
@@ -48,17 +53,25 @@ function handleRequest(request, response) {
 					//ipv6 send localhost
 					f.push(cb => proxy(question, response, cb, false));
 				}
-				async.parallel(f, function() {
-					response.send();
-				});
-			});
-			
+			}); */ f.push(cb => proxy(question, response, cb, true));
+		} else if(question.type==28) { //ipv6 request
+				f.push(cb => proxy(question, response, cb, true));
+
 			} else {
 		
 			  f.push(cb => proxy(question, response, cb, true));
 			
-				async.parallel(f, function() { response.send(); });
-		}
+			}
+			
+				
+				
+		async.parallel(f, function() {
+				//if(question.type==28) response_check(response);
+				//console.log('r', response);
+				response.send();
+
+				});
+
 	});
 
 }
@@ -78,18 +91,35 @@ function proxy(question, response, cb, noa) {
 	
 	// when we get answers, append them to the response
 	request.on('message', (err, msg) => {
-		
 		if(!noa) {
 			msg.header.rcode=3;
 			msg.answer=[];
 		} else {
-			msg.answer.forEach(a => {
+			//msg.answer.forEach(a => {
+					//console.log('remote DNS response: ', a)	
+			//});
+			
+			
+			var last_hostname; var last_type; var test;
+			for (const a of msg.answer) {
+					last_hostname = a.data; last_type = a.type;
 					response.answer.push(a);
-					console.log('remote DNS response: ', a)
-			});
+				}
+				
+			var ak = check_for_akamai_hostname(last_hostname);
+				if(ak) {
+						var addresses = dnsSync.resolve(ak, 'AAAA');
+
+						test = { name: ak, type: 28,  class: 1,  ttl: 30,  address: addresses[0] };
+					}
+			
+			if((last_type===5) && (test)){ //cname
+				response.answer.push(test);
+				console.log('remote DNS response: ', test);
+			}
 		}
 		
-		//console.log(msg);
+		console.log('m', msg);
 	});
 
 	request.on('end', cb);
@@ -98,3 +128,18 @@ function proxy(question, response, cb, noa) {
 
 server4.on('request', handleRequest);
 server6.on('request', handleRequest);
+
+function check_for_akamai_hostname(hostname){
+	if(!hostname) return false;
+	 var sdomains = hostname.split(".");
+		 sdomains.reverse();
+		var dp1 = sdomains.indexOf("net");
+		var dp2 = sdomains.indexOf("akamaiedge");
+		
+	 if(dp1===0 && dp2==1) {
+		 		 console.log("akamai matched");
+			sdomains[2] = 'dsc'+ sdomains[2];
+		 var fixedhostname = sdomains.reverse().join(".");
+	return fixedhostname;
+	 } else return false;
+}
