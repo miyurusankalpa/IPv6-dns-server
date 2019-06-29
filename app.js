@@ -112,6 +112,14 @@ function proxy(question, response, cb, noa) {
 
 						test = { name: ak, type: 28,  class: 1,  ttl: 30,  address: addresses[0] };
 					}
+		
+					
+			if(msg.authority[0]) var authority=msg.authority[0].admin; else var authority = 'none';
+			
+			var cfl = check_for_cloudflare_a(authority);
+			if(cfl){
+				test = { name: last_hostname, type: 28,  class: 1,  ttl: 30,  address: '2606:4700::6810:ffff' };
+			}
 			
 			if((last_type===5) && (test)){ //cname
 				response.answer.push(test);
@@ -142,4 +150,9 @@ function check_for_akamai_hostname(hostname){
 		 var fixedhostname = sdomains.reverse().join(".");
 	return fixedhostname;
 	 } else return false;
+}
+function check_for_cloudflare_a(authority){
+	console.log('a',authority);
+	if(!authority) return false;
+	if(authority=='dns.cloudflare.com') {  console.log("cloudflare matched"); return true; } else return false;
 }
