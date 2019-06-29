@@ -112,7 +112,14 @@ function proxy(question, response, cb, noa) {
 
 						test = { name: ak, type: 28,  class: 1,  ttl: 30,  address: addresses[0] };
 					}
-			
+					
+			var s3 = check_for_s3_hostname(last_hostname);
+			if(s3) {
+				console.log(s3);
+						var addresses = dnsSync.resolve(s3, 'AAAA');
+
+						test = { name: s3, type: 28,  class: 1,  ttl: 30,  address: addresses[0] };
+			}
 					
 			if(msg.authority[0]) var authority=msg.authority[0].admin; else var authority = 'none';
 			
@@ -159,6 +166,41 @@ function check_for_akamai_hostname(hostname){
 	return fixedhostname;
 	 } else return false;
 }
+function check_for_cloudfront_hostname(hostname){
+	if(!hostname) return false;
+	 var sdomains = hostname.split(".");
+		 sdomains.reverse();
+		var dp1 = sdomains.indexOf("net");
+		var dp2 = sdomains.indexOf("cloudfront");
+		
+	 if(dp1===0 && dp2==1) {
+		 		 console.log("cloudfront matched");
+		 var fixedhostname = sdomains.reverse().join(".");
+	return fixedhostname;
+	 } else return false;
+}
+function check_for_s3_hostname(hostname){
+	if(!hostname) return false;
+	 var sdomains = hostname.split(".");
+		 sdomains.reverse();
+		var dp1 = sdomains.indexOf("com");
+		var dp2 = sdomains.indexOf("amazonaws");
+		//var dp3 = sdomains.indexOf("s3");
+		var dp4 = sdomains.indexOf("s3-1-w");
+		
+	 if(dp1===0 && dp2==1) {
+		 		 console.log("s3 matched");
+				 
+				 if(dp4===2) {  //matched  s3-1-w.amazonaws.com
+						sdomains[2] = 'us-east-1';
+				 }
+				 
+			sdomains[3] = 'dualstack';
+			sdomains[4] = 's3';
+		 var fixedhostname = sdomains.reverse().join(".");
+	return fixedhostname;
+	 } else return false;
+}
 function check_for_cloudflare_a(authority){
 	console.log('a',authority);
 	if(!authority) return false;
@@ -169,3 +211,15 @@ function check_for_cloudfront_a(authority){
 	if(!authority) return false;
 	if(authority=='awsdns-hostmaster.amazon.com') {  console.log("cloudfront matched"); return true; } else return false;
 }
+/*async function check_for_cloudflare_ip(ipv4){
+	if(!ipv4) return false;
+	 await  maxmind.open('GeoLite2-ASN.mmdb').then((lookup) => {
+		 var as = lookup.get(ipv4);
+		 console.log(as);
+		 if(as.autonomous_system_number===13335) {
+			 var test = { name: ak, type: 28,  class: 1,  ttl: 30,  address: '1.1.1.1' };
+					response.answer.push(test);
+					console.log('remote DNS response: ', test);
+		 }
+	});
+}*/
