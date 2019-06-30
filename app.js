@@ -71,39 +71,39 @@ function proxy(question, response, cb) {
 	// when we get answers, append them to the response
 	request.on('message', (err, msg) => {
 		
-		//if(!noa) {
-			//msg.header.rcode=3;
-			//msg.answer=[];
-		//} else {
 			
 			
 			if(question.type===28) //AAAA recore
 				{
-				var last_hostname; var last_type; var newaaaa;
+				var last_hostname; var last_type; var newaaaa; var matched = false;
 				for (const a of msg.answer) {
 						last_hostname = a.data; last_type = a.type;
 						response.answer.push(a);
 					}
 					
-					if(last_type===28) cb();
+					if(last_type===28) {
+						cb();
+						return;
+					}
 					
 				if(last_hostname==undefined) {
 					last_hostname = question.name;
-					/*var topdcheck = last_hostname.split(".");
+					last_type=5;
+					var topdcheck = last_hostname.split(".");
 					if(topdcheck.length==2) {
 						last_hostname = 'www.'+last_hostname;
 						var cnames = dnsSync.resolve(last_hostname, 'CNAME');
 							if(cnames) {
 								last_hostname = cnames[0];
-								last_type=5;
 							}
-					}*/
+					}
 				}
 					
 				console.log('lh',last_hostname);
 				
 				var ak = check_for_akamai_hostname(last_hostname);
 					if(ak) {
+						matched = true;
 							resolver.resolve6(ak, (err, addresses) => {
 									newaaaa = { name: ak, type: 28,  class: 1,  ttl: 30,  address: addresses[0] };
 									handleResponse(last_type, response, newaaaa , cb);
@@ -111,18 +111,19 @@ function proxy(question, response, cb) {
 						}
 						
 				
-				//bug 	: incoming.telemetry.mozilla.org
-				/*var s3 = check_for_s3_hostname(last_hostname);
+				var s3 = check_for_s3_hostname(last_hostname);
 				if(s3) {
+					matched = true;
 							resolver.resolve6(s3, (err, addresses) => {
 									newaaaa = { name: s3, type: 28,  class: 1,  ttl: 30,  address: addresses[0] };
 									handleResponse(last_type, response, newaaaa , cb);
 							});
-				}*/
+				}
 				
 				
 				var hw = check_for_highwinds_hostname(last_hostname);
 				if(hw) {
+					matched = true;
 					newaaaa = { name: last_hostname, type: 28,  class: 1,  ttl: 30,  address: '2001:4de0:ac19::1:b:1a' };
 					handleResponse(last_type, response, newaaaa , cb);
 				}
@@ -131,6 +132,7 @@ function proxy(question, response, cb) {
 				
 				var cfl = check_for_cloudflare_a(authority);
 				if(cfl){
+					matched = true;
 					newaaaa = { name: last_hostname, type: 28,  class: 1,  ttl: 30,  address: '2606:4700::6810:ffff' };
 					handleResponse(last_type, response, newaaaa , cb);
 				}
@@ -138,6 +140,7 @@ function proxy(question, response, cb) {
 				var fsta = check_for_fastly_a(authority);
 				if(!fsta) fsta = check_for_fastly_hostname(last_hostname);
 				if(fsta){
+					matched = true;
 							resolver.resolve4(last_hostname, (err, v4addresses) => {
 									console.log(v4addresses);
 									var fv6 = fastlyv4tov6(v4addresses);
@@ -150,6 +153,7 @@ function proxy(question, response, cb) {
 				//var cfr = check_for_cloudfront_a(authority);
 				var cfr = check_for_cloudfront_hostname(last_hostname);
 				if(cfr){
+					matched = true;
 					//Mozilla cloudfront domain
 					var aaaa_cloudfrtont_domain = 'balrog-cloudfront.prod.mozaws.net';
 					
@@ -158,12 +162,15 @@ function proxy(question, response, cb) {
 									handleResponse(last_type, response, newaaaa , cb);
 							});
 				}
+				
+				if(!matched) cb();
 			} else {
 				
-				//aaaa checl
+				//aaaa check
 				
 				resolver.resolve6(question.name, (err, addresses) => {
-					if(!addresses)
+					console.log('aaaa check' ,addresses);
+					if(addresses!==[])
 					{
 						msg.answer.forEach(a => {
 							response.answer.push(a);
@@ -175,15 +182,8 @@ function proxy(question, response, cb) {
 					}
 						cb();
 				});
-				
-				/*msg.answer.forEach(a => {
-					response.answer.push(a);
-					console.log('remote DNS response: ', a)	
-				});
-				cb();*/
 			}
 			
-		//}
 		
 		console.log('m', msg);
 	});
@@ -192,6 +192,7 @@ function proxy(question, response, cb) {
 	request.send();
 }
 function handleResponse(last_type, response, aaaaresponse, cb) {
+	console.log('lt', last_type);
 	if((last_type===5) && (aaaaresponse)){ //cname
 				response.answer.push(aaaaresponse);
 				console.log('remote DNS response: ', aaaaresponse);
@@ -249,20 +250,28 @@ function check_for_s3_hostname(hostname){
 		 sdomains.reverse();
 		var dp1 = sdomains.indexOf("com");
 		var dp2 = sdomains.indexOf("amazonaws");
-		//var dp3 = sdomains.indexOf("s3");
-		var dp4 = sdomains.indexOf("s3-1-w");
+		var dp3 = sdomains.indexOf("s3");
+		var dp4 = sdomains.indexOf("s3-control");
+		var dp5 = sdomains.indexOf("s3-1-w");
 		
 	 if(dp1===0 && dp2==1) {
-		 		 console.log("s3 matched");
+		 		 console.log("amazon matched");
 				 
-				 if(dp4===2) {  //matched  s3-1-w.amazonaws.com
+				 if(dp5===2) {  //matched  s3-1-w.amazonaws.com
 						sdomains[2] = 'us-east-1';
-				 }
+						sdomains[3] = 'dualstack';
+						sdomains[4] = 's3';
+						console.log("s3 matched");
+				 } else if(dp3===3 || dp4===3)
+				 {
+					sdomains[3] = 'dualstack';
+					sdomains[4] = 's3';
+					console.log("s3 matched");
+				 } else return false;
 				 
-			sdomains[3] = 'dualstack';
-			sdomains[4] = 's3';
-		 var fixedhostname = sdomains.reverse().join(".");
+	var fixedhostname = sdomains.reverse().join(".");
 	return fixedhostname;
+	
 	 } else return false;
 }
 function check_for_fastly_hostname(hostname){
