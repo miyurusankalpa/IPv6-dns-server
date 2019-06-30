@@ -45,6 +45,13 @@ let authority = {
     type: 'udp6'
 };
 
+var noaaaa = ["jekyllrb.com"];
+var addaaaa = {
+    'archive.is': "2001:41d0:1:8720::1",
+    'news.ycombinator.com': "2606:4700::6810:686e",
+    'meta.stackoverflow.com': "fastly"
+};
+
 function handleRequest(request, response) {
     var question = request.question[0];
     console.log('request from', request.address.address, 'for', question.name);
@@ -55,6 +62,12 @@ function handleRequest(request, response) {
     // proxy all questions
     // since proxying is asynchronous, store all callbacks
     request.question.forEach(question => {
+
+        if (question.type === 28) //AAAA records
+        {
+            if (noaaaa.indexOf(question.name) !== -1) return; //return fake repose
+        }
+
         f.push(cb => proxy(question, response, cb));
     });
 
@@ -81,18 +94,75 @@ function proxy(question, response, cb) {
     // when we get answers, append them to the response
     request.on('message', (err, msg) => {
 
-
-
-        if (question.type === 28) //AAAA recore
+        if (question.type === 28) //AAAA records
         {
             var last_hostname;
             var last_type;
             var newaaaa;
             var matched = false;
+
             for (const a of msg.answer) {
                 last_hostname = a.data;
                 last_type = a.type;
                 response.answer.push(a);
+            }
+
+            var getip = addaaaa[question.name];
+
+            var fsta;
+            var ak;
+            var s3;
+            var v0c;
+            var cfl;
+            var cfr;
+            var mse;
+            var gio;
+            var hw;
+
+            if (getip) {
+                console.log('custom');
+
+                switch (getip) {
+                    case 'fastly':
+                        fsta = true;
+                        break;
+                    case 'akamai':
+                        ak = true;
+                        break;
+                    case 's3':
+                        s3 = true;
+                        break;
+                    case 'cloudflare':
+                        cfl = true;
+                        break;
+                    case 'cloudfront':
+                        cfr = true;
+                        break;
+                    case 'msedge':
+                        mse = true;
+                        break;
+                    case 'gihubio':
+                        gio = true;
+                        break;
+                    case 'highwinds':
+                        hw = true;
+                        break;
+                    case 'edgecast_windows':
+                        v0c = true;
+                        break;
+
+                    default: {
+                        newaaaa = {
+                            name: question.name,
+                            type: 28,
+                            class: 1,
+                            ttl: 30,
+                            address: getip
+                        };
+                        handleResponse(5, response, newaaaa, cb);
+                        return;
+                    }
+                }
             }
 
             if (last_type === 28) {
@@ -115,7 +185,7 @@ function proxy(question, response, cb) {
 
             console.log('lh', last_hostname);
 
-            var ak = check_for_akamai_hostname(last_hostname);
+            if (!ak) ak = check_for_akamai_hostname(last_hostname);
             if (ak) {
                 matched = true;
                 resolver.resolve6(ak, (err, addresses) => {
@@ -128,10 +198,11 @@ function proxy(question, response, cb) {
                     };
                     handleResponse(last_type, response, newaaaa, cb);
                 });
+                return;
             }
 
 
-            var s3 = check_for_s3_hostname(last_hostname);
+            if (!s3) s3 = check_for_s3_hostname(last_hostname);
             if (s3) {
                 matched = true;
                 resolver.resolve6(s3, (err, addresses) => {
@@ -144,10 +215,11 @@ function proxy(question, response, cb) {
                     };
                     handleResponse(last_type, response, newaaaa, cb);
                 });
+                return;
             }
 
 
-            var hw = check_for_highwinds_hostname(last_hostname);
+            if (!hw) hw = check_for_highwinds_hostname(last_hostname);
             if (hw) {
                 matched = true;
                 newaaaa = {
@@ -158,6 +230,7 @@ function proxy(question, response, cb) {
                     address: '2001:4de0:ac19::1:b:1a'
                 };
                 handleResponse(last_type, response, newaaaa, cb);
+                return;
             }
 
             if (msg.authority[0]) var authority = msg.authority[0].admin;
@@ -165,7 +238,7 @@ function proxy(question, response, cb) {
             if (msg.authority[0]) var authorityname = msg.authority[0].name;
             else var authorityname = 'none';
 
-            var cfl = check_for_cloudflare_a(authority);
+            if (!cfl) cfl = check_for_cloudflare_a(authority);
             if (cfl) {
                 matched = true;
                 newaaaa = {
@@ -176,9 +249,10 @@ function proxy(question, response, cb) {
                     address: '2606:4700::6810:ffff'
                 };
                 handleResponse(last_type, response, newaaaa, cb);
+                return;
             }
 
-            var gio = check_for_githubio_a(authorityname);
+            if (!gio) gio = check_for_githubio_a(authorityname);
             if (gio) {
                 matched = true;
                 newaaaa = {
@@ -189,9 +263,10 @@ function proxy(question, response, cb) {
                     address: '2a04:4e42::133'
                 };
                 handleResponse(last_type, response, newaaaa, cb);
+                return;
             }
 
-            var fsta = check_for_fastly_a(authority);
+            if (!fsta) fsta = check_for_fastly_a(authority);
             if (!fsta) fsta = check_for_fastly_hostname(last_hostname);
             if (fsta) {
                 matched = true;
@@ -208,10 +283,10 @@ function proxy(question, response, cb) {
                     };
                     handleResponse(last_type, response, newaaaa, cb);
                 });
-
+                return;
             }
 
-            var mse = check_for_microsoftedge_a(authorityname);
+            if (!mse) mse = check_for_microsoftedge_a(authorityname);
             if (mse) {
                 matched = true;
                 resolver.resolve4(last_hostname, (err, v4addresses) => {
@@ -232,11 +307,12 @@ function proxy(question, response, cb) {
                         address: fv6
                     };
                     handleResponse(last_type, response, newaaaa, cb);
+                    return;
                 });
 
             }
 
-            var cfr = check_for_cloudfront_hostname(last_hostname);
+            if (!cfr) cfr = check_for_cloudfront_hostname(last_hostname);
             if (cfr) {
                 matched = true;
                 //Mozilla cloudfront domain
@@ -251,10 +327,11 @@ function proxy(question, response, cb) {
                         address: addresses[0]
                     };
                     handleResponse(last_type, response, newaaaa, cb);
+                    return;
                 });
             }
 
-            var v0c = check_for_v0cdn_hostname(last_hostname);
+            if (!v0c) v0c = check_for_v0cdn_hostname(last_hostname);
             if (v0c) {
                 matched = true;
                 resolver.resolve6(v0c, (err, addresses) => {
@@ -266,37 +343,39 @@ function proxy(question, response, cb) {
                         address: addresses[0]
                     };
                     handleResponse(last_type, response, newaaaa, cb);
+                    return;
                 });
             }
 
             if (!matched) cb();
         } else {
 
-            //aaaa check
+            //A record
 
-            resolver_own.resolve6(question.name, (err, addresses) => {
-                console.log('aaaa check', addresses);
-                if (addresses === undefined || addresses[0] === undefined) {
-                    console.log("no aaaa records");
-                    msg.answer.forEach(a => {
-                        response.answer.push(a);
-                        console.log('remote DNS response: ', a)
-                    });
-                } else {
-                    console.log("aaaa found records");
-                    msg.header.rcode = 3;
-                    msg.answer = [];
-                }
-                cb();
+            msg.answer.forEach(a => {
+                response.answer.push(a);
+                console.log('remote DNS response: ', a)
             });
+            cb();
+
         }
 
 
         console.log('m', msg);
     });
 
-    //request.on('end', cb);
-    request.send();
+    if (question.type === 1) //A records
+    {
+        resolver_own.resolve6(question.name, (err, addresses) => {
+            console.log('aaaa check', addresses);
+            if (addresses === undefined || addresses[0] === undefined) {
+                request.send();
+            } else {
+                cb();
+            }
+        });
+    } else request.send();
+
 }
 
 function handleResponse(last_type, response, aaaaresponse, cb) {
