@@ -129,11 +129,19 @@ function proxy(question, response, cb) {
 				}
 				
 				if(msg.authority[0]) var authority=msg.authority[0].admin; else var authority = 'none';
+				if(msg.authority[0]) var authorityname=msg.authority[0].name; else var authorityname = 'none';
 				
 				var cfl = check_for_cloudflare_a(authority);
 				if(cfl){
 					matched = true;
 					newaaaa = { name: last_hostname, type: 28,  class: 1,  ttl: 30,  address: '2606:4700::6810:ffff' };
+					handleResponse(last_type, response, newaaaa , cb);
+				}
+				
+				var gio = check_for_githubio_a(authorityname);
+				if(gio){
+					matched = true;
+					newaaaa = { name: last_hostname, type: 28,  class: 1,  ttl: 30,  address: '2a04:4e42::133' };
 					handleResponse(last_type, response, newaaaa , cb);
 				}
 				
@@ -150,7 +158,6 @@ function proxy(question, response, cb) {
 							});
 							
 				}
-				//var cfr = check_for_cloudfront_a(authority);
 				var cfr = check_for_cloudfront_hostname(last_hostname);
 				if(cfr){
 					matched = true;
@@ -293,15 +300,15 @@ function check_for_cloudflare_a(authority){
 	if(!authority) return false;
 	if(authority=='dns.cloudflare.com') {  console.log("cloudflare matched"); return true; } else return false;
 }
-function check_for_cloudfront_a(authority){
-	console.log('a',authority);
-	if(!authority) return false;
-	if(authority=='awsdns-hostmaster.amazon.com') {  console.log("cloudfront matched"); return true; } else return false;
-}
 function check_for_fastly_a(authority){
 	console.log('a',authority);
 	if(!authority) return false;
 	if(authority=='hostmaster.fastly.com') {  console.log("fastly matched"); return true; } else return false;
+}
+function check_for_githubio_a(authority){
+	console.log('a',authority);
+	if(!authority) return false;
+	if(authority=='github.io') {  console.log("githubio matched"); return true; } else return false;
 }
 function fastlyv4tov6(ipv4){
 	console.log('f',ipv4);
