@@ -1,24 +1,24 @@
 'use strict';
 
 //use a EDNS enabled DNS resolver for best results
-//var dns_resolver = '2001:4860:4860::8888';
-var dns_resolver = '8.8.8.8';
+var dns_resolver = '2001:4860:4860::8888';
+//var dns_resolver = '8.8.8.8';
 
 let dns = require('native-dns');
 let async = require('async');
 var dnsSync = require('dns-sync');
-//const maxmind = require('maxmind');
 
 const { Resolver } = require('dns');
+
 const resolver = new Resolver();
-//const resolver_own = new Resolver();
+const resolver_own = new Resolver();
 
 let server4 = dns.createServer({ dgram_type: 'udp4' });
 let server6 = dns.createServer({ dgram_type: 'udp6' });
 
 resolver.setServers([dns_resolver]);
 
-//resolver_own.setServers('127.0.0.1');
+resolver_own.setServers(['[::1]']);
 
 server4.on('listening', () => console.log('server listening on', server4.address()));
 server4.on('close', () => console.log('server closed', server4.address()));
@@ -158,6 +158,20 @@ function proxy(question, response, cb) {
 							});
 							
 				}
+				
+				var mse = check_for_microsoftedge_a(authorityname);
+				if(mse){
+					matched = true;
+							resolver.resolve4(last_hostname, (err, v4addresses) => {
+									console.log(v4addresses);
+									var fv6 = msev4tov6(v4addresses,authorityname);
+									console.log(fv6);
+									newaaaa = { name: last_hostname, type: 28,  class: 1,  ttl: 30,  address: fv6 };
+									handleResponse(last_type, response, newaaaa , cb);
+							});
+							
+				}
+				
 				var cfr = check_for_cloudfront_hostname(last_hostname);
 				if(cfr){
 					matched = true;
@@ -175,17 +189,17 @@ function proxy(question, response, cb) {
 				
 				//aaaa check
 				
-				resolver.resolve6(question.name, (err, addresses) => {
+				resolver_own.resolve6(question.name, (err, addresses) => {
 					console.log('aaaa check' ,addresses);
-					if(addresses!==[])
+					if (addresses===[])
 					{
+						msg.header.rcode=3;
+						msg.answer=[];
+					} else {
 						msg.answer.forEach(a => {
 							response.answer.push(a);
 							console.log('remote DNS response: ', a)	
 						});
-					} else {
-						msg.header.rcode=3;
-						msg.answer=[];
 					}
 						cb();
 				});
@@ -206,7 +220,6 @@ function handleResponse(last_type, response, aaaaresponse, cb) {
 				cb();
 	}
 }
-
 
 server4.on('request', handleRequest);
 server6.on('request', handleRequest);
@@ -310,33 +323,49 @@ function check_for_githubio_a(authority){
 	if(!authority) return false;
 	if(authority=='github.io') {  console.log("githubio matched"); return true; } else return false;
 }
+function check_for_microsoftedge_a(authority){
+	console.log('a',authority);
+	if(!authority) return false;
+	if(authority.match(/msedge.net/g)!==null) {  console.log("microsoft edge matched"); return true; } else return false;
+}
 function fastlyv4tov6(ipv4){
 	console.log('f',ipv4);
 	if(!ipv4[0]) return false;
 
-	var hextects = ipv4[0].split(".");
-	console.log(hextects[3]);
-	
+	var octets = ipv4[0].split(".");
+
+	console.log('last octets', octets[3]);
+
 	var fastly_range = '2a04:4e42::'; //anycasted range
 	
 	if(ipv4.length==1){
-		return fastly_range+hextects[3];
+		return fastly_range+octets[3];
 	} else {
-		var v6hex = ((hextects[2]%64) * 256 + (hextects[3]*1)); //huge thanks @tambry for this expression
+		var v6hex = ((octets[2]%64) * 256 + (octets[3]*1)); //huge thanks @tambry for this expression
 		return fastly_range+v6hex;
 	}
-		
-	console.log(hextects[1]);
 }
-/*async function check_for_cloudflare_ip(ipv4){
-	if(!ipv4) return false;
-	 await  maxmind.open('GeoLite2-ASN.mmdb').then((lookup) => {
-		 var as = lookup.get(ipv4);
-		 console.log(as);
-		 if(as.autonomous_system_number===13335) {
-			 var test = { name: ak, type: 28,  class: 1,  ttl: 30,  address: '1.1.1.1' };
-					response.answer.push(test);
-					console.log('remote DNS response: ', test);
-		 }
-	});
-}*/
+function msev4tov6(ipv4,hostname){
+	console.log('f',ipv4);
+	if(!ipv4[0]) return false;
+
+	var octets = ipv4[0].split(".");
+	var mseid = hostname.split("-");
+	console.log('mseid', mseid[0]);
+
+	console.log('last octets', octets[3]);
+	
+	 //anycasted range
+	if(mseid[0]=='l')	var mse_range = '2620:1ec:21::';
+	if(mseid[0]=='a')	var mse_range = '2620:1ec:c11::';
+	if(mseid[0]=='spo')	var mse_range = '2620:1ec:8f8::';
+
+	if(!mseid[0]) {
+		console.log('unkown mseid');
+		return;
+	}
+		
+	if(ipv4.length==1){
+		return mse_range+octets[3];
+	}
+}
