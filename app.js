@@ -92,10 +92,10 @@ function proxy(question, response, cb) {
 					var topdcheck = last_hostname.split(".");
 					if(topdcheck.length==2) {
 						last_hostname = 'www.'+last_hostname;
-						var cnames = dnsSync.resolve(last_hostname, 'CNAME');
+						/*var cnames = dnsSync.resolve(last_hostname, 'CNAME');
 							if(cnames) {
 								last_hostname = cnames[0];
-							}
+							}*/
 					}
 				}
 					
@@ -166,6 +166,12 @@ function proxy(question, response, cb) {
 									console.log(v4addresses);
 									var fv6 = msev4tov6(v4addresses,authorityname);
 									console.log(fv6);
+									
+									if(!fv6) {
+										cb();
+										return;
+									}
+									
 									newaaaa = { name: last_hostname, type: 28,  class: 1,  ttl: 30,  address: fv6 };
 									handleResponse(last_type, response, newaaaa , cb);
 							});
@@ -200,15 +206,17 @@ function proxy(question, response, cb) {
 				
 				resolver_own.resolve6(question.name, (err, addresses) => {
 					console.log('aaaa check' ,addresses);
-					if (addresses===[])
+					if (addresses===undefined || addresses[0]===undefined)
 					{
-						msg.header.rcode=3;
-						msg.answer=[];
-					} else {
+						console.log("no aaaa records");
 						msg.answer.forEach(a => {
 							response.answer.push(a);
 							console.log('remote DNS response: ', a)	
 						});
+					} else {
+						console.log("aaaa found records");
+						msg.header.rcode=3;
+						msg.answer=[];
 					}
 						cb();
 				});
@@ -381,9 +389,10 @@ function msev4tov6(ipv4,hostname){
 	 //anycasted range
 	if(mseid[0]=='l')	var mse_range = '2620:1ec:21::';
 	if(mseid[0]=='a')	var mse_range = '2620:1ec:c11::';
+	if(mseid[0]=='s')	var mse_range = '2620:1ec:6::';
 	if(mseid[0]=='spo')	var mse_range = '2620:1ec:8f8::';
 
-	if(!mseid[0]) {
+	if(!mse_range) {
 		console.log('unkown mseid');
 		return;
 	}
