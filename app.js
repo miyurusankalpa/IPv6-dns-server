@@ -184,6 +184,15 @@ function proxy(question, response, cb) {
 							});
 				}
 				
+				var v0c = check_for_v0cdn_hostname(last_hostname);
+				if(v0c){
+					matched = true;
+							resolver.resolve6(v0c, (err, addresses) => {
+									newaaaa = { name: last_hostname, type: 28,  class: 1,  ttl: 30,  address: addresses[0] };
+									handleResponse(last_type, response, newaaaa , cb);
+							});
+				}
+				
 				if(!matched) cb();
 			} else {
 				
@@ -260,6 +269,20 @@ function check_for_highwinds_hostname(hostname){
 		
 	 if(dp1===0 && dp2==1) {
 		 		 console.log("highwinds matched");
+		 var fixedhostname = sdomains.reverse().join(".");
+	return fixedhostname;
+	 } else return false;
+}
+function check_for_v0cdn_hostname(hostname){
+	if(!hostname) return false;
+	 var sdomains = hostname.split(".");
+		 sdomains.reverse();
+		var dp1 = sdomains.indexOf("net");
+		var dp2 = sdomains.indexOf("v0cdn");
+		
+	 if(dp1===0 && dp2==1) {
+		 	 console.log("v0cdn matched");
+			 sdomains[3] = 'cs21';
 		 var fixedhostname = sdomains.reverse().join(".");
 	return fixedhostname;
 	 } else return false;
