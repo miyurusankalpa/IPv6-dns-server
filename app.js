@@ -3,12 +3,14 @@
 //add cache results and auto ipv4 to cloudfront and fastly
 
 //use a EDNS enabled DNS resolver for best results
-var dns_resolver = '2001:4860:4860::8888';
+//var dns_resolver = '2001:4860:4860::8888';
+var dns_resolver = '2606:4700:4700::1111';
 //var dns_resolver = '8.8.8.8';
 
 let dns = require('native-dns');
 let async = require('async');
 var dnsSync = require('dns-sync');
+var localStorageMemory = require('localstorage-memory');
 
 const {
     Resolver
@@ -18,15 +20,15 @@ const resolver = new Resolver();
 const resolver_own = new Resolver();
 
 let server4 = dns.createServer({
-    dgram_type: 'udp4'
+    dgram_type: 'udp4',
+    reuseAddr: true
 });
 let server6 = dns.createServer({
-    dgram_type: 'udp6'
+    dgram_type: 'udp6',
+    reuseAddr: true
 });
 
 resolver.setServers([dns_resolver]);
-
-resolver_own.setServers(['[::1]']);
 
 server4.on('listening', () => console.log('server listening on', server4.address()));
 server4.on('close', () => console.log('server closed', server4.address()));
@@ -38,8 +40,10 @@ server6.on('close', () => console.log('server closed', server6.address()));
 server6.on('error', (err, buff, req, res) => console.error(err.stack));
 server6.on('socketError', (err, socket) => console.error(err));
 
-server4.serve(53);
+//server4.serve(53);
 server6.serve(53);
+
+resolver_own.setServers(['[::1]']);
 
 let authority = {
     address: dns_resolver,
@@ -67,7 +71,21 @@ function handleRequest(request, response) {
 
         if (question.type === 28) //AAAA records
         {
-            if (noaaaa.indexOf(question.name) !== -1) return; //return fake repose
+            if (noaaaa.indexOf(question.name) !== -1) {
+                response.header.rcode = 0;
+                response.send();
+                return;
+            }
+            var cachedaaaaresponse = JSON.parse(localStorageMemory.getItem(question.name));
+
+            if (cachedaaaaresponse) {
+                console.log(question.name, 'cached');
+                response.answer = cachedaaaaresponse;
+                response.send();
+                return;
+
+            }
+
         }
 
         f.push(cb => proxy(question, response, cb));
@@ -76,6 +94,7 @@ function handleRequest(request, response) {
     // do the proxying in parallel
     // when done, respond to the request by sending the response
     async.parallel(f, function() {
+        //console.log('response', response);
         response.send();
     });
 }
@@ -363,7 +382,7 @@ function proxy(question, response, cb) {
         }
 
 
-        console.log('m', msg);
+        //console.log('m', msg);
     });
 
     if (question.type === 1) //A records
@@ -373,6 +392,7 @@ function proxy(question, response, cb) {
             if (addresses === undefined || addresses[0] === undefined) {
                 request.send();
             } else {
+                response.header.rcode = 0;
                 cb();
             }
         });
@@ -382,8 +402,10 @@ function proxy(question, response, cb) {
 
 function handleResponse(last_type, response, aaaaresponse, cb) {
     console.log('lt', last_type);
+    console.log('cachekey', response.question[0].name);
     if ((last_type === 5) && (aaaaresponse)) { //cname
         response.answer.push(aaaaresponse);
+        localStorageMemory.setItem(response.question[0].name, JSON.stringify(response.answer));
         console.log('remote DNS response: ', aaaaresponse);
         cb();
     }
