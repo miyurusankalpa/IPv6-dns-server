@@ -8,9 +8,9 @@
     "start": "node app.js"
   },
   "keywords": [
-    "node",
+    "ipv6",
     "dns",
-    "server",
+    "server"
   ],
   "author": "Miyuru Sankalpa",
   "license": "Apache-2.0",

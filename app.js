@@ -1,5 +1,7 @@
 'use strict';
 
+//add cache results and auto ipv4 to cloudfront and fastly
+
 //use a EDNS enabled DNS resolver for best results
 var dns_resolver = '2001:4860:4860::8888';
 //var dns_resolver = '8.8.8.8';
@@ -396,8 +398,9 @@ function check_for_akamai_hostname(hostname) {
     sdomains.reverse();
     var dp1 = sdomains.indexOf("net");
     var dp2 = sdomains.indexOf("akamaiedge");
+    var dp3 = sdomains.indexOf("akamai");
 
-    if (dp1 === 0 && dp2 == 1) {
+    if (dp1 === 0 && (dp2 == 1 || dp3 == 1)) {
         console.log("akamai matched");
         sdomains[2] = 'dsc' + sdomains[2];
         var fixedhostname = sdomains.reverse().join(".");
@@ -538,13 +541,14 @@ function fastlyv4tov6(ipv4) {
     console.log('last octets', octets[3]);
 
     var fastly_range = '2a04:4e42::'; //anycasted range
+    var v6hex;
 
     if (ipv4.length == 1) {
-        return fastly_range + octets[3];
+        v6hex = ((octets[2] % 4) * 256 + (octets[3] * 1));
     } else {
-        var v6hex = ((octets[2] % 64) * 256 + (octets[3] * 1)); //huge thanks @tambry for this expression
-        return fastly_range + v6hex;
+        v6hex = ((octets[2] % 64) * 256 + (octets[3] * 1)); //huge thanks @tambry for this expression
     }
+    return fastly_range + v6hex;
 }
 
 function msev4tov6(ipv4, hostname) {
@@ -561,7 +565,10 @@ function msev4tov6(ipv4, hostname) {
     if (mseid[0] == 'l') var mse_range = '2620:1ec:21::';
     if (mseid[0] == 'a') var mse_range = '2620:1ec:c11::';
     if (mseid[0] == 's') var mse_range = '2620:1ec:6::';
-    if (mseid[0] == 'spo') var mse_range = '2620:1ec:8f8::';
+    if (mseid[0] == 'spo') {
+        var mse_range = '2620:1ec:8f8::';
+        if (octets[3] == 9) octets[3] = 8;
+    }
 
     if (!mse_range) {
         console.log('unkown mseid');
