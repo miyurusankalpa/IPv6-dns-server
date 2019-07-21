@@ -4,8 +4,8 @@
 
 //use a EDNS enabled DNS resolver for best results
 //var dns_resolver = '2001:4860:4860::8888';
-//var dns_resolver = '2606:4700:4700::1111';
-var dns_resolver = '8.8.8.8';
+var dns_resolver = '2606:4700:4700::1111';
+//var dns_resolver = '8.8.8.8';
 
 let dns = require('native-dns');
 let async = require('async');
@@ -44,7 +44,7 @@ server6.on('socketError', (err, socket) => console.error(err));
 server4.serve(53);
 server6.serve(53);
 
-//resolver_own.setServers(['127.0.0.1']);
+resolver_own.setServers(['127.0.0.1']);
 resolver_own.setServers(['[::1]']);
 
 let authority = {
@@ -56,8 +56,10 @@ let authority = {
 var noaaaa = ["jekyllrb.com"];
 var addaaaa = {
     'archive.is': "2001:41d0:1:8720::1",
-    'news.ycombinator.com': "2606:4700::6810:686e",
+	'registry.npmjs.org': "cloudflare",
+    'news.ycombinator.com': "cloudflare",
     'static.twitchcdn.net': "fastly",
+	'android.clients.google.com': "2404:6800:4003:c04::8b",
 };
 
 //from http://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips
@@ -155,6 +157,7 @@ function proxy(question, response, cb) {
             var mse;
             var gio;
             var hw;
+            var bun;
 
             if (getip) {
                 console.log('custom');
@@ -186,6 +189,9 @@ function proxy(question, response, cb) {
                         break;
                     case 'edgecast_windows':
                         v0c = true;
+                        break;
+                    case 'bunnycdn':
+                        bun = true;
                         break;
 
                     default: {
@@ -367,6 +373,25 @@ function proxy(question, response, cb) {
                     return;
                 });
             }
+			
+			if (!bun) bun = check_for_bunnycdn_hostname(last_hostname);
+            if (bun) {
+                matched = true;
+                //crtlblog ipv6 enabled domain
+                var aaaa_bunny_domain = 'ctrl.b-cdn.net';
+
+                resolver.resolve6(aaaa_bunny_domain, (err, addresses) => {
+                    newaaaa = {
+                        name: last_hostname,
+                        type: 28,
+                        class: 1,
+                        ttl: 300,
+                        address: addresses[0]
+                    };
+                    handleResponse(last_type, response, newaaaa, cb);
+                    return;
+                });
+            }
 
             if (!v0c) v0c = check_for_v0cdn_hostname(last_hostname);
             if (v0c) {
@@ -399,7 +424,9 @@ function proxy(question, response, cb) {
                 var qhostname;
 
                 qhostname = msg.question[0].name;
-                if (typeof msg.answer[0] !== 'undefined') qaddr = msg.answer[0].address;
+                if (typeof msg.answer[0] !== 'undefined') {
+					if(msg.answer[0].type == 1) qaddr = msg.answer[0].address; else qaddr = msg.answer[1].address;
+				}
 
                 if (check_for_fastly_ip(qaddr) === true) {
                     console.log("added to fastly object");
@@ -498,6 +525,21 @@ function check_for_cloudfront_hostname(hostname) {
         return fixedhostname;
     } else return false;
 }
+
+function check_for_bunnycdn_hostname(hostname) {
+    if (!hostname) return false;
+    var sdomains = hostname.split(".");
+    sdomains.reverse();
+    var dp1 = sdomains.indexOf("net");
+    var dp2 = sdomains.indexOf("b-cdn");
+
+    if (dp1 === 0 && dp2 == 1) {
+        console.log("bunnycdn matched");
+        var fixedhostname = sdomains.reverse().join(".");
+        return fixedhostname;
+    } else return false;
+}
+
 
 function check_for_highwinds_hostname(hostname) {
     if (!hostname) return false;
