@@ -20,32 +20,19 @@ const {
 const resolver = new Resolver();
 const resolver_own = new Resolver();
 
-let server4 = dns.createServer({
-    dgram_type: 'udp4',
-    reuseAddr: true
-});
+resolver.setServers([dns_resolver]);
+resolver_own.setServers(['[::1]']);
+
 let server6 = dns.createServer({
     dgram_type: 'udp6',
-    reuseAddr: true
 });
-
-resolver.setServers([dns_resolver]);
-
-server4.on('listening', () => console.log('server listening on', server4.address()));
-server4.on('close', () => console.log('server closed', server4.address()));
-server4.on('error', (err, buff, req, res) => console.error(err.stack));
-server4.on('socketError', (err, socket) => console.error(err));
 
 server6.on('listening', () => console.log('server listening on', server6.address()));
 server6.on('close', () => console.log('server closed', server6.address()));
 server6.on('error', (err, buff, req, res) => console.error(err.stack));
 server6.on('socketError', (err, socket) => console.error(err));
 
-server4.serve(53);
 server6.serve(53);
-
-resolver_own.setServers(['127.0.0.1']);
-resolver_own.setServers(['[::1]']);
 
 let authority = {
     address: dns_resolver,
@@ -56,10 +43,11 @@ let authority = {
 var noaaaa = ["jekyllrb.com"];
 var addaaaa = {
     'archive.is': "2001:41d0:1:8720::1",
-	'registry.npmjs.org': "cloudflare",
+    'registry.npmjs.org': "cloudflare",
     'news.ycombinator.com': "cloudflare",
     'static.twitchcdn.net': "fastly",
-	'android.clients.google.com': "2404:6800:4003:c04::8b",
+    'www.bbc.com': "fastly",
+    'android.clients.google.com': "2404:6800:4003:c04::8b",
 };
 
 //from http://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips
@@ -71,7 +59,7 @@ var cloudfrontiplist = {
 function handleRequest(request, response) {
     var question = request.question[0];
     console.log('request from', request.address.address, 'for', question.name);
-    console.log('questions', request.question);
+    //console.log('questions', request.question);
 
     let f = []; // array of functions
 
@@ -96,7 +84,7 @@ function handleRequest(request, response) {
             var cachedaaaaresponse = JSON.parse(localStorageMemory.getItem(question.name));
 
             if (cachedaaaaresponse) {
-                console.log(question.name, 'cached');
+                //console.log(question.name, 'cached');
                 response.answer = cachedaaaaresponse;
                 response.send();
                 return;
@@ -110,7 +98,7 @@ function handleRequest(request, response) {
     // do the proxying in parallel
     // when done, respond to the request by sending the response
     async.parallel(f, function() {
-        //console.log('response', response);
+        ////console.log('response', response);
         response.send();
     });
 }
@@ -125,7 +113,7 @@ function proxy(question, response, cb) {
     });
 
     request.on('timeout', function() {
-        console.log('Timeout in making request no forwarding', question.name);
+        //console.log('Timeout in making request no forwarding', question.name);
     });
 
     // when we get answers, append them to the response
@@ -146,7 +134,7 @@ function proxy(question, response, cb) {
 
             var getip = addaaaa[question.name];
 
-            console.log(addaaaa);
+            //console.log(addaaaa);
 
             var fsta;
             var ak;
@@ -160,7 +148,7 @@ function proxy(question, response, cb) {
             var bun;
 
             if (getip) {
-                console.log('custom');
+                //console.log('custom');
 
                 switch (getip) {
                     case 'fastly':
@@ -226,7 +214,7 @@ function proxy(question, response, cb) {
                 }*/
             }
 
-            console.log('lh', last_hostname);
+            //console.log('lh', last_hostname);
 
             if (!ak) ak = check_for_akamai_hostname(last_hostname);
             if (ak) {
@@ -314,9 +302,9 @@ function proxy(question, response, cb) {
             if (fsta) {
                 matched = true;
                 resolver.resolve4(last_hostname, (err, v4addresses) => {
-                    console.log(v4addresses);
+                    //console.log(v4addresses);
                     var fv6 = fastlyv4tov6(v4addresses);
-                    console.log(fv6);
+                    //console.log(fv6);
                     newaaaa = {
                         name: last_hostname,
                         type: 28,
@@ -333,9 +321,9 @@ function proxy(question, response, cb) {
             if (mse) {
                 matched = true;
                 resolver.resolve4(last_hostname, (err, v4addresses) => {
-                    console.log(v4addresses);
+                    //console.log(v4addresses);
                     var fv6 = msev4tov6(v4addresses, authorityname);
-                    console.log(fv6);
+                    //console.log(fv6);
 
                     if (!fv6) {
                         cb();
@@ -373,8 +361,8 @@ function proxy(question, response, cb) {
                     return;
                 });
             }
-			
-			if (!bun) bun = check_for_bunnycdn_hostname(last_hostname);
+
+            if (!bun) bun = check_for_bunnycdn_hostname(last_hostname);
             if (bun) {
                 matched = true;
                 //crtlblog ipv6 enabled domain
@@ -417,7 +405,7 @@ function proxy(question, response, cb) {
 
                 msg.answer.forEach(a => {
                     response.answer.push(a);
-                    //console.log('remote DNS response: ', a)
+                    ////console.log('remote DNS response: ', a)
                 });
 
                 var qaddr;
@@ -425,11 +413,12 @@ function proxy(question, response, cb) {
 
                 qhostname = msg.question[0].name;
                 if (typeof msg.answer[0] !== 'undefined') {
-					if(msg.answer[0].type == 1) qaddr = msg.answer[0].address; else qaddr = msg.answer[1].address;
-				}
+                    if (msg.answer[0].type == 1) qaddr = msg.answer[0].address;
+                    else if ((typeof msg.answer[1] !== 'undefined')) qaddr = msg.answer[1].address;
+                }
 
                 if (check_for_fastly_ip(qaddr) === true) {
-                    console.log("added to fastly object");
+                    ////console.log("added to fastly object");
                     addaaaa[qhostname] = "fastly";
                     response.answer.forEach(function(item, index) {
                         response.answer[index].ttl = 2;
@@ -439,7 +428,7 @@ function proxy(question, response, cb) {
                 }
 
                 if (check_for_cfr_ip(qaddr) === true) {
-                    console.log("added to cloudfront object");
+                    ////console.log("added to cloudfront object");
                     addaaaa[qhostname] = "cloudfront";
                     response.answer.forEach(function(item, index) {
                         response.answer[index].ttl = 2;
@@ -454,13 +443,13 @@ function proxy(question, response, cb) {
         }
 
 
-        console.log('m', msg);
+        //console.log('m', msg);
     });
 
     /* if (question.type === 1) //A records
     {
         resolver_own.resolve6(question.name, (err, addresses) => {
-            console.log('aaaa check', addresses);
+            //console.log('aaaa check', addresses);
 
             if (addresses === undefined || addresses[0] === undefined) {
                 request.send();
@@ -483,17 +472,16 @@ function proxy(question, response, cb) {
 }
 
 function handleResponse(last_type, response, aaaaresponse, cb) {
-    console.log('lt', last_type);
-    console.log('cachekey', response.question[0].name);
+    //console.log('lt', last_type);
+    //console.log('cachekey', response.question[0].name);
     if ((last_type === 5) && (aaaaresponse)) { //cname
         response.answer.push(aaaaresponse);
         localStorageMemory.setItem(response.question[0].name, JSON.stringify(response.answer));
-        console.log('remote DNS response: ', aaaaresponse);
+        //console.log('remote DNS response: ', aaaaresponse);
         cb();
     }
 }
 
-server4.on('request', handleRequest);
 server6.on('request', handleRequest);
 
 function check_for_akamai_hostname(hostname) {
@@ -505,7 +493,7 @@ function check_for_akamai_hostname(hostname) {
     var dp3 = sdomains.indexOf("akamai");
 
     if (dp1 === 0 && (dp2 == 1 || dp3 == 1)) {
-        console.log("akamai matched");
+        //console.log("akamai matched");
         sdomains[2] = 'dsc' + sdomains[2];
         var fixedhostname = sdomains.reverse().join(".");
         return fixedhostname;
@@ -520,7 +508,7 @@ function check_for_cloudfront_hostname(hostname) {
     var dp2 = sdomains.indexOf("cloudfront");
 
     if (dp1 === 0 && dp2 == 1) {
-        console.log("cloudfront matched");
+        //console.log("cloudfront matched");
         var fixedhostname = sdomains.reverse().join(".");
         return fixedhostname;
     } else return false;
@@ -534,7 +522,7 @@ function check_for_bunnycdn_hostname(hostname) {
     var dp2 = sdomains.indexOf("b-cdn");
 
     if (dp1 === 0 && dp2 == 1) {
-        console.log("bunnycdn matched");
+        //console.log("bunnycdn matched");
         var fixedhostname = sdomains.reverse().join(".");
         return fixedhostname;
     } else return false;
@@ -549,7 +537,7 @@ function check_for_highwinds_hostname(hostname) {
     var dp2 = sdomains.indexOf("hwcdn");
 
     if (dp1 === 0 && dp2 == 1) {
-        console.log("highwinds matched");
+        //console.log("highwinds matched");
         var fixedhostname = sdomains.reverse().join(".");
         return fixedhostname;
     } else return false;
@@ -563,7 +551,7 @@ function check_for_v0cdn_hostname(hostname) {
     var dp2 = sdomains.indexOf("v0cdn");
 
     if (dp1 === 0 && dp2 == 1) {
-        console.log("v0cdn matched");
+        //console.log("v0cdn matched");
         sdomains[3] = 'cs21';
         var fixedhostname = sdomains.reverse().join(".");
         return fixedhostname;
@@ -581,17 +569,17 @@ function check_for_s3_hostname(hostname) {
     var dp5 = sdomains.indexOf("s3-1-w");
 
     if (dp1 === 0 && dp2 == 1) {
-        console.log("amazon matched");
+        //console.log("amazon matched");
 
         if (dp5 === 2) { //matched  s3-1-w.amazonaws.com
             sdomains[2] = 'us-east-1';
             sdomains[3] = 'dualstack';
             sdomains[4] = 's3';
-            console.log("s3 matched");
+            //console.log("s3 matched");
         } else if (dp3 === 3 || dp4 === 3) {
             sdomains[3] = 'dualstack';
             sdomains[4] = 's3';
-            console.log("s3 matched");
+            //console.log("s3 matched");
         } else return false;
 
         var fixedhostname = sdomains.reverse().join(".");
@@ -609,55 +597,55 @@ function check_for_fastly_hostname(hostname) {
     var dp3 = sdomains.indexOf("fastlylb");
 
     if (dp1 === 0 && (dp2 == 1 || dp3 == 1)) {
-        console.log("fastly matched");
+        //console.log("fastly matched");
         var fixedhostname = sdomains.reverse().join(".");
         return fixedhostname;
     } else return false;
 }
 
 function check_for_cloudflare_a(authority) {
-    console.log('a', authority);
+    //console.log('a', authority);
     if (!authority) return false;
     if (authority == 'dns.cloudflare.com') {
-        console.log("cloudflare matched");
+        //console.log("cloudflare matched");
         return true;
     } else return false;
 }
 
 function check_for_fastly_a(authority) {
-    console.log('a', authority);
+    //console.log('a', authority);
     if (!authority) return false;
     if (authority == 'hostmaster.fastly.com') {
-        console.log("fastly matched");
+        //console.log("fastly matched");
         return true;
     } else return false;
 }
 
 function check_for_githubio_a(authority) {
-    console.log('a', authority);
+    //console.log('a', authority);
     if (!authority) return false;
     if (authority == 'github.io') {
-        console.log("githubio matched");
+        //console.log("githubio matched");
         return true;
     } else return false;
 }
 
 function check_for_microsoftedge_a(authority) {
-    console.log('a', authority);
+    //console.log('a', authority);
     if (!authority) return false;
     if (authority.match(/msedge.net/g) !== null) {
-        console.log("microsoft edge matched");
+        //console.log("microsoft edge matched");
         return true;
     } else return false;
 }
 
 function fastlyv4tov6(ipv4) {
-    console.log('f', ipv4);
+    //console.log('f', ipv4);
     if (!ipv4[0]) return false;
 
     var octets = ipv4[0].split(".");
 
-    console.log('last octets', octets[3]);
+    //console.log('last octets', octets[3]);
 
     var fastly_range = '2a04:4e42::'; //anycasted range
     var v6hex;
@@ -671,14 +659,14 @@ function fastlyv4tov6(ipv4) {
 }
 
 function msev4tov6(ipv4, hostname) {
-    console.log('f', ipv4);
+    //console.log('f', ipv4);
     if (!ipv4[0]) return false;
 
     var octets = ipv4[0].split(".");
     var mseid = hostname.split("-");
-    console.log('mseid', mseid[0]);
+    //console.log('mseid', mseid[0]);
 
-    console.log('last octets', octets[3]);
+    //console.log('last octets', octets[3]);
 
     //anycasted range
     if (mseid[0] == 'l') var mse_range = '2620:1ec:21::';
@@ -690,7 +678,7 @@ function msev4tov6(ipv4, hostname) {
     }
 
     if (!mse_range) {
-        console.log('unkown mseid');
+        //console.log('unkown mseid');
         return;
     }
 
@@ -700,18 +688,18 @@ function msev4tov6(ipv4, hostname) {
 }
 
 function check_for_fastly_ip(ipv4) {
-    console.log('fastly ip check', ipv4);
+    //console.log('fastly ip check', ipv4);
     if (!ipv4) return false;
 
     return ipRangeCheck(ipv4, "151.101.0.0/16");
 }
 
 function check_for_cfr_ip(ipv4) {
-    console.log('cloudfront ip check', ipv4);
+    //console.log('cloudfront ip check', ipv4);
     if (!ipv4) return false;
 
-    console.log('cloudfront global check', ipRangeCheck(ipv4, cloudfrontiplist.CLOUDFRONT_GLOBAL_IP_LIST));
-    console.log('cloudfront reg check', ipRangeCheck(ipv4, cloudfrontiplist.CLOUDFRONT_REGIONAL_EDGE_IP_LIST));
+    //console.log('cloudfront global check', ipRangeCheck(ipv4, cloudfrontiplist.CLOUDFRONT_GLOBAL_IP_LIST));
+    //console.log('cloudfront reg check', ipRangeCheck(ipv4, cloudfrontiplist.CLOUDFRONT_REGIONAL_EDGE_IP_LIST));
 
     if (ipRangeCheck(ipv4, cloudfrontiplist.CLOUDFRONT_GLOBAL_IP_LIST)) return true;
     else return ipRangeCheck(ipv4, cloudfrontiplist.CLOUDFRONT_REGIONAL_EDGE_IP_LIST);
