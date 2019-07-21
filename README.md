@@ -6,7 +6,7 @@ A simple Node DNS Server proxy based on [Peteris Rocks tutorial](https://peteris
 
 Clone the repo and branch
 
-	git clone https://gh6.mortzu.de/miyurusankalpa/IPv6-dns-server.git -b ipv6-cdns
+	git clone https://gh6.mortzu.de/miyurusankalpa/IPv6-dns-server.git
 
 Build the project 
 
@@ -82,7 +82,7 @@ Change the `dns_resolver` variable in the app.js file.
 
 ## Microsoft Windows (Edgecast)
 
-* Test domains: 
+* Test domains: software-download.microsoft.com
 * IPv6 Type: Unicast
 * Coverage: Only on some services
 * Usability: Unknown
@@ -95,7 +95,7 @@ Change the `dns_resolver` variable in the app.js file.
 * Usability: Stable
 * Note: HTTPS breaks on custom domains, hence no IPv6 address added 
 
-## Stackwxcahnge sites (Faslty)
+## Stack Exchange sites (Faslty)
 
 * Test domains: stackoverflow.com
 * IPv6 Type: Anycast

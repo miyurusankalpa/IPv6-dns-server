@@ -12,7 +12,7 @@
     "dns",
     "server"
   ],
-  "author": "Miyuru Sankalpa",
+  "author": "Miyuru Sankalpa (https://www.miyuru.lk)",
   "license": "Apache-2.0",
   "dependencies": {
     "async": "^1.5.2",
