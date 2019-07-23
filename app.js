@@ -134,7 +134,7 @@ function proxy(question, response, cb) {
 
             var getip = addaaaa[question.name];
 
-            //console.log(addaaaa);
+            console.log(addaaaa);
 
             var fsta;
             var ak;
@@ -403,23 +403,20 @@ function proxy(question, response, cb) {
             if (question.type === 1) //A records
             {
 
+                var ansaddr;
+                var qhostname;
+				
                 msg.answer.forEach(a => {
                     response.answer.push(a);
-                    ////console.log('remote DNS response: ', a)
+                    //console.log('remote DNS response: ', a)
+					ansaddr = a.address;
                 });
 
-                var qaddr;
-                var qhostname;
+				qhostname = question.name;
 
-                qhostname = msg.question[0].name;
-                if (typeof msg.answer[0] !== 'undefined') {
-                    if (msg.answer[0].type == 1) qaddr = msg.answer[0].address;
-                    else if ((typeof msg.answer[1] !== 'undefined')) qaddr = msg.answer[1].address;
-                }
-
-                if (check_for_fastly_ip(qaddr) === true) {
-                    ////console.log("added to fastly object");
-                    addaaaa[qhostname] = "fastly";
+                if (check_for_fastly_ip(ansaddr) === true) {
+                    //console.log("added to fastly object");
+                    if(!check_for_fastly_hostname(qhostname)) addaaaa[qhostname] = "fastly";
                     response.answer.forEach(function(item, index) {
                         response.answer[index].ttl = 2;
                     });
@@ -427,9 +424,9 @@ function proxy(question, response, cb) {
                     return;
                 }
 
-                if (check_for_cfr_ip(qaddr) === true) {
-                    ////console.log("added to cloudfront object");
-                    addaaaa[qhostname] = "cloudfront";
+                if (check_for_cfr_ip(ansaddr) === true) {
+                    //console.log("added to cloudfront object");
+                    if(!check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
                     response.answer.forEach(function(item, index) {
                         response.answer[index].ttl = 2;
                     });
@@ -567,11 +564,12 @@ function check_for_s3_hostname(hostname) {
     var dp3 = sdomains.indexOf("s3");
     var dp4 = sdomains.indexOf("s3-control");
     var dp5 = sdomains.indexOf("s3-1-w");
+    var dp6 = sdomains.indexOf("s3-1");
 
     if (dp1 === 0 && dp2 == 1) {
         //console.log("amazon matched");
 
-        if (dp5 === 2) { //matched  s3-1-w.amazonaws.com
+        if (dp5 === 2 || dp6 === 2) { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
             sdomains[2] = 'us-east-1';
             sdomains[3] = 'dualstack';
             sdomains[4] = 's3';
@@ -695,7 +693,7 @@ function check_for_fastly_ip(ipv4) {
 }
 
 function check_for_cfr_ip(ipv4) {
-    //console.log('cloudfront ip check', ipv4);
+    console.log('cloudfront ip check', ipv4);
     if (!ipv4) return false;
 
     //console.log('cloudfront global check', ipRangeCheck(ipv4, cloudfrontiplist.CLOUDFRONT_GLOBAL_IP_LIST));

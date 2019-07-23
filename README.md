@@ -48,9 +48,8 @@ Change the `dns_resolver` variable in the app.js file.
 
 * Test domains: github-production-release-asset-2e65be.s3.amazonaws.com
 * IPv6 Type: Unicast
-* Coverage: *.s3.amazonaws.com hostnames/cnames only. See Note.
+* Coverage: *.s3.amazonaws.com hostnames/cnames only.
 * Usability: Stable
-* Note: Some domains are still not matched. Looking into it.
 
 ## Amazon Cloudfront 
 
