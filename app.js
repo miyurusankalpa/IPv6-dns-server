@@ -1,6 +1,6 @@
 'use strict';
 
-//add cache results and auto ipv4 to cloudfront and fastly
+//add fake doamin to test dns
 
 //use a EDNS enabled DNS resolver for best results
 //var dns_resolver = '2001:4860:4860::8888';
@@ -44,6 +44,7 @@ var noaaaa = ["jekyllrb.com"];
 var addaaaa = {
     'archive.is': "2001:41d0:1:8720::1",
     'registry.npmjs.org': "cloudflare",
+    'cdn.jsdelivr.net': "cloudflare", //https://github.com/jsdelivr/jsdelivr/issues/18163
     'news.ycombinator.com': "cloudflare",
     'static.twitchcdn.net': "fastly",
     'www.bbc.com': "fastly",
@@ -123,7 +124,6 @@ function proxy(question, response, cb) {
         {
             var last_hostname;
             var last_type;
-            var newaaaa;
             var matched = false;
 
             for (const a of msg.answer) {
@@ -181,16 +181,8 @@ function proxy(question, response, cb) {
                     case 'bunnycdn':
                         bun = true;
                         break;
-
                     default: {
-                        newaaaa = {
-                            name: question.name,
-                            type: 28,
-                            class: 1,
-                            ttl: 300,
-                            address: getip
-                        };
-                        handleResponse(5, response, newaaaa, cb);
+                        handleResponse(5, response, generate_aaaa(question.name, getip), cb);
                         return;
                     }
                 }
@@ -205,13 +197,6 @@ function proxy(question, response, cb) {
                 last_hostname = question.name;
                 last_type = 5;
                 var topdcheck = last_hostname.split(".");
-                /*if (topdcheck.length == 2) {
-                    last_hostname = 'www.' + last_hostname;
-                    var cnames = dnsSync.resolve(last_hostname, 'CNAME');
-                    	if(cnames) {
-                    		last_hostname = cnames[0];
-                    	}
-                }*/
             }
 
             //console.log('lh', last_hostname);
@@ -237,14 +222,7 @@ function proxy(question, response, cb) {
             if (s3) {
                 matched = true;
                 resolver.resolve6(s3, (err, addresses) => {
-                    newaaaa = {
-                        name: s3,
-                        type: 28,
-                        class: 1,
-                        ttl: 300,
-                        address: addresses[0]
-                    };
-                    handleResponse(last_type, response, newaaaa, cb);
+                    handleResponse(last_type, response, generate_aaaa(s3, addresses[0]), cb);
                 });
                 return;
             }
@@ -253,14 +231,7 @@ function proxy(question, response, cb) {
             if (!hw) hw = check_for_highwinds_hostname(last_hostname);
             if (hw) {
                 matched = true;
-                newaaaa = {
-                    name: last_hostname,
-                    type: 28,
-                    class: 1,
-                    ttl: 300,
-                    address: '2001:4de0:ac19::1:b:1a'
-                };
-                handleResponse(last_type, response, newaaaa, cb);
+                handleResponse(last_type, response, generate_aaaa(last_hostname, '2001:4de0:ac19::1:b:1a'), cb);
                 return;
             }
 
@@ -272,28 +243,14 @@ function proxy(question, response, cb) {
             if (!cfl) cfl = check_for_cloudflare_a(authority);
             if (cfl) {
                 matched = true;
-                newaaaa = {
-                    name: last_hostname,
-                    type: 28,
-                    class: 1,
-                    ttl: 300,
-                    address: '2606:4700::6810:ffff'
-                };
-                handleResponse(last_type, response, newaaaa, cb);
+                handleResponse(last_type, response, generate_aaaa(last_hostname, '2606:4700::6810:ffff'), cb);
                 return;
             }
 
             if (!gio) gio = check_for_githubio_a(authorityname);
             if (gio) {
                 matched = true;
-                newaaaa = {
-                    name: last_hostname,
-                    type: 28,
-                    class: 1,
-                    ttl: 300,
-                    address: '2a04:4e42::133'
-                };
-                handleResponse(last_type, response, newaaaa, cb);
+                handleResponse(last_type, response, generate_aaaa(last_hostname, '2a04:4e42::133'), cb);
                 return;
             }
 
@@ -305,14 +262,13 @@ function proxy(question, response, cb) {
                     //console.log(v4addresses);
                     var fv6 = fastlyv4tov6(v4addresses);
                     //console.log(fv6);
-                    newaaaa = {
-                        name: last_hostname,
-                        type: 28,
-                        class: 1,
-                        ttl: 300,
-                        address: fv6
-                    };
-                    handleResponse(last_type, response, newaaaa, cb);
+					
+					if (!fv6) {
+                        cb();
+                        return;
+                    }
+					
+                    handleResponse(last_type, response, generate_aaaa(last_hostname, fv6), cb);
                 });
                 return;
             }
@@ -322,22 +278,15 @@ function proxy(question, response, cb) {
                 matched = true;
                 resolver.resolve4(last_hostname, (err, v4addresses) => {
                     //console.log(v4addresses);
-                    var fv6 = msev4tov6(v4addresses, authorityname);
-                    //console.log(fv6);
+                    var mv6 = msev4tov6(v4addresses, authorityname);
+                    //console.log(mv6);
 
-                    if (!fv6) {
+                    if (!mv6) {
                         cb();
                         return;
                     }
 
-                    newaaaa = {
-                        name: last_hostname,
-                        type: 28,
-                        class: 1,
-                        ttl: 300,
-                        address: fv6
-                    };
-                    handleResponse(last_type, response, newaaaa, cb);
+                    handleResponse(last_type, response, generate_aaaa(last_hostname, mv6), cb);
                     return;
                 });
 
@@ -350,14 +299,7 @@ function proxy(question, response, cb) {
                 var aaaa_cloudfrtont_domain = 'balrog-cloudfront.prod.mozaws.net';
 
                 resolver.resolve6(aaaa_cloudfrtont_domain, (err, addresses) => {
-                    newaaaa = {
-                        name: last_hostname,
-                        type: 28,
-                        class: 1,
-                        ttl: 300,
-                        address: addresses[0]
-                    };
-                    handleResponse(last_type, response, newaaaa, cb);
+                    handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb);
                     return;
                 });
             }
@@ -369,14 +311,7 @@ function proxy(question, response, cb) {
                 var aaaa_bunny_domain = 'ctrl.b-cdn.net';
 
                 resolver.resolve6(aaaa_bunny_domain, (err, addresses) => {
-                    newaaaa = {
-                        name: last_hostname,
-                        type: 28,
-                        class: 1,
-                        ttl: 300,
-                        address: addresses[0]
-                    };
-                    handleResponse(last_type, response, newaaaa, cb);
+                    handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb);
                     return;
                 });
             }
@@ -385,14 +320,7 @@ function proxy(question, response, cb) {
             if (v0c) {
                 matched = true;
                 resolver.resolve6(v0c, (err, addresses) => {
-                    newaaaa = {
-                        name: last_hostname,
-                        type: 28,
-                        class: 1,
-                        ttl: 300,
-                        address: addresses[0]
-                    };
-                    handleResponse(last_type, response, newaaaa, cb);
+                    handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb);
                     return;
                 });
             }
@@ -701,4 +629,16 @@ function check_for_cfr_ip(ipv4) {
 
     if (ipRangeCheck(ipv4, cloudfrontiplist.CLOUDFRONT_GLOBAL_IP_LIST)) return true;
     else return ipRangeCheck(ipv4, cloudfrontiplist.CLOUDFRONT_REGIONAL_EDGE_IP_LIST);
+}
+
+function generate_aaaa(hostname, ipv6) {
+    if (!ipv6) return false;
+	var newaaaa = {       
+			name: hostname,
+			type: 28,
+			class: 1,
+			ttl: 300,
+			address: ipv6
+	};
+	return newaaaa;
 }
