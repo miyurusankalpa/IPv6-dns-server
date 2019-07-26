@@ -42,6 +42,7 @@ let authority = {
 
 var noaaaa = ["jekyllrb.com"];
 var addaaaa = {
+    'dnscheck.miyuru.lk': "2001:bc8:4730:3113::1",
     'archive.is': "2001:41d0:1:8720::1",
     'registry.npmjs.org': "cloudflare",
     'cdn.jsdelivr.net': "cloudflare", //https://github.com/jsdelivr/jsdelivr/issues/18163
@@ -99,7 +100,7 @@ function handleRequest(request, response) {
     // do the proxying in parallel
     // when done, respond to the request by sending the response
     async.parallel(f, function() {
-        ////console.log('response', response);
+        //console.log('response', response);
         response.send();
     });
 }
@@ -134,7 +135,7 @@ function proxy(question, response, cb) {
 
             var getip = addaaaa[question.name];
 
-            console.log(addaaaa);
+            //console.log(addaaaa);
 
             var fsta;
             var ak;
@@ -205,14 +206,7 @@ function proxy(question, response, cb) {
             if (ak) {
                 matched = true;
                 resolver.resolve6(ak, (err, addresses) => {
-                    newaaaa = {
-                        name: ak,
-                        type: 28,
-                        class: 1,
-                        ttl: 300,
-                        address: addresses[0]
-                    };
-                    handleResponse(last_type, response, newaaaa, cb);
+                    handleResponse(last_type, response, generate_aaaa(ak, addresses[0]), cb);
                 });
                 return;
             }
@@ -367,7 +361,6 @@ function proxy(question, response, cb) {
 
         }
 
-
         //console.log('m', msg);
     });
 
@@ -452,7 +445,6 @@ function check_for_bunnycdn_hostname(hostname) {
         return fixedhostname;
     } else return false;
 }
-
 
 function check_for_highwinds_hostname(hostname) {
     if (!hostname) return false;
@@ -640,5 +632,6 @@ function generate_aaaa(hostname, ipv6) {
 			ttl: 300,
 			address: ipv6
 	};
+	//console.log(newaaaa);
 	return newaaaa;
 }
