@@ -2,9 +2,9 @@
 
 A simple Node DNS Server proxy based on [Peteris Rocks tutorial](https://peteris.rocks/blog/dns-proxy-server-in-node-js-with-ui/), which serves IPv6 records if a CDN is matched.
 
-## Running localy
+## Running locally
 
-Clone the repo and branch
+Clone the repo
 
 	git clone https://gh6.mortzu.de/miyurusankalpa/IPv6-dns-server.git
 
@@ -16,9 +16,17 @@ Starting the server
 
 	npm start
 
-# Changing DNS Resolvers
+## Changing DNS Resolvers
 
 Change the `dns_resolver` variable in the app.js file.
+
+## Disable IPv6 for a domain
+
+Add the domain to `noaaaa` array in the app.js file.
+
+## Add a custom IPv6 for a domain
+
+Add the domain to `addaaaa` object with IPv6 address in the app.js file.
 
 # Testing if DNS proxy is working
 
@@ -37,7 +45,7 @@ Change the `dns_resolver` variable in the app.js file.
 * Coverage: All
 * Usability: Stable
 
-## Faslty 
+## Fastly 
 
 * Test domains: imgur.com, www.twitch.tv
 * IPv6 Type: Anycast, Unicast
@@ -86,7 +94,7 @@ Change the `dns_resolver` variable in the app.js file.
 * Coverage: Only on some services
 * Usability: Unknown
 
-## Github.io (Faslty)
+## Github.io (Fastly)
 
 * Test domains: twitter.github.io
 * IPv6 Type: Anycast
@@ -94,7 +102,7 @@ Change the `dns_resolver` variable in the app.js file.
 * Usability: Stable
 * Note: HTTPS breaks on custom domains, hence no IPv6 address added 
 
-## Stack Exchange sites (Faslty)
+## Stack Exchange sites (Fastly)
 
 * Test domains: stackoverflow.com
 * IPv6 Type: Anycast

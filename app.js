@@ -560,7 +560,8 @@ function check_for_microsoftedge_a(authority) {
 function fastlyv4tov6(ipv4) {
     //console.log('f', ipv4);
     if (!ipv4[0]) return false;
-
+	if(!check_for_fastly_ip(ipv4[0])) return false;
+		
     var octets = ipv4[0].split(".");
 
     //console.log('last octets', octets[3]);
