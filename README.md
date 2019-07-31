@@ -32,11 +32,10 @@ Add the domain to `addaaaa` object with IPv6 address in the app.js file.
 
 ## Cloudflare
 
-* Test domains: troyhunt.com, news.ycombinator.com
+* Test domains: db-ip.com
 * IPv6 Type: Anycast
-* Usability: TLS connectivity issues on some sites that does not have cloudflare ssl cert 
-* Coverage: All+See note
-* Note: All cloudflare services which uses their **DNS service**, regardless of cloudflare proxy has been disabled(grey cloud) will get a proxied.
+* Usability: Stable
+* Coverage: All
 
 ## Akamai
 
@@ -100,7 +99,6 @@ Add the domain to `addaaaa` object with IPv6 address in the app.js file.
 * IPv6 Type: Anycast
 * Coverage: Only *.github.io domains
 * Usability: unstable (some custom domains still get proxied)
-* Note: HTTPS breaks on custom domains, hence no IPv6 address added 
 
 ## Stack Exchange sites (Fastly)
 

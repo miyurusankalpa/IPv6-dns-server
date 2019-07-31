@@ -73,13 +73,6 @@ function handleRequest(request, response) {
         {
             if (noaaaa.indexOf(question.name) !== -1) {
                 response.header.rcode = 0;
-                response.answer = [{
-                    name: question.name,
-                    type: 1,
-                    class: 1,
-                    ttl: 300,
-                    address: '127.0.0.1'
-                }];
                 response.send();
                 return;
             }
@@ -234,13 +227,13 @@ function proxy(question, response, cb) {
             if (msg.authority[0]) var authorityname = msg.authority[0].name;
             else var authorityname = 'none';
 
-            if (!cfl) cfl = check_for_cloudflare_a(authority);
+            //if (!cfl) cfl = check_for_cloudflare_a(authority);
             if (cfl) {
                 matched = true;
                 handleResponse(last_type, response, generate_aaaa(last_hostname, '2606:4700::6810:ffff'), cb);
                 return;
             }
-
+			
             if (!gio) gio = check_for_githubio_a(authorityname);
             if (gio) {
                 matched = true;
@@ -346,7 +339,7 @@ function proxy(question, response, cb) {
                     return;
                 }
 
-                if (check_for_cfr_ip(ansaddr) === true) {
+                if (check_for_cloudfront_ip(ansaddr) === true) {
                     //console.log("added to cloudfront object");
                     if(!check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
                     response.answer.forEach(function(item, index) {
@@ -355,13 +348,24 @@ function proxy(question, response, cb) {
                     cb();
                     return;
                 }
+				
+				if (check_for_cloudflare_ip(ansaddr) === true) {
+                    console.log("added to cloudflare object");
+                    addaaaa[qhostname] = "cloudflare";
+                    response.answer.forEach(function(item, index) {
+                        response.answer[index].ttl = 2;
+                    });
+                    cb();
+                    return;
+                }
+				
             }
 
             cb();
 
         }
 
-        //console.log('m', msg);
+        console.log('m', msg);
     });
 
     /* if (question.type === 1) //A records
@@ -613,7 +617,7 @@ function check_for_fastly_ip(ipv4) {
     return ipRangeCheck(ipv4, "151.101.0.0/16");
 }
 
-function check_for_cfr_ip(ipv4) {
+function check_for_cloudfront_ip(ipv4) {
     console.log('cloudfront ip check', ipv4);
     if (!ipv4) return false;
 
@@ -622,6 +626,13 @@ function check_for_cfr_ip(ipv4) {
 
     if (ipRangeCheck(ipv4, cloudfrontiplist.CLOUDFRONT_GLOBAL_IP_LIST)) return true;
     else return ipRangeCheck(ipv4, cloudfrontiplist.CLOUDFRONT_REGIONAL_EDGE_IP_LIST);
+}
+
+function check_for_cloudflare_ip(ipv4) {
+    //console.log('cloudflare ip check', ipv4);
+    if (!ipv4) return false;
+
+    return ipRangeCheck(ipv4, "104.16.0.0/12");
 }
 
 function generate_aaaa(hostname, ipv6) {
