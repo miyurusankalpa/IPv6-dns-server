@@ -36,6 +36,7 @@ Add the domain to `addaaaa` object with IPv6 address in the app.js file.
 * IPv6 Type: Anycast
 * Usability: Stable
 * Coverage: All
+* Aggressive mode: All cloudflare services which uses their **DNS service**, regardless of cloudflare proxy has been disabled(grey cloud) will get a proxied.
 
 ## Akamai
 
@@ -98,14 +99,16 @@ Add the domain to `addaaaa` object with IPv6 address in the app.js file.
 * Test domains: twitter.github.io
 * IPv6 Type: Anycast
 * Coverage: Only *.github.io domains
-* Usability: unstable (some custom domains still get proxied)
+* Usability: Stable
+* Aggressive mode: HTTPS breaks on custom domains
 
 ## Stack Exchange sites (Fastly)
 
 * Test domains: stackoverflow.com
 * IPv6 Type: Anycast
-* Coverage: All
+* Coverage: All+Only on Aggressive mode
 * Usability: Logout or delete cookies
+* Aggressive mode: Errors on some pages
 
 # Credits
 * [Pēteris Ņikiforovs](https://peteris.rocks/)

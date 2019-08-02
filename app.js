@@ -1,11 +1,9 @@
 'use strict';
 
-//add fake doamin to test dns
-
 //use a EDNS enabled DNS resolver for best results
 //var dns_resolver = '2001:4860:4860::8888';
-var dns_resolver = '2606:4700:4700::1111';
-//var dns_resolver = '8.8.8.8';
+//var dns_resolver = '2606:4700:4700::1111';
+var dns_resolver = '8.8.8.8';
 
 let dns = require('native-dns');
 let async = require('async');
@@ -51,6 +49,8 @@ var addaaaa = {
     'www.bbc.com': "fastly",
     'android.clients.google.com': "2404:6800:4003:c04::8b",
 };
+
+var aggressive_v6 = true;
 
 //from http://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips
 var cloudfrontiplist = {
@@ -227,7 +227,7 @@ function proxy(question, response, cb) {
             if (msg.authority[0]) var authorityname = msg.authority[0].name;
             else var authorityname = 'none';
 
-            //if (!cfl) cfl = check_for_cloudflare_a(authority);
+            if (!cfl && aggressive_v6) cfl = check_for_cloudflare_a(authority);
             if (cfl) {
                 matched = true;
                 handleResponse(last_type, response, generate_aaaa(last_hostname, '2606:4700::6810:ffff'), cb);
@@ -331,6 +331,8 @@ function proxy(question, response, cb) {
 
                 if (check_for_fastly_ip(ansaddr) === true) {
                     //console.log("added to fastly object");
+					if((check_for_stackexchange_ip(ansaddr)) && (!aggressive_v6)) noaaaa.push(qhostname);
+
                     if(!check_for_fastly_hostname(qhostname)) addaaaa[qhostname] = "fastly";
                     response.answer.forEach(function(item, index) {
                         response.answer[index].ttl = 2;
@@ -358,7 +360,6 @@ function proxy(question, response, cb) {
                     cb();
                     return;
                 }
-				
             }
 
             cb();
@@ -633,6 +634,13 @@ function check_for_cloudflare_ip(ipv4) {
     if (!ipv4) return false;
 
     return ipRangeCheck(ipv4, "104.16.0.0/12");
+}
+
+function check_for_stackexchange_ip(ipv4) {
+    if (!ipv4) return false;
+
+    var octets = ipv4.split(".");
+	if(octets[3] == 69) return true; else return false;
 }
 
 function generate_aaaa(hostname, ipv6) {
