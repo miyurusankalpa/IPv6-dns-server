@@ -28,6 +28,14 @@ Add the domain to `noaaaa` array in the app.js file.
 
 Add the domain to `addaaaa` object with IPv6 address in the app.js file.
 
+## Turn on aggressive mode
+
+Change the `aggressive_v6` variable to true in the app.js file. See individual services below to see what aggressive mode does.
+
+## Turn on IPv6 only mode
+
+Change the `v6_only` variable to true in the app.js file.
+
 # Testing if DNS proxy is working
 
 ## Cloudflare
@@ -70,7 +78,7 @@ Add the domain to `addaaaa` object with IPv6 address in the app.js file.
 
 * Test domains: cdn-b-east.streamable.com
 * IPv6 Type: Unicast
-* Coverage: IPv6 is not available in some locations. All on Aggressive.
+* Coverage: IPv6 is not available in some locations. All on Aggressive mode.
 * Usability: Stable
 * Aggressive mode: Adds AMS POP address in aggressive mode, where IPv6 address is not available.
 
@@ -99,7 +107,7 @@ Add the domain to `addaaaa` object with IPv6 address in the app.js file.
 
 * Test domains: twitter.github.io
 * IPv6 Type: Anycast
-* Coverage: Only *.github.io domains
+* Coverage: Only *.github.io domains. All on Aggressive mode.
 * Usability: Stable
 * Aggressive mode: HTTPS breaks on custom domains
 
@@ -107,7 +115,7 @@ Add the domain to `addaaaa` object with IPv6 address in the app.js file.
 
 * Test domains: stackoverflow.com
 * IPv6 Type: Anycast
-* Coverage: All+Only on Aggressive mode
+* Coverage: All+Only on Aggressive mode.
 * Usability: Logout or delete cookies
 * Aggressive mode: Errors on some pages
 
