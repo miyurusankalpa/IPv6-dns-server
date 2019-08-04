@@ -70,8 +70,9 @@ Add the domain to `addaaaa` object with IPv6 address in the app.js file.
 
 * Test domains: cdn-b-east.streamable.com
 * IPv6 Type: Unicast
-* Coverage: IPv6 is not available in some locations.
+* Coverage: IPv6 is not available in some locations. All on Aggressive.
 * Usability: Stable
+* Aggressive mode: Adds AMS POP address in aggressive mode, where IPv6 address is not available.
 
 ## Highwinds
 

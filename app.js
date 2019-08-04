@@ -7,7 +7,6 @@ var dns_resolver = '8.8.8.8';
 
 //ipv6onlyonde
 //fastlyget autoiprange
-//aggressive bunny
 
 let dns = require('native-dns');
 let async = require('async');
@@ -88,7 +87,6 @@ function handleRequest(request, response) {
                 response.send();
                 return;
             }
-
         }
 
         f.push(cb => proxy(question, response, cb));
@@ -302,6 +300,7 @@ function proxy(question, response, cb) {
                 var aaaa_bunny_domain = 'ctrl.b-cdn.net';
 
                 resolver.resolve6(aaaa_bunny_domain, (err, addresses) => {
+					if((addresses[0] == undefined) && (aggressive_v6)) addresses[0] = '2a02:6ea0:c020::2'; //bunnycdn AMS POP IP
                     handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb);
                     return;
                 });
