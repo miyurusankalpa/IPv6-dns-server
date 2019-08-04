@@ -2,11 +2,8 @@
 
 //use a EDNS enabled DNS resolver for best results
 //var dns_resolver = '2001:4860:4860::8888';
-//var dns_resolver = '2606:4700:4700::1111';
-var dns_resolver = '8.8.8.8';
-
-//ipv6onlyonde
-//fastlyget autoiprange
+var dns_resolver = '2606:4700:4700::1111';
+//var dns_resolver = '8.8.8.8';
 
 let dns = require('native-dns');
 let async = require('async');
@@ -54,7 +51,7 @@ var addaaaa = {
 };
 
 var aggressive_v6 = true;
-var v6_only = true;
+var v6_only = false;
 
 //from http://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips
 var cloudfrontiplist = {
@@ -139,7 +136,7 @@ function proxy(question, response, cb) {
                 response.answer.push(a);
             }
 
-            var getip = addaaaa[question.name];
+			var getcdn = addaaaa[question.name];
 
             //console.log(addaaaa);
 
@@ -154,15 +151,17 @@ function proxy(question, response, cb) {
             var hw;
             var bun;
 
-            if (getip) {
-                //console.log('custom');
+            if (getcdn) {
+					var providers = addaaaa[question.name].split("|");
+					var provider_name = providers[0];
 
-                switch (getip) {
+                //console.log('custom', provider_name);
+                switch (provider_name) {
                     case 'fastly':
                         fsta = true;
                         break;
                     case 'akamai':
-                        ak = true;
+                        ak = check_for_akamai_hostname(providers[1]);
                         break;
                     case 's3':
                         s3 = true;
@@ -386,9 +385,7 @@ function proxy(question, response, cb) {
                     return;
                 }
             }
-			
             cb();
-
         }
 
         console.log('m', msg);
@@ -596,7 +593,7 @@ function fastlyv4tov6(ipv4) {
 
     //console.log('last octets', octets[3]);
 
-    var fastly_range = '2a04:4e42::'; //anycasted range
+    var fastly_range = getfastlyv6address();
     var v6hex;
 
     if (ipv4.length == 1) {
@@ -606,6 +603,20 @@ function fastlyv4tov6(ipv4) {
     }
     return fastly_range + v6hex;
 }
+
+function getfastlyv6address() {
+    var aaaa_fastly_domain = 'dualstack.g.shared.global.fastly.net';
+	var v6range = localStorageMemory.getItem('fastlyv6range');
+	
+		if(!v6range){
+		console.log("not cached");
+		resolver.resolve6(aaaa_fastly_domain, (err, addresses) => {
+				var v6range = addresses[0].slice(0, -3);
+				localStorageMemory.setItem('fastlyv6range', v6range);
+				return v6range;
+		  });
+		} else return v6range;
+	}
 
 function msev4tov6(ipv4, hostname) {
     //console.log('f', ipv4);
