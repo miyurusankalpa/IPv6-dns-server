@@ -5,6 +5,10 @@
 //var dns_resolver = '2606:4700:4700::1111';
 var dns_resolver = '8.8.8.8';
 
+//ipv6onlyonde
+//fastlyget autoiprange
+//aggressive bunny
+
 let dns = require('native-dns');
 let async = require('async');
 var dnsSync = require('dns-sync');
@@ -38,7 +42,7 @@ let authority = {
     type: 'udp6'
 };
 
-var noaaaa = ["jekyllrb.com"];
+var noaaaa = [];
 var addaaaa = {
     'dnscheck.miyuru.lk': "2001:bc8:4730:3113::1",
     'archive.is': "2001:41d0:1:8720::1",
@@ -360,8 +364,19 @@ function proxy(question, response, cb) {
                     cb();
                     return;
                 }
-            }
+				
+				if ((check_for_githubpages_ip(ansaddr) === true) && (aggressive_v6)) {
+                    console.log("added to github.io object");
+					addaaaa[qhostname] = "githubio";
 
+                    response.answer.forEach(function(item, index) {
+                        response.answer[index].ttl = 2;
+                    });
+                    cb();
+                    return;
+                }
+            }
+			
             cb();
 
         }
@@ -634,6 +649,16 @@ function check_for_cloudflare_ip(ipv4) {
     if (!ipv4) return false;
 
     return ipRangeCheck(ipv4, "104.16.0.0/12");
+}
+
+function check_for_githubpages_ip(ipv4) {
+    //console.log('githubio ip check', ipv4);
+    if (!ipv4) return false;
+
+    if(!ipRangeCheck(ipv4, "185.199.108.0/22")) return false;
+	
+	var octets = ipv4.split(".");
+	if(octets[3] == 153) return true; else return false;
 }
 
 function check_for_stackexchange_ip(ipv4) {
