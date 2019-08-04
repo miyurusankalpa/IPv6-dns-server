@@ -54,6 +54,7 @@ var addaaaa = {
 };
 
 var aggressive_v6 = true;
+var v6_only = true;
 
 //from http://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips
 var cloudfrontiplist = {
@@ -79,11 +80,21 @@ function handleRequest(request, response) {
                 response.send();
                 return;
             }
+			
             var cachedaaaaresponse = JSON.parse(localStorageMemory.getItem(question.name));
 
             if (cachedaaaaresponse) {
                 //console.log(question.name, 'cached');
                 response.answer = cachedaaaaresponse;
+                response.send();
+                return;
+            }
+        }
+		
+		if (question.type === 1) //A records
+        {
+            if (v6_only) {
+                response.header.rcode = 0;
                 response.send();
                 return;
             }
