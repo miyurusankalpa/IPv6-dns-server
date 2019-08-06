@@ -39,7 +39,14 @@ let authority = {
 };
 
 var noaaaa = [];
-var addaaaa = {
+var addaaaa = {};
+
+var aggressive_v6 = true;
+var v6_only = true;
+
+if(aggressive_v6)
+{
+	var addaaaa = {
     'dnscheck.miyuru.lk': "2001:bc8:4730:3113::1",
     'archive.is': "2001:41d0:1:8720::1",
     'registry.npmjs.org': "cloudflare",
@@ -47,11 +54,14 @@ var addaaaa = {
     'news.ycombinator.com': "cloudflare",
     'static.twitchcdn.net': "fastly",
     'www.bbc.com': "fastly",
+	'cdn.statically.io': "bunnycdn",
+	'store.steampowered.com': "2a02:26f0:6b:2a0::3a7",
+	'steamcommunity.com': "2a02:26f0:6b:2a0::3a7",
     'android.clients.google.com': "2404:6800:4003:c04::8b",
-};
-
-var aggressive_v6 = true;
-var v6_only = false;
+	'router.utorrent.com': "2001:41d0:c:5ac:5::1",
+	'router.bittorrent.com': "2001:41d0:c:5ac:5::1",
+	};
+}
 
 //from http://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips
 var cloudfrontiplist = {
@@ -150,6 +160,7 @@ function proxy(question, response, cb) {
             var gio;
             var hw;
             var bun;
+			var val;
 
             if (getcdn) {
 					var providers = addaaaa[question.name].split("|");
@@ -188,7 +199,7 @@ function proxy(question, response, cb) {
                         bun = true;
                         break;
                     default: {
-                        handleResponse(5, response, generate_aaaa(question.name, getip), cb);
+                        handleResponse(5, response, generate_aaaa(question.name, provider_name), cb);
                         return;
                     }
                 }
@@ -226,11 +237,10 @@ function proxy(question, response, cb) {
                 return;
             }
 
-
             if (!hw) hw = check_for_highwinds_hostname(last_hostname);
             if (hw) {
                 matched = true;
-                handleResponse(last_type, response, generate_aaaa(last_hostname, '2001:4de0:ac19::1:b:1a'), cb);
+                handleResponse(last_type, response, generate_aaaa(last_hostname, '2001:4de0:ac19::1:b:2a'), cb);
                 return;
             }
 
@@ -242,7 +252,7 @@ function proxy(question, response, cb) {
             if (!cfl && aggressive_v6) cfl = check_for_cloudflare_a(authority);
             if (cfl) {
                 matched = true;
-                handleResponse(last_type, response, generate_aaaa(last_hostname, '2606:4700::6810:ffff'), cb);
+                handleResponse(last_type, response, generate_aaaa(last_hostname, getcloudflarev6address()), cb);
                 return;
             }
 			
@@ -252,6 +262,13 @@ function proxy(question, response, cb) {
                 handleResponse(last_type, response, generate_aaaa(last_hostname, '2a04:4e42::133'), cb);
                 return;
             }
+			
+			/*if (!val) val = check_for_valve_a(authority);
+            if (val) {
+                matched = true;
+                handleResponse(last_type, response, generate_aaaa(last_hostname, '2a02:26f0:6b:2a0::2db2'), cb);
+                return;
+            }*/
 
             if (!fsta) fsta = check_for_fastly_a(authority);
             if (!fsta) fsta = check_for_fastly_hostname(last_hostname);
@@ -294,26 +311,19 @@ function proxy(question, response, cb) {
             if (!cfr) cfr = check_for_cloudfront_hostname(last_hostname);
             if (cfr) {
                 matched = true;
-                //Mozilla cloudfront domain
-                var aaaa_cloudfrtont_domain = 'balrog-cloudfront.prod.mozaws.net';
 
-                resolver.resolve6(aaaa_cloudfrtont_domain, (err, addresses) => {
-                    handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb);
+
+                    handleResponse(last_type, response, generate_aaaa(last_hostname, getcloudfrontv6address()), cb);
                     return;
-                });
-            }
+				}
 
             if (!bun) bun = check_for_bunnycdn_hostname(last_hostname);
             if (bun) {
                 matched = true;
-                //crtlblog ipv6 enabled domain
-                var aaaa_bunny_domain = 'ctrl.b-cdn.net';
-
-                resolver.resolve6(aaaa_bunny_domain, (err, addresses) => {
-					if((addresses[0] == undefined) && (aggressive_v6)) addresses[0] = '2a02:6ea0:c020::2'; //bunnycdn AMS POP IP
-                    handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb);
+					var bv6address = getbunnycdnv6address();
+					if((bv6address == undefined) && (aggressive_v6)) bv6address = '2a02:6ea0:c020::2'; //bunnycdn AMS POP IP
+                    handleResponse(last_type, response, generate_aaaa(last_hostname, bv6address), cb);
                     return;
-                });
             }
 
             if (!v0c) v0c = check_for_v0cdn_hostname(last_hostname);
@@ -431,6 +441,7 @@ server6.on('request', handleRequest);
 
 function check_for_akamai_hostname(hostname) {
     if (!hostname) return false;
+	console.log(hostname);
     var sdomains = hostname.split(".");
     sdomains.reverse();
     var dp1 = sdomains.indexOf("net");
@@ -438,7 +449,7 @@ function check_for_akamai_hostname(hostname) {
     var dp3 = sdomains.indexOf("akamai");
 
     if (dp1 === 0 && (dp2 == 1 || dp3 == 1)) {
-        //console.log("akamai matched");
+        console.log("akamai matched");
         sdomains[2] = 'dsc' + sdomains[2];
         var fixedhostname = sdomains.reverse().join(".");
         return fixedhostname;
@@ -575,6 +586,15 @@ function check_for_githubio_a(authority) {
     } else return false;
 }
 
+function check_for_valve_a(authority) {
+    console.log('a', authority);
+    if (!authority) return false;
+    if (authority == 'admin-dns.valvesoftware.com') {
+        console.log("valve matched");
+        return true;
+    } else return false;
+}
+
 function check_for_microsoftedge_a(authority) {
     //console.log('a', authority);
     if (!authority) return false;
@@ -616,7 +636,41 @@ function getfastlyv6address() {
 				return v6range;
 		  });
 		} else return v6range;
-	}
+}
+
+function getbunnycdnv6address() {
+	                //crtlblog ipv6 enabled domain
+
+    var aaaa_bunny_domain = 'ctrl.b-cdn.net';
+	var v6range = localStorageMemory.getItem('bunnycdnv6range');
+	
+		if(!v6range){
+		console.log("not cached");
+		resolver.resolve6(aaaa_bunny_domain, (err, addresses) => {
+				var v6range = addresses[0];
+				localStorageMemory.setItem('bunnycdnv6range', v6range);
+				return v6range;
+		  });
+		} else return v6range;
+}
+function getcloudfrontv6address() {
+		//Mozilla cloudfront domain
+    var aaaa_cloudfront_domain = 'balrog-cloudfront.prod.mozaws.net';
+	var v6range = localStorageMemory.getItem('cloudfrontv6range');
+	
+		if(!v6range){
+		console.log("not cached");
+		resolver.resolve6(aaaa_cloudfront_domain, (err, addresses) => {
+				var v6range = addresses[0].slice(0, -4);
+				localStorageMemory.setItem('cloudfrontv6range', v6range);
+				return v6range+rand_hex();
+		  });
+		} else return v6range+rand_hex();
+}
+
+function getcloudflarev6address() {
+    return '2606:4700::6810:'+rand_hex();
+}
 
 function msev4tov6(ipv4, hostname) {
     //console.log('f', ipv4);
@@ -700,4 +754,8 @@ function generate_aaaa(hostname, ipv6) {
 	};
 	//console.log(newaaaa);
 	return newaaaa;
+}
+
+function rand_hex() {
+	return Math.random().toString(16).slice(2, 6);
 }
