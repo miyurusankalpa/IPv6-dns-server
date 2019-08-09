@@ -41,26 +41,23 @@ let authority = {
 var noaaaa = [];
 var addaaaa = {};
 
-var aggressive_v6 = true;
-var v6_only = true;
+var aggressive_v6 = false;
+var v6_only = false;
 
-if(aggressive_v6)
-{
-	var addaaaa = {
-    'dnscheck.miyuru.lk': "2001:bc8:4730:3113::1",
-    'archive.is': "2001:41d0:1:8720::1",
-    'registry.npmjs.org': "cloudflare",
-    'cdn.jsdelivr.net': "cloudflare", //https://github.com/jsdelivr/jsdelivr/issues/18163
-    'news.ycombinator.com': "cloudflare",
-    'static.twitchcdn.net': "fastly",
-    'www.bbc.com': "fastly",
-	'cdn.statically.io': "bunnycdn",
-	'store.steampowered.com': "2a02:26f0:6b:2a0::3a7",
-	'steamcommunity.com': "2a02:26f0:6b:2a0::3a7",
-    'android.clients.google.com': "2404:6800:4003:c04::8b",
-	'router.utorrent.com': "2001:41d0:c:5ac:5::1",
-	'router.bittorrent.com': "2001:41d0:c:5ac:5::1",
-	};
+if (aggressive_v6) {
+    var addaaaa = {
+        'dnscheck.miyuru.lk': "2001:bc8:4730:3113::1",
+        'archive.is': "2001:41d0:1:8720::1",
+        'registry.npmjs.org': "cloudflare",
+        'cdn.jsdelivr.net': "cloudflare", //https://github.com/jsdelivr/jsdelivr/issues/18163
+        'news.ycombinator.com': "cloudflare",
+        'static.twitchcdn.net': "fastly",
+        'www.bbc.com': "fastly",
+        'cdn.statically.io': "bunnycdn",
+        'store.steampowered.com': "2a02:26f0:6b:2a0::3a7",
+        'steamcommunity.com': "2a02:26f0:6b:2a0::3a7",
+        'android.clients.google.com': "2404:6800:4003:c04::8b",
+    };
 }
 
 //from http://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips
@@ -87,7 +84,7 @@ function handleRequest(request, response) {
                 response.send();
                 return;
             }
-			
+
             var cachedaaaaresponse = JSON.parse(localStorageMemory.getItem(question.name));
 
             if (cachedaaaaresponse) {
@@ -97,8 +94,8 @@ function handleRequest(request, response) {
                 return;
             }
         }
-		
-		if (question.type === 1) //A records
+
+        if (question.type === 1) //A records
         {
             if (v6_only) {
                 response.header.rcode = 0;
@@ -146,7 +143,7 @@ function proxy(question, response, cb) {
                 response.answer.push(a);
             }
 
-			var getcdn = addaaaa[question.name];
+            var getcdn = addaaaa[question.name];
 
             //console.log(addaaaa);
 
@@ -160,11 +157,11 @@ function proxy(question, response, cb) {
             var gio;
             var hw;
             var bun;
-			var val;
+            var val;
 
             if (getcdn) {
-					var providers = addaaaa[question.name].split("|");
-					var provider_name = providers[0];
+                var providers = addaaaa[question.name].split("|");
+                var provider_name = providers[0];
 
                 //console.log('custom', provider_name);
                 switch (provider_name) {
@@ -222,7 +219,7 @@ function proxy(question, response, cb) {
             if (ak) {
                 matched = true;
                 resolver.resolve6(ak, (err, addresses) => {
-                    handleResponse(last_type, response, generate_aaaa(ak, addresses[0]), cb);
+                    if (addresses[0]) handleResponse(last_type, response, generate_aaaa(ak, addresses[0]), cb);
                 });
                 return;
             }
@@ -232,7 +229,7 @@ function proxy(question, response, cb) {
             if (s3) {
                 matched = true;
                 resolver.resolve6(s3, (err, addresses) => {
-                    handleResponse(last_type, response, generate_aaaa(s3, addresses[0]), cb);
+                    if (addresses[0]) handleResponse(last_type, response, generate_aaaa(s3, addresses[0]), cb);
                 });
                 return;
             }
@@ -255,15 +252,15 @@ function proxy(question, response, cb) {
                 handleResponse(last_type, response, generate_aaaa(last_hostname, getcloudflarev6address()), cb);
                 return;
             }
-			
+
             if (!gio) gio = check_for_githubio_a(authorityname);
             if (gio) {
                 matched = true;
                 handleResponse(last_type, response, generate_aaaa(last_hostname, '2a04:4e42::133'), cb);
                 return;
             }
-			
-			/*if (!val) val = check_for_valve_a(authority);
+
+            /*if (!val) val = check_for_valve_a(authority);
             if (val) {
                 matched = true;
                 handleResponse(last_type, response, generate_aaaa(last_hostname, '2a02:26f0:6b:2a0::2db2'), cb);
@@ -278,12 +275,12 @@ function proxy(question, response, cb) {
                     //console.log(v4addresses);
                     var fv6 = fastlyv4tov6(v4addresses);
                     //console.log(fv6);
-					
-					if (!fv6) {
+
+                    if (!fv6) {
                         cb();
                         return;
                     }
-					
+
                     handleResponse(last_type, response, generate_aaaa(last_hostname, fv6), cb);
                 });
                 return;
@@ -313,17 +310,17 @@ function proxy(question, response, cb) {
                 matched = true;
 
 
-                    handleResponse(last_type, response, generate_aaaa(last_hostname, getcloudfrontv6address()), cb);
-                    return;
-				}
+                handleResponse(last_type, response, generate_aaaa(last_hostname, getcloudfrontv6address()), cb);
+                return;
+            }
 
             if (!bun) bun = check_for_bunnycdn_hostname(last_hostname);
             if (bun) {
                 matched = true;
-					var bv6address = getbunnycdnv6address();
-					if((bv6address == undefined) && (aggressive_v6)) bv6address = '2a02:6ea0:c020::2'; //bunnycdn AMS POP IP
-                    handleResponse(last_type, response, generate_aaaa(last_hostname, bv6address), cb);
-                    return;
+                var bv6address = getbunnycdnv6address();
+                if ((bv6address == undefined) && (aggressive_v6)) bv6address = '2a02:6ea0:c020::2'; //bunnycdn AMS POP IP
+                handleResponse(last_type, response, generate_aaaa(last_hostname, bv6address), cb);
+                return;
             }
 
             if (!v0c) v0c = check_for_v0cdn_hostname(last_hostname);
@@ -343,20 +340,20 @@ function proxy(question, response, cb) {
 
                 var ansaddr;
                 var qhostname;
-				
+
                 msg.answer.forEach(a => {
                     response.answer.push(a);
                     //console.log('remote DNS response: ', a)
-					ansaddr = a.address;
+                    ansaddr = a.address;
                 });
 
-				qhostname = question.name;
+                qhostname = question.name;
 
                 if (check_for_fastly_ip(ansaddr) === true) {
                     //console.log("added to fastly object");
-					if((check_for_stackexchange_ip(ansaddr)) && (!aggressive_v6)) noaaaa.push(qhostname);
+                    if ((check_for_stackexchange_ip(ansaddr)) && (!aggressive_v6)) noaaaa.push(qhostname);
 
-                    if(!check_for_fastly_hostname(qhostname)) addaaaa[qhostname] = "fastly";
+                    if (!check_for_fastly_hostname(qhostname)) addaaaa[qhostname] = "fastly";
                     response.answer.forEach(function(item, index) {
                         response.answer[index].ttl = 2;
                     });
@@ -366,16 +363,16 @@ function proxy(question, response, cb) {
 
                 if (check_for_cloudfront_ip(ansaddr) === true) {
                     //console.log("added to cloudfront object");
-                    if(!check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
+                    if (!check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
                     response.answer.forEach(function(item, index) {
                         response.answer[index].ttl = 2;
                     });
                     cb();
                     return;
                 }
-				
-				if (check_for_cloudflare_ip(ansaddr) === true) {
-                    console.log("added to cloudflare object");
+
+                if (check_for_cloudflare_ip(ansaddr) === true) {
+                    //console.log("added to cloudflare object");
                     addaaaa[qhostname] = "cloudflare";
                     response.answer.forEach(function(item, index) {
                         response.answer[index].ttl = 2;
@@ -383,10 +380,10 @@ function proxy(question, response, cb) {
                     cb();
                     return;
                 }
-				
-				if ((check_for_githubpages_ip(ansaddr) === true) && (aggressive_v6)) {
-                    console.log("added to github.io object");
-					addaaaa[qhostname] = "githubio";
+
+                if ((check_for_githubpages_ip(ansaddr) === true) && (aggressive_v6)) {
+                    //console.log("added to github.io object");
+                    addaaaa[qhostname] = "githubio";
 
                     response.answer.forEach(function(item, index) {
                         response.answer[index].ttl = 2;
@@ -398,7 +395,7 @@ function proxy(question, response, cb) {
             cb();
         }
 
-        console.log('m', msg);
+        //console.log('m', msg);
     });
 
     /* if (question.type === 1) //A records
@@ -441,16 +438,18 @@ server6.on('request', handleRequest);
 
 function check_for_akamai_hostname(hostname) {
     if (!hostname) return false;
-	console.log(hostname);
+    console.log(hostname);
     var sdomains = hostname.split(".");
     sdomains.reverse();
     var dp1 = sdomains.indexOf("net");
     var dp2 = sdomains.indexOf("akamaiedge");
     var dp3 = sdomains.indexOf("akamai");
+    var dp4 = sdomains.indexOf("cj");
 
     if (dp1 === 0 && (dp2 == 1 || dp3 == 1)) {
-        console.log("akamai matched");
-        sdomains[2] = 'dsc' + sdomains[2];
+        //console.log("akamai matched");
+        if (dp4 === 2) sdomains[2] = 'ds' + sdomains[2];
+        else sdomains[2] = 'dsc' + sdomains[2];
         var fixedhostname = sdomains.reverse().join(".");
         return fixedhostname;
     } else return false;
@@ -587,10 +586,10 @@ function check_for_githubio_a(authority) {
 }
 
 function check_for_valve_a(authority) {
-    console.log('a', authority);
+    //console.log('a', authority);
     if (!authority) return false;
     if (authority == 'admin-dns.valvesoftware.com') {
-        console.log("valve matched");
+        //console.log("valve matched");
         return true;
     } else return false;
 }
@@ -607,8 +606,8 @@ function check_for_microsoftedge_a(authority) {
 function fastlyv4tov6(ipv4) {
     //console.log('f', ipv4);
     if (!ipv4[0]) return false;
-	if(!check_for_fastly_ip(ipv4[0])) return false;
-		
+    if (!check_for_fastly_ip(ipv4[0])) return false;
+
     var octets = ipv4[0].split(".");
 
     //console.log('last octets', octets[3]);
@@ -626,50 +625,51 @@ function fastlyv4tov6(ipv4) {
 
 function getfastlyv6address() {
     var aaaa_fastly_domain = 'dualstack.g.shared.global.fastly.net';
-	var v6range = localStorageMemory.getItem('fastlyv6range');
-	
-		if(!v6range){
-		console.log("not cached");
-		resolver.resolve6(aaaa_fastly_domain, (err, addresses) => {
-				var v6range = addresses[0].slice(0, -3);
-				localStorageMemory.setItem('fastlyv6range', v6range);
-				return v6range;
-		  });
-		} else return v6range;
+    var v6range = localStorageMemory.getItem('fastlyv6range');
+
+    if (!v6range) {
+        console.log("not cached");
+        resolver.resolve6(aaaa_fastly_domain, (err, addresses) => {
+            var v6range = addresses[0].slice(0, -3);
+            localStorageMemory.setItem('fastlyv6range', v6range);
+            return v6range;
+        });
+    } else return v6range;
 }
 
 function getbunnycdnv6address() {
-	                //crtlblog ipv6 enabled domain
+    //crtlblog ipv6 enabled domain
 
     var aaaa_bunny_domain = 'ctrl.b-cdn.net';
-	var v6range = localStorageMemory.getItem('bunnycdnv6range');
-	
-		if(!v6range){
-		console.log("not cached");
-		resolver.resolve6(aaaa_bunny_domain, (err, addresses) => {
-				var v6range = addresses[0];
-				localStorageMemory.setItem('bunnycdnv6range', v6range);
-				return v6range;
-		  });
-		} else return v6range;
+    var v6range = localStorageMemory.getItem('bunnycdnv6range');
+
+    if (!v6range) {
+        console.log("not cached");
+        resolver.resolve6(aaaa_bunny_domain, (err, addresses) => {
+            var v6range = addresses[0];
+            localStorageMemory.setItem('bunnycdnv6range', v6range);
+            return v6range;
+        });
+    } else return v6range;
 }
+
 function getcloudfrontv6address() {
-		//Mozilla cloudfront domain
+    //Mozilla cloudfront domain
     var aaaa_cloudfront_domain = 'balrog-cloudfront.prod.mozaws.net';
-	var v6range = localStorageMemory.getItem('cloudfrontv6range');
-	
-		if(!v6range){
-		console.log("not cached");
-		resolver.resolve6(aaaa_cloudfront_domain, (err, addresses) => {
-				var v6range = addresses[0].slice(0, -4);
-				localStorageMemory.setItem('cloudfrontv6range', v6range);
-				return v6range+rand_hex();
-		  });
-		} else return v6range+rand_hex();
+    var v6range = localStorageMemory.getItem('cloudfrontv6range');
+
+    if (!v6range) {
+        //console.log("not cached");
+        resolver.resolve6(aaaa_cloudfront_domain, (err, addresses) => {
+            var v6range = addresses[0].slice(0, -4);
+            localStorageMemory.setItem('cloudfrontv6range', v6range);
+            return v6range + rand_hex();
+        });
+    } else return v6range + rand_hex();
 }
 
 function getcloudflarev6address() {
-    return '2606:4700::6810:'+rand_hex();
+    return '2606:4700::6810:' + rand_hex();
 }
 
 function msev4tov6(ipv4, hostname) {
@@ -709,7 +709,7 @@ function check_for_fastly_ip(ipv4) {
 }
 
 function check_for_cloudfront_ip(ipv4) {
-    console.log('cloudfront ip check', ipv4);
+    //console.log('cloudfront ip check', ipv4);
     if (!ipv4) return false;
 
     //console.log('cloudfront global check', ipRangeCheck(ipv4, cloudfrontiplist.CLOUDFRONT_GLOBAL_IP_LIST));
@@ -730,32 +730,34 @@ function check_for_githubpages_ip(ipv4) {
     //console.log('githubio ip check', ipv4);
     if (!ipv4) return false;
 
-    if(!ipRangeCheck(ipv4, "185.199.108.0/22")) return false;
-	
-	var octets = ipv4.split(".");
-	if(octets[3] == 153) return true; else return false;
+    if (!ipRangeCheck(ipv4, "185.199.108.0/22")) return false;
+
+    var octets = ipv4.split(".");
+    if (octets[3] == 153) return true;
+    else return false;
 }
 
 function check_for_stackexchange_ip(ipv4) {
     if (!ipv4) return false;
 
     var octets = ipv4.split(".");
-	if(octets[3] == 69) return true; else return false;
+    if (octets[3] == 69) return true;
+    else return false;
 }
 
 function generate_aaaa(hostname, ipv6) {
     if (!ipv6) return false;
-	var newaaaa = {       
-			name: hostname,
-			type: 28,
-			class: 1,
-			ttl: 300,
-			address: ipv6
-	};
-	//console.log(newaaaa);
-	return newaaaa;
+    var newaaaa = {
+        name: hostname,
+        type: 28,
+        class: 1,
+        ttl: 300,
+        address: ipv6
+    };
+    //console.log(newaaaa);
+    return newaaaa;
 }
 
 function rand_hex() {
-	return Math.random().toString(16).slice(2, 6);
+    return Math.random().toString(16).slice(2, 6);
 }
