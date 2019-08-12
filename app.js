@@ -489,8 +489,10 @@ function check_for_highwinds_hostname(hostname) {
     sdomains.reverse();
     var dp1 = sdomains.indexOf("net");
     var dp2 = sdomains.indexOf("hwcdn");
-
-    if (dp1 === 0 && dp2 == 1) {
+    var dp3 = sdomains.indexOf("com");
+    var dp4 = sdomains.indexOf("stackpathcdn");
+	
+    if ((dp1 === 0 && dp2 == 1) || (dp3 === 0 && dp4 == 1)) {
         //console.log("highwinds matched");
         var fixedhostname = sdomains.reverse().join(".");
         return fixedhostname;
@@ -684,7 +686,7 @@ function msev4tov6(ipv4, hostname) {
 
     //anycasted range
     if (mseid[0] == 'l') var mse_range = '2620:1ec:21::';
-    if (mseid[0] == 'a') var mse_range = '2620:1ec:c11::';
+    //if (mseid[0] == 'a') var mse_range = '2620:1ec:c11::';
     if (mseid[0] == 's') var mse_range = '2620:1ec:6::';
     if (mseid[0] == 'spo') {
         var mse_range = '2620:1ec:8f8::';
