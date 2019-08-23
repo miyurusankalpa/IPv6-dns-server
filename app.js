@@ -1,8 +1,9 @@
 'use strict';
 
 //use a EDNS enabled DNS resolver for best results
-//var dns_resolver = '2001:4860:4860::8888';
-var dns_resolver = '2606:4700:4700::1111';
+var dns_resolver = '2001:4860:4860::8888';
+//var dns_resolver = '2606:4700:4700::1111';
+//var dns_resolver = '2a02:6b8::feed:0ff';
 //var dns_resolver = '8.8.8.8';
 
 let dns = require('native-dns');
@@ -38,11 +39,12 @@ let authority = {
     type: 'udp6'
 };
 
-var noaaaa = [];
+var noaaaa = ['old.reddit.com'];
 var addaaaa = {};
 
 var aggressive_v6 = false;
 var v6_only = false;
+var remove_v4_if_v6_exsist = false;
 
 if (aggressive_v6) {
     var addaaaa = {
@@ -52,7 +54,7 @@ if (aggressive_v6) {
         'cdn.jsdelivr.net': "cloudflare", //https://github.com/jsdelivr/jsdelivr/issues/18163
         'news.ycombinator.com': "cloudflare",
         'static.twitchcdn.net': "fastly",
-        'www.bbc.com': "fastly",
+        'www.bbc.com': "2a04:4e42::81",
         'cdn.statically.io': "bunnycdn",
         'store.steampowered.com': "2a02:26f0:6b:2a0::3a7",
         'steamcommunity.com': "2a02:26f0:6b:2a0::3a7",
@@ -398,7 +400,7 @@ function proxy(question, response, cb) {
         //console.log('m', msg);
     });
 
-    /* if (question.type === 1) //A records
+    if (question.type === 1 && (remove_v4_if_v6_exsist)) //A records
     {
         resolver_own.resolve6(question.name, (err, addresses) => {
             //console.log('aaaa check', addresses);
@@ -407,19 +409,18 @@ function proxy(question, response, cb) {
                 request.send();
             } else {
 				response.header.rcode = 0;
-				response.answer = [{
+				/*response.answer = [{
                             name: question.name,
                             type: 1,
                             class: 1,
                             ttl: 300,
-                            address: '127.0.0.1'
-                        }];
+                            address: '127.0.100.100'
+                        }];*/
                 cb();
             }
         });
 		
-    } else */
-    request.send();
+    } else request.send();
 
 }
 
@@ -438,7 +439,7 @@ server6.on('request', handleRequest);
 
 function check_for_akamai_hostname(hostname) {
     if (!hostname) return false;
-    console.log(hostname);
+    //console.log(hostname);
     var sdomains = hostname.split(".");
     sdomains.reverse();
     var dp1 = sdomains.indexOf("net");
@@ -630,7 +631,7 @@ function getfastlyv6address() {
     var v6range = localStorageMemory.getItem('fastlyv6range');
 
     if (!v6range) {
-        console.log("not cached");
+        //console.log("not cached");
         resolver.resolve6(aaaa_fastly_domain, (err, addresses) => {
             var v6range = addresses[0].slice(0, -3);
             localStorageMemory.setItem('fastlyv6range', v6range);
@@ -646,7 +647,7 @@ function getbunnycdnv6address() {
     var v6range = localStorageMemory.getItem('bunnycdnv6range');
 
     if (!v6range) {
-        console.log("not cached");
+        //console.log("not cached");
         resolver.resolve6(aaaa_bunny_domain, (err, addresses) => {
             var v6range = addresses[0];
             localStorageMemory.setItem('bunnycdnv6range', v6range);
@@ -671,7 +672,7 @@ function getcloudfrontv6address() {
 }
 
 function getcloudflarev6address() {
-    return '2606:4700::6810:' + rand_hex();
+    return '2606:4700::6810:2';
 }
 
 function msev4tov6(ipv4, hostname) {
