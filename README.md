@@ -28,9 +28,9 @@ Add the domain to `noaaaa` array in the app.js file.
 
 Add the domain to `addaaaa` object with IPv6 address in the app.js file.
 
-## Turn on aggressive mode
+## Turn off aggressive mode
 
-Change the `aggressive_v6` variable to true in the app.js file. See individual services below to see what aggressive mode does.
+Change the `aggressive_v6` variable to false in the app.js file. See individual services below to see what aggressive mode does.
 
 ## Turn on IPv6 only mode
 
@@ -62,7 +62,7 @@ Change the `v6_only` variable to true in the app.js file.
 
 ## Amazon S3 
 
-* Test domains: github-production-release-asset-2e65be.s3.amazonaws.com
+* Test domains: s3.amazonaws.com, github-production-release-asset-2e65be.s3.amazonaws.com
 * IPv6 Type: Unicast
 * Coverage: *.s3.amazonaws.com hostnames/cnames only.
 * Usability: Stable

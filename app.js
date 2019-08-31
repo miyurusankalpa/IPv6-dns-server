@@ -42,7 +42,7 @@ let authority = {
 var noaaaa = ['old.reddit.com'];
 var addaaaa = {};
 
-var aggressive_v6 = false;
+var aggressive_v6 = true;
 var v6_only = false;
 var remove_v4_if_v6_exsist = false;
 
@@ -523,13 +523,14 @@ function check_for_s3_hostname(hostname) {
     var dp2 = sdomains.indexOf("amazonaws");
     var dp3 = sdomains.indexOf("s3");
     var dp4 = sdomains.indexOf("s3-control");
-    var dp5 = sdomains.indexOf("s3-1-w");
-    var dp6 = sdomains.indexOf("s3-1");
+    var dp5 = sdomains.indexOf("s3-w");
 
     if (dp1 === 0 && dp2 == 1) {
-        //console.log("amazon matched");
+        //console.log(hostname+" amazon matched");
+		var ssdomains = sdomains[2].split("-");
+	    //console.log(ssdomains);
 
-        if (dp5 === 2 || dp6 === 2) { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
+        if (ssdomains[0] === 's3') { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
             sdomains[2] = 'us-east-1';
             sdomains[3] = 'dualstack';
             sdomains[4] = 's3';
@@ -538,9 +539,14 @@ function check_for_s3_hostname(hostname) {
             sdomains[3] = 'dualstack';
             sdomains[4] = 's3';
             //console.log("s3 matched");
-        } else return false;
+		} else if (dp5 === 3) {
+            sdomains[3] = 'dualstack';
+            sdomains[4] = 's3-w';
+            //console.log("s3 matched");
+		} else return false;
 
         var fixedhostname = sdomains.reverse().join(".");
+		 //console.log(fixedhostname);
         return fixedhostname;
 
     } else return false;
