@@ -642,13 +642,13 @@ function getfastlyv6address() {
 
 function getbunnycdnv6address() {
     //crtlblog ipv6 enabled domain
-
     var aaaa_bunny_domain = 'ctrl.b-cdn.net';
     var v6range = localStorageMemory.getItem('bunnycdnv6range');
 
     if (!v6range) {
         //console.log("not cached");
         resolver.resolve6(aaaa_bunny_domain, (err, addresses) => {
+			if(err) return;
             var v6range = addresses[0];
             localStorageMemory.setItem('bunnycdnv6range', v6range);
             return v6range;
