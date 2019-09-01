@@ -185,7 +185,7 @@ function proxy(question, response, cb) {
                     case 'msedge':
                         mse = true;
                         break;
-                    case 'gihubio':
+                    case 'githubio':
                         gio = true;
                         break;
                     case 'highwinds':
