@@ -68,6 +68,9 @@ var cloudfrontiplist = {
     "CLOUDFRONT_REGIONAL_EDGE_IP_LIST": ["13.124.199.0/24", "34.226.14.0/24", "52.15.127.128/26", "35.158.136.0/24", "52.57.254.0/24", "18.216.170.128/25", "13.54.63.128/26", "13.59.250.0/26", "13.210.67.128/26", "35.167.191.128/26", "52.47.139.0/24", "52.199.127.192/26", "52.212.248.0/26", "52.66.194.128/26", "13.113.203.0/24", "34.195.252.0/24", "35.162.63.192/26", "34.223.12.224/27", "52.56.127.0/25", "34.223.80.192/26", "13.228.69.0/24", "34.216.51.0/25", "54.233.255.128/26", "52.52.191.128/26", "52.78.247.128/26", "52.220.191.0/26", "34.232.163.208/29"]
 };
 
+//cache fastly range
+getfastlyv6address();
+
 function handleRequest(request, response) {
     var question = request.question[0];
     console.log('request from', request.address.address, 'for', question.name);
@@ -268,15 +271,14 @@ function proxy(question, response, cb) {
                 handleResponse(last_type, response, generate_aaaa(last_hostname, '2a02:26f0:6b:2a0::2db2'), cb);
                 return;
             }*/
-
-            if (!fsta) fsta = check_for_fastly_a(authority);
+			
             if (!fsta) fsta = check_for_fastly_hostname(last_hostname);
+            if (!fsta) fsta = check_for_fastly_a(authority);
             if (fsta) {
                 matched = true;
                 resolver.resolve4(last_hostname, (err, v4addresses) => {
                     //console.log(v4addresses);
                     var fv6 = fastlyv4tov6(v4addresses);
-                    //console.log(fv6);
 
                     if (!fv6) {
                         cb();
@@ -294,7 +296,6 @@ function proxy(question, response, cb) {
                 resolver.resolve4(last_hostname, (err, v4addresses) => {
                     //console.log(v4addresses);
                     var mv6 = msev4tov6(v4addresses, authorityname);
-                    //console.log(mv6);
 
                     if (!mv6) {
                         cb();
