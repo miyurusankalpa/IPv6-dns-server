@@ -16,23 +16,23 @@ Starting the server
 
 	npm start
 
-## Changing DNS Resolvers
+### Changing DNS Resolvers
 
 Change the `dns_resolver` variable in the app.js file.
 
-## Disable IPv6 for a domain
+### Disable IPv6 for a domain
 
 Add the domain to `noaaaa` array in the app.js file.
 
-## Add a custom IPv6 for a domain
+### Add a custom IPv6 for a domain
 
 Add the domain to `addaaaa` object with IPv6 address in the app.js file.
 
-## Turn off aggressive mode
+### Turn off aggressive mode
 
 Change the `aggressive_v6` variable to false in the app.js file. See individual services below to see what aggressive mode does.
 
-## Turn on IPv6 only mode
+### Turn on IPv6 only mode
 
 Change the `v6_only` variable to true in the app.js file.
 
@@ -44,7 +44,7 @@ Change the `v6_only` variable to true in the app.js file.
 * IPv6 Type: Anycast
 * Usability: Stable
 * Coverage: All
-* Aggressive mode: All cloudflare services which uses their **DNS service**, regardless of cloudflare proxy has been disabled(grey cloud) will get a proxied.
+* Aggressive mode: All cloudflare services which uses their **DNS service**, regardless of cloudflare proxy has been disabled(grey cloud) will get a Cloudflare IPv6 address.
 
 ## Akamai
 
@@ -80,7 +80,7 @@ Change the `v6_only` variable to true in the app.js file.
 * IPv6 Type: Unicast
 * Coverage: IPv6 is not available in some locations. All on Aggressive mode.
 * Usability: Stable
-* Aggressive mode: Adds AMS POP address in aggressive mode, where IPv6 address is not available.
+* Aggressive mode: When IPv6 address is not available, adds AMS POP IPv6 address in aggressive mode.
 
 ## Highwinds
 

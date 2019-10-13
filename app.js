@@ -39,12 +39,12 @@ let authority = {
     type: 'udp6'
 };
 
-var noaaaa = ['old.reddit.com'];
+var noaaaa = [];
 var addaaaa = {};
 
-var aggressive_v6 = true;
+var aggressive_v6 = false;
 var v6_only = false;
-var remove_v4_if_v6_exsist = false;
+var remove_v4_if_v6_exist = false;
 
 if (aggressive_v6) {
     var addaaaa = {
@@ -401,7 +401,7 @@ function proxy(question, response, cb) {
         //console.log('m', msg);
     });
 
-    if (question.type === 1 && (remove_v4_if_v6_exsist)) //A records
+    if (question.type === 1 && (remove_v4_if_v6_exist)) //A records
     {
         resolver_own.resolve6(question.name, (err, addresses) => {
             //console.log('aaaa check', addresses);
