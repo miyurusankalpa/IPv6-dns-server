@@ -679,7 +679,7 @@ function getcloudfrontv6address() {
 }
 
 function getcloudflarev6address() {
-    return '2606:4700::6810:2';
+    return '2606:4700::6810:bad'; //will give SSL_ERROR_NO_CYPHER_OVERLAP on non cloudflare sites on aggressive mode
 }
 
 function msev4tov6(ipv4, hostname) {
