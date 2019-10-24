@@ -1,10 +1,10 @@
 'use strict';
 
 //use a EDNS enabled DNS resolver for best results
-var dns_resolver = '2001:4860:4860::8888';
-//var dns_resolver = '2606:4700:4700::1111';
-//var dns_resolver = '2a02:6b8::feed:0ff';
-//var dns_resolver = '8.8.8.8';
+var dns_resolver = '2001:4860:4860::8888'; //Google
+//var dns_resolver = '2606:4700:4700::1111'; //Cloudflare
+//var dns_resolver = '2a02:6b8::feed:0ff'; //Yandedx
+//var dns_resolver = '8.8.8.8'; //Google
 
 let dns = require('native-dns');
 let async = require('async');
@@ -527,6 +527,11 @@ function check_for_s3_hostname(hostname) {
 
     if (dp1 === 0 && dp2 == 1) {
         //console.log(hostname+" amazon matched");
+		var regex = new RegExp(/s3/g);
+		var s3 = hostname.match(regex);
+
+		if(s3 == null) return false;
+			
 		var ssdomains = sdomains[2].split("-");
 	    //console.log(ssdomains);
 
