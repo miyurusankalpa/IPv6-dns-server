@@ -524,27 +524,27 @@ function check_for_s3_hostname(hostname) {
     var dp2 = sdomains.indexOf("amazonaws");
     var dp3 = sdomains.indexOf("s3");
     var dp4 = sdomains.indexOf("s3-control");
-    var dp5 = sdomains.indexOf("s3-w");
 
     if (dp1 === 0 && dp2 == 1) {
         //console.log(hostname+" amazon matched");
 		var ssdomains = sdomains[2].split("-");
 	    //console.log(ssdomains);
 
-        if (ssdomains[0] === 's3') { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
+        if (ssdomains[0] === 's3' && ssdomains[1] === '1') { //s3.amazonaws.com
             sdomains[2] = 'us-east-1';
             sdomains[3] = 'dualstack';
             sdomains[4] = 's3';
-            //console.log("s3 matched");
         } else if (dp3 === 3 || dp4 === 3) {
             sdomains[3] = 'dualstack';
             sdomains[4] = 's3';
-            //console.log("s3 matched");
-		} else if (dp5 === 3) {
+		} else if (ssdomains[0] === 's3' && ssdomains[1] === 'us') { 
+			sdomains[2] = sdomains[2].replace('s3-', '');
             sdomains[3] = 'dualstack';
-            sdomains[4] = 's3-w';
-            //console.log("s3 matched");
-		} else return false;
+			sdomains[4] = 's3';
+		} else {
+			sdomains[4] = sdomains[3];
+			sdomains[3] = 'dualstack';
+		}
 
         var fixedhostname = sdomains.reverse().join(".");
 		 //console.log(fixedhostname);
