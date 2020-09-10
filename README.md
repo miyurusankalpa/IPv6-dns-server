@@ -6,7 +6,7 @@ A simple Node DNS Server proxy based on [Peteris Rocks tutorial](https://peteris
 
 Clone the repo
 
-	git clone https://gh6.mortzu.de/miyurusankalpa/IPv6-dns-server.git
+	git clone https://gitlab.com/miyurusankalpa/IPv6-dns-server.git
 
 Build the project 
 
