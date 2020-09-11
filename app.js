@@ -524,32 +524,40 @@ function check_for_s3_hostname(hostname) {
     var dp2 = sdomains.indexOf("amazonaws");
     var dp3 = sdomains.indexOf("s3");
     var dp4 = sdomains.indexOf("s3-control");
+    var dp5 = sdomains.indexOf("s3-w");
+    var dp6 = sdomains.indexOf("s3-accelerate");
 
     if (dp1 === 0 && dp2 == 1) {
-        //console.log(hostname+" amazon matched");
-		var regex = new RegExp(/s3/g);
-		var s3 = hostname.match(regex);
-
-		if(s3 == null) return false;
-			
+        //console.log(hostname+" amazon matched");		
 		var ssdomains = sdomains[2].split("-");
-	    //console.log(ssdomains);
+		if(sdomains.length==5) sdomains[5] = sdomains[4];
 
-        if (ssdomains[0] === 's3' && ssdomains[1] === '1') { //s3.amazonaws.com
+		if(dp6 === 2) { //matched s3-accelerate domains
+			sdomains[4] = sdomains[3];
+			sdomains[3] = 's3-accelerate';
+            sdomains[2] = 'dualstack';
+		} else if (ssdomains[0] === 's3' && ssdomains[1] === '1' ) { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
+			if(sdomains[3]) sdomains[5] = sdomains[3];
             sdomains[2] = 'us-east-1';
             sdomains[3] = 'dualstack';
             sdomains[4] = 's3';
+            //console.log("s3 matched");
+		} else if (ssdomains[0] === 's3') { //matched  **.s3-[region].amazonaws.com
+			if(sdomains[3]) sdomains[5] = sdomains[3];
+			ssdomains.splice(0, 1); //remove s3 from region
+            sdomains[2] = ssdomains.join("-"); //recreate the region without s3
+            sdomains[3] = 'dualstack';
+            sdomains[4] = 's3';
+            //console.log("s3 matched");
         } else if (dp3 === 3 || dp4 === 3) {
             sdomains[3] = 'dualstack';
             sdomains[4] = 's3';
-		} else if (ssdomains[0] === 's3' && ssdomains[1] === 'us') { 
-			sdomains[2] = sdomains[2].replace('s3-', '');
+            //console.log("s3 matched");
+		} else if (dp5 === 3) {
             sdomains[3] = 'dualstack';
-			sdomains[4] = 's3';
-		} else {
-			sdomains[4] = sdomains[3];
-			sdomains[3] = 'dualstack';
-		}
+            sdomains[4] = 's3-w';
+            //console.log("s3 matched");
+		} else return false;
 
         var fixedhostname = sdomains.reverse().join(".");
 		 //console.log(fixedhostname);
