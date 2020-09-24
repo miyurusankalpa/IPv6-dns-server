@@ -678,7 +678,7 @@ function getbunnycdnv6address() {
 
 function getcloudfrontv6address() {
     //Mozilla cloudfront domain
-    var aaaa_cloudfront_domain = 'balrog-cloudfront.prod.mozaws.net';
+    var aaaa_cloudfront_domain = 'static.twitchcdn.net';
     var v6range = localStorageMemory.getItem('cloudfrontv6range');
 
     if (!v6range) {
