@@ -31,33 +31,34 @@ function check_for_s3_hostname(hostname) {
         } else if (dp7 === 3) { //matched s3-accesspoint domains
             sdomains.splice(4, 1);
             //console.log("s3 matched 7");
-        } else if (ssdomains[0] === 's3' && ssdomains[1] === '1') { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
+        } else if (ssdomains[0] === 's3' && ssdomains[1] === '1' && dp1 !== 0) { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
             sdomains.splice(2, 0, "us-east-1");
             sdomains.splice(4, 0, "s3");
             //console.log("s3 matched 2");
         } else if (dp3 === 3 || dp4 === 3) {
             //console.log(sdomains);
             sdomains.splice(4, 1);
-            //console.log("s3 matched 4");
+            //console.log("s3 matched 3");
         } else if (dp5 === 3) {
             sdomains.splice(4, 0, "s3-w");
-            //console.log("s3 matched 5");
+            //console.log("s3 matched 4");
         } else if (ssdomains.length > 1) { //matched  **.s3-[region].amazonaws.com
-
+			if(ssdomains[0]!=="s3") return false;
+			
             sdomains.splice(2, 1); //remove matched s3 region
 
-            if (ssdomains.length == 0) {
+            if (ssdomains.length == 0 && dp1 !== 0) {
                 sdomains.splice(2, 0, "us-east-1");
             } else {
-                if (ssdomains.length == 4) ssdomains.splice(0, 1); //remove s3 from region {
+                if (ssdomains.length == 4 && dp1 !== 0) ssdomains.splice(0, 1); //remove s3 from region {
                 sdomains.splice(2, 0, ssdomains.join("-")); //recreate the region without s3
             }
 
             //console.log(sdomains);
             if (dp3 == -1) sdomains.splice(3, 0, "s3");
 
-            //console.log("s3 matched 3");
-        } else if (dp2 === 1 || dp3 === 2) {
+            //console.log("s3 matched 5");
+        } else if ((dp2 === 1 || dp3 === 2) && dp1 !== 0) {
             sdomains.splice(2, 0, "us-east-1");
             //console.log("s3 matched 6");
         } else return false;
@@ -76,9 +77,11 @@ function check_for_s3_hostname(hostname) {
 }
 
 assert.equal(check_for_s3_hostname("s3.amazonaws.com"), "s3.dualstack.us-east-1.amazonaws.com");
+assert.notEqual(check_for_s3_hostname("s3.amazonaws.com.cn"), "s3.dualstack.us-east-1.amazonaws.com.cn");
 
 assert.equal(check_for_s3_hostname("redditstatic.s3.amazonaws.com"), "redditstatic.s3.dualstack.us-east-1.amazonaws.com");
 assert.equal(check_for_s3_hostname("2020awsreinvent.s3-us-west-2.amazonaws.com"), "2020awsreinvent.s3.dualstack.us-west-2.amazonaws.com");
+assert.notEqual(check_for_s3_hostname("2020awsreinvent.s3-us-west-2.amazonaws.com.cn"), "2020awsreinvent.s3.dualstack.us-west-2.amazonaws.com.cn");
 
 assert.equal(check_for_s3_hostname("s3.eu-central-1.amazonaws.com"), "s3.dualstack.eu-central-1.amazonaws.com");
 assert.equal(check_for_s3_hostname("account-id.s3-control.eu-central-1.amazonaws.com"), "account-id.s3-control.dualstack.eu-central-1.amazonaws.com");
@@ -95,3 +98,6 @@ assert.equal(check_for_s3_hostname("s3-accesspoint.ap-southeast-1.amazonaws.com"
 assert.equal(check_for_s3_hostname("web.s3-accesspoint.ap-southeast-1.amazonaws.com"), "web.s3-accesspoint.dualstack.ap-southeast-1.amazonaws.com");
 
 assert.equal(check_for_s3_hostname("download.opencontent.netflix.com.s3.amazonaws.com"), "download.opencontent.netflix.com.s3.dualstack.us-east-1.amazonaws.com");
+
+assert.equal(check_for_s3_hostname("pub-web-4b45fc8aac32a800.elb.eu-central-1.amazonaws.com"), false);
+assert.equal(check_for_s3_hostname("dynamodb.us-east-2.amazonaws.com"), false);

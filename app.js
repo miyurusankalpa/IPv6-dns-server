@@ -547,33 +547,34 @@ function check_for_s3_hostname(hostname) {
         } else if (dp7 === 3) { //matched s3-accesspoint domains
             sdomains.splice(4, 1);
             //console.log("s3 matched 7");
-        } else if (ssdomains[0] === 's3' && ssdomains[1] === '1') { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
+        } else if (ssdomains[0] === 's3' && ssdomains[1] === '1' && dp1 !== 0) { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
             sdomains.splice(2, 0, "us-east-1");
             sdomains.splice(4, 0, "s3");
             //console.log("s3 matched 2");
         } else if (dp3 === 3 || dp4 === 3) {
             //console.log(sdomains);
             sdomains.splice(4, 1);
-            //console.log("s3 matched 4");
+            //console.log("s3 matched 3");
         } else if (dp5 === 3) {
             sdomains.splice(4, 0, "s3-w");
-            //console.log("s3 matched 5");
+            //console.log("s3 matched 4");
         } else if (ssdomains.length > 1) { //matched  **.s3-[region].amazonaws.com
-
+			if(ssdomains[0]!=="s3") return false;
+			
             sdomains.splice(2, 1); //remove matched s3 region
 
-            if (ssdomains.length == 0) {
+            if (ssdomains.length == 0 && dp1 !== 0) {
                 sdomains.splice(2, 0, "us-east-1");
             } else {
-                if (ssdomains.length == 4) ssdomains.splice(0, 1); //remove s3 from region {
+                if (ssdomains.length == 4 && dp1 !== 0) ssdomains.splice(0, 1); //remove s3 from region {
                 sdomains.splice(2, 0, ssdomains.join("-")); //recreate the region without s3
             }
 
             //console.log(sdomains);
             if (dp3 == -1) sdomains.splice(3, 0, "s3");
 
-            //console.log("s3 matched 3");
-        } else if (dp2 === 1 || dp3 === 2) {
+            //console.log("s3 matched 5");
+        } else if ((dp2 === 1 || dp3 === 2) && dp1 !== 0) {
             sdomains.splice(2, 0, "us-east-1");
             //console.log("s3 matched 6");
         } else return false;
