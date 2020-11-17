@@ -48,17 +48,14 @@ var remove_v4_if_v6_exist = false;
 
 if (aggressive_v6) {
     var addaaaa = {
-        'dnscheck.miyuru.lk': "2001:bc8:4730:3113::1",
-        'archive.is': "2001:41d0:1:8720::1",
+
         'registry.npmjs.org': "cloudflare",
         'cdn.jsdelivr.net': "cloudflare", //https://github.com/jsdelivr/jsdelivr/issues/18163
         'news.ycombinator.com': "cloudflare",
         'static.twitchcdn.net': "fastly",
         'www.bbc.com': "2a04:4e42::81",
         'cdn.statically.io': "bunnycdn",
-        'store.steampowered.com': "2a02:26f0:6b:2a0::3a7",
-        'steamcommunity.com': "2a02:26f0:6b:2a0::3a7",
-        'android.clients.google.com': "2404:6800:4003:c04::8b",
+        'production.cloudflare.docker.com ': "cloudflare",
     };
 }
 
