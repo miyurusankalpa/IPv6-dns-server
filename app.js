@@ -224,7 +224,7 @@ function proxy(question, response, cb) {
             if (ak) {
                 matched = true;
                 resolver.resolve6(ak, (err, addresses) => {
-                    if (addresses[0]) handleResponse(last_type, response, generate_aaaa(ak, addresses[0]), cb);
+                    if (addresses.length!=0) handleResponse(last_type, response, generate_aaaa(ak, addresses[0]), cb);
                 });
                 return;
             }
@@ -234,7 +234,7 @@ function proxy(question, response, cb) {
             if (s3) {
                 matched = true;
                 resolver.resolve6(s3, (err, addresses) => {
-                    if (addresses[0]) handleResponse(last_type, response, generate_aaaa(s3, addresses[0]), cb);
+                    if (addresses.length!=0) handleResponse(last_type, response, generate_aaaa(s3, addresses[0]), cb);
                 });
                 return;
             }
@@ -311,7 +311,6 @@ function proxy(question, response, cb) {
             if (!cfr) cfr = check_for_cloudfront_hostname(last_hostname);
             if (cfr) {
                 matched = true;
-
 
                 handleResponse(last_type, response, generate_aaaa(last_hostname, getcloudfrontv6address()), cb);
                 return;
