@@ -25,7 +25,8 @@ function check_for_s3_hostname(hostname) {
         //console.log(ssdomains);
 
         if (dp6 === 2) { //matched s3-accelerate domains
-            sdomains.splice(2, 0, "s3-accelerate");
+            //sdomains.splice(2, 0, "s3-accelerate");
+			sdomains.splice(2, 0, "dualstack");
             //console.log(sdomains);
             //console.log("s3 matched 1");
         } else if (dp7 === 3) { //matched s3-accesspoint domains
@@ -62,8 +63,8 @@ function check_for_s3_hostname(hostname) {
             sdomains.splice(2, 0, "us-east-1");
             //console.log("s3 matched 6");
         } else return false;
-
-        sdomains.splice(3, 0, "dualstack");
+		
+        if(sdomains[2]!=="dualstack") sdomains.splice(3, 0, "dualstack");
 
         //matched china region, add the china tld back
         if (dp1 == 0) sdomains.splice(0, 0, "cn");
@@ -80,8 +81,13 @@ assert.equal(check_for_s3_hostname("s3.amazonaws.com"), "s3.dualstack.us-east-1.
 assert.notEqual(check_for_s3_hostname("s3.amazonaws.com.cn"), "s3.dualstack.us-east-1.amazonaws.com.cn");
 
 assert.equal(check_for_s3_hostname("redditstatic.s3.amazonaws.com"), "redditstatic.s3.dualstack.us-east-1.amazonaws.com");
+assert.equal(check_for_s3_hostname("github-production-release-asset-2e65be.s3.amazonaws.com"), "github-production-release-asset-2e65be.s3.dualstack.us-east-1.amazonaws.com");
 assert.equal(check_for_s3_hostname("2020awsreinvent.s3-us-west-2.amazonaws.com"), "2020awsreinvent.s3.dualstack.us-west-2.amazonaws.com");
 assert.notEqual(check_for_s3_hostname("2020awsreinvent.s3-us-west-2.amazonaws.com.cn"), "2020awsreinvent.s3.dualstack.us-west-2.amazonaws.com.cn");
+assert.equal(check_for_s3_hostname("s3-accesspoint.us-east-2.amazonaws.com"), "s3-accesspoint.dualstack.us-east-2.amazonaws.com");
+
+assert.equal(check_for_s3_hostname("s3-accelerate-speedtest.s3-accelerate.amazonaws.com"), "s3-accelerate-speedtest.s3-accelerate.dualstack.amazonaws.com");
+assert.equal(check_for_s3_hostname("cheetah-test-us-east-1-02.s3-accelerate.amazonaws.com"), "cheetah-test-us-east-1-02.s3-accelerate.dualstack.amazonaws.com");
 
 assert.equal(check_for_s3_hostname("s3.eu-central-1.amazonaws.com"), "s3.dualstack.eu-central-1.amazonaws.com");
 assert.equal(check_for_s3_hostname("account-id.s3-control.eu-central-1.amazonaws.com"), "account-id.s3-control.dualstack.eu-central-1.amazonaws.com");

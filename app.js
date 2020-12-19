@@ -221,17 +221,17 @@ function proxy(question, response, cb) {
             if (ak) {
                 matched = true;
                 resolver.resolve6(ak, (err, addresses) => {
-                    if (addresses.length!=0) handleResponse(last_type, response, generate_aaaa(ak, addresses[0]), cb);
+                   if (addresses!=undefined) handleResponse(last_type, response, generate_aaaa(ak, addresses[0]), cb); else return;
                 });
                 return;
             }
 
 
-            if (!s3) s3 = check_for_s3_hostname(last_hostname);
+            if (!s3) s3 = check_for_s3_hostname(question.name);
             if (s3) {
                 matched = true;
                 resolver.resolve6(s3, (err, addresses) => {
-                    if (addresses.length!=0) handleResponse(last_type, response, generate_aaaa(s3, addresses[0]), cb);
+                   if (addresses!=undefined) handleResponse(last_type, response, generate_aaaa(s3, addresses[0]), cb); else return;
                 });
                 return;
             }
@@ -537,7 +537,8 @@ function check_for_s3_hostname(hostname) {
         //console.log(ssdomains);
 
         if (dp6 === 2) { //matched s3-accelerate domains
-            sdomains.splice(2, 0, "s3-accelerate");
+            //sdomains.splice(2, 0, "s3-accelerate");
+			sdomains.splice(2, 0, "dualstack");
             //console.log(sdomains);
             //console.log("s3 matched 1");
         } else if (dp7 === 3) { //matched s3-accesspoint domains
@@ -574,8 +575,8 @@ function check_for_s3_hostname(hostname) {
             sdomains.splice(2, 0, "us-east-1");
             //console.log("s3 matched 6");
         } else return false;
-
-        sdomains.splice(3, 0, "dualstack");
+		
+        if(sdomains[2]!=="dualstack") sdomains.splice(3, 0, "dualstack");
 
         //matched china region, add the china tld back
         if (dp1 == 0) sdomains.splice(0, 0, "cn");
