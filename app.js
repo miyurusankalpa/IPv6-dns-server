@@ -159,7 +159,6 @@ function proxy(question, response, cb) {
             var gio;
             var hw;
             var bun;
-            var val;
 
             if (getcdn) {
                 var providers = addaaaa[question.name].split("|");
@@ -261,13 +260,6 @@ function proxy(question, response, cb) {
                 handleResponse(last_type, response, generate_aaaa(last_hostname, '2a04:4e42::133'), cb);
                 return;
             }
-
-            /*if (!val) val = check_for_valve_a(authority);
-            if (val) {
-                matched = true;
-                handleResponse(last_type, response, generate_aaaa(last_hostname, '2a02:26f0:6b:2a0::2db2'), cb);
-                return;
-            }*/
 			
             if (!fsta) fsta = check_for_fastly_hostname(last_hostname);
             if (!fsta) fsta = check_for_fastly_a(authority);
@@ -627,15 +619,6 @@ function check_for_githubio_a(authority) {
     if (!authority) return false;
     if (authority == 'github.io') {
         //console.log("githubio matched");
-        return true;
-    } else return false;
-}
-
-function check_for_valve_a(authority) {
-    //console.log('a', authority);
-    if (!authority) return false;
-    if (authority == 'admin-dns.valvesoftware.com') {
-        //console.log("valve matched");
         return true;
     } else return false;
 }
