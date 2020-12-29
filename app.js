@@ -261,7 +261,16 @@ function proxy(question, response, cb) {
                 return;
             }
 			
-            if (!fsta) fsta = check_for_fastly_hostname(last_hostname);
+            if (!fsta) var fsta1 = check_for_fastly_hostname(last_hostname);
+			if (fsta1 && fsta1[0]=="d") {
+				//console.log(fsta1);
+                matched = true; fsta = fsta1;
+                resolver.resolve6(fsta1, (err, addresses) => {
+                   if (addresses!=undefined) handleResponse(last_type, response, generate_aaaa(fsta1, addresses[0]), cb); else return;
+                });
+                return;
+            } else if(fsta1) fsta = fsta1;
+			
             if (!fsta) fsta = check_for_fastly_a(authority);
             if (fsta) {
                 matched = true;
@@ -590,6 +599,7 @@ function check_for_fastly_hostname(hostname) {
     var dp3 = sdomains.indexOf("fastlylb");
 
     if (dp1 === 0 && (dp2 == 1 || dp3 == 1)) {
+		if(sdomains.length==5) sdomains[5] = "dualstack";
         //console.log("fastly matched");
         var fixedhostname = sdomains.reverse().join(".");
         return fixedhostname;
