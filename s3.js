@@ -59,7 +59,7 @@ function check_for_s3_hostname(hostname) {
             if (dp3 == -1) sdomains.splice(3, 0, "s3");
 
             //console.log("s3 matched 5");
-        } else if ((dp2 === 1 || dp3 === 2) && dp1 !== 0) {
+        } else if ((dp2 === 1 && dp3 === 2) && dp1 !== 0) {
             sdomains.splice(2, 0, "us-east-1");
             //console.log("s3 matched 6");
         } else return false;
@@ -106,4 +106,5 @@ assert.equal(check_for_s3_hostname("web.s3-accesspoint.ap-southeast-1.amazonaws.
 assert.equal(check_for_s3_hostname("download.opencontent.netflix.com.s3.amazonaws.com"), "download.opencontent.netflix.com.s3.dualstack.us-east-1.amazonaws.com");
 
 assert.equal(check_for_s3_hostname("pub-web-4b45fc8aac32a800.elb.eu-central-1.amazonaws.com"), false);
+assert.equal(check_for_s3_hostname("cdn.assets.as2.amazonaws.com"), false);
 assert.equal(check_for_s3_hostname("dynamodb.us-east-2.amazonaws.com"), false);

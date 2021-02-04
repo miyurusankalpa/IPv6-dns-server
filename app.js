@@ -572,7 +572,7 @@ function check_for_s3_hostname(hostname) {
             if (dp3 == -1) sdomains.splice(3, 0, "s3");
 
             //console.log("s3 matched 5");
-        } else if ((dp2 === 1 || dp3 === 2) && dp1 !== 0) {
+        } else if ((dp2 === 1 && dp3 === 2) && dp1 !== 0) {
             sdomains.splice(2, 0, "us-east-1");
             //console.log("s3 matched 6");
         } else return false;
@@ -702,7 +702,7 @@ function getbunnycdnv6address() {
 }
 
 function getcloudfrontv6address() {
-    //Mozilla cloudfront domain
+    //twitch ipv6 enabled cloudfront domain
     var aaaa_cloudfront_domain = 'static.twitchcdn.net';
     var v6range = localStorageMemory.getItem('cloudfrontv6range');
 
