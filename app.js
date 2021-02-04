@@ -753,7 +753,7 @@ function check_for_fastly_ip(ipv4) {
     //console.log('fastly ip check', ipv4);
     if (!ipv4) return false;
 
-    return ipRangeCheck(ipv4, "151.101.0.0/16");
+    return ipRangeCheck(ipv4, ["151.101.0.0/16","199.232.0.0/16"]);
 }
 
 function check_for_cloudfront_ip(ipv4) {
