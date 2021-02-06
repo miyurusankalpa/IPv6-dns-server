@@ -261,16 +261,6 @@ function proxy(question, response, cb) {
                 return;
             }
 			
-            if (!fsta) var fsta1 = check_for_fastly_hostname(last_hostname);
-			if (fsta1 && fsta1[0]=="d") {
-				//console.log(fsta1);
-                matched = true; fsta = fsta1;
-                resolver.resolve6(fsta1, (err, addresses) => {
-                   if (addresses!=undefined) handleResponse(last_type, response, generate_aaaa(fsta1, addresses[0]), cb); else return;
-                });
-                return;
-            } else if(fsta1) fsta = fsta1;
-			
             if (!fsta) fsta = check_for_fastly_a(authority);
             if (fsta) {
                 matched = true;
@@ -284,6 +274,16 @@ function proxy(question, response, cb) {
                     }
 
                     handleResponse(last_type, response, generate_aaaa(last_hostname, fv6), cb);
+                });
+                return;
+            }
+
+            if (!fsta) var fsta1 = check_for_fastly_hostname(last_hostname);
+			if (fsta1 && fsta1[0]=="d") {
+				//console.log(fsta1);
+                matched = true; fsta = fsta1;
+                resolver.resolve6(fsta1, (err, addresses) => {
+                   if (addresses!=undefined) handleResponse(last_type, response, generate_aaaa(fsta1, addresses[0]), cb); else return;
                 });
                 return;
             }
@@ -663,11 +663,15 @@ function fastlyv4tov6(ipv4) {
     var fastly_range = getfastlyv6address();
     var v6hex;
 
-    if (ipv4.length == 1) {
-        v6hex = ((octets[2] % 4) * 256 + (octets[3] * 1));
-    } else {
-        v6hex = ((octets[2] % 64) * 256 + (octets[3] * 1)); //huge thanks @tambry for this expression
-    }
+	if(octets[0]=="151")
+	{
+		if (ipv4.length == 1) {
+			v6hex = ((octets[2] % 4) * 256 + (octets[3] * 1));
+		} else {
+			v6hex = ((octets[2] % 64) * 256 + (octets[3] * 1)); //huge thanks @tambry for this expression
+		}
+	} else v6hex = octets[3];
+	
     return fastly_range + v6hex;
 }
 
