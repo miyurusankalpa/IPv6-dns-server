@@ -121,7 +121,7 @@ function handleRequest(request, response) {
 }
 
 function proxy(question, response, cb) {
-    console.log('proxying', JSON.stringify(question));
+    //console.log('proxying', JSON.stringify(question));
 
     var request = dns.Request({
         question: question, // forwarding the question
@@ -263,7 +263,7 @@ function proxy(question, response, cb) {
                 handleResponse(last_type, response, generate_aaaa(last_hostname, '2a04:4e42::133'), cb);
                 return;
             }
-			
+						
             if (!fsta) fsta = check_for_fastly_a(authority);
             if (fsta) {
                 matched = true;
@@ -290,7 +290,7 @@ function proxy(question, response, cb) {
                 });
                 return;
             }
-
+			
             if (!mse) mse = check_for_microsoftedge_a(authorityname);
             if (mse) {
                 matched = true;
@@ -358,7 +358,7 @@ function proxy(question, response, cb) {
 
                     if (!check_for_fastly_hostname(qhostname)) addaaaa[qhostname] = "fastly";
                     response.answer.forEach(function(item, index) {
-                        response.answer[index].ttl = 2;
+                        response.answer[index].ttl = 0;
                     });
                     cb();
                     return;
@@ -368,7 +368,7 @@ function proxy(question, response, cb) {
                     //console.log("added to cloudfront object");
                     if (!check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
                     response.answer.forEach(function(item, index) {
-                        response.answer[index].ttl = 2;
+                        response.answer[index].ttl = 0;
                     });
                     cb();
                     return;
@@ -378,7 +378,7 @@ function proxy(question, response, cb) {
                     //console.log("added to cloudflare object");
                     addaaaa[qhostname] = "cloudflare";
                     response.answer.forEach(function(item, index) {
-                        response.answer[index].ttl = 2;
+                        response.answer[index].ttl = 5;
                     });
                     cb();
                     return;
@@ -389,7 +389,7 @@ function proxy(question, response, cb) {
                     addaaaa[qhostname] = "githubio";
 
                     response.answer.forEach(function(item, index) {
-                        response.answer[index].ttl = 2;
+                        response.answer[index].ttl = 0;
                     });
                     cb();
                     return;
@@ -602,7 +602,7 @@ function check_for_fastly_hostname(hostname) {
     var dp3 = sdomains.indexOf("fastlylb");
 
     if (dp1 === 0 && (dp2 == 1 || dp3 == 1)) {
-		if(sdomains.length==5) sdomains[5] = "dualstack";
+		if(sdomains.length==4) sdomains[4] = "dualstack";
         //console.log("fastly matched");
         var fixedhostname = sdomains.reverse().join(".");
         return fixedhostname;
@@ -656,12 +656,12 @@ function check_for_microsoftedge_a(authority) {
 
 function fastlyv4tov6(ipv4) {
     //console.log('f', ipv4);
-    if (!ipv4[0]) return false;
+    if (!ipv4 || !ipv4[0]) return false;
     if (!check_for_fastly_ip(ipv4[0])) return false;
 
     var octets = ipv4[0].split(".");
 
-    //console.log('last octets', octets[3]);
+    //'last octets', octets[3]);
 
     var fastly_range = getfastlyv6address();
     var v6hex;
@@ -685,7 +685,9 @@ function getfastlyv6address() {
     if (!v6range) {
         //console.log("not cached");
         resolver.resolve6(aaaa_fastly_domain, (err, addresses) => {
+			if(err) { console.log(err); return; }
             var v6range = addresses[0].slice(0, -3);
+			//console.log(v6range);
             localStorageMemory.setItem('fastlyv6range', v6range);
             return v6range;
         });
@@ -700,7 +702,7 @@ function getbunnycdnv6address() {
     if (!v6range) {
         //console.log("not cached");
         resolver.resolve6(aaaa_bunny_domain, (err, addresses) => {
-			if(err) return;
+			if(err) { console.log(err); return; }
             var v6range = addresses[0];
             localStorageMemory.setItem('bunnycdnv6range', v6range);
             return v6range;
@@ -716,6 +718,7 @@ function getcloudfrontv6address() {
     if (!v6range) {
         //console.log("not cached");
         resolver.resolve6(aaaa_cloudfront_domain, (err, addresses) => {
+			if(err) { console.log(err); return; }
             var v6range = addresses[0].slice(0, -4);
             localStorageMemory.setItem('cloudfrontv6range', v6range);
             return v6range + rand_hex();
