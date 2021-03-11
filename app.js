@@ -55,6 +55,9 @@ if (aggressive_v6) {
         'static.twitchcdn.net': "fastly",
         'www.bbc.com': "2a04:4e42::81",
         'cdn.statically.io': "bunnycdn",
+		'twitter.com': "cloudfront",
+		'api.twitter.com': "cloudfront",
+		'mobile.twitter.com': "cloudfront",
         'production.cloudflare.docker.com ': "cloudflare",
     };
 }
