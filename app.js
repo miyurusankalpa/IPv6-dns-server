@@ -48,24 +48,21 @@ var remove_v4_if_v6_exist = false;
 
 if (aggressive_v6) {
     var addaaaa = {
-
         'registry.npmjs.org': "cloudflare",
-        'cdn.jsdelivr.net': "cloudflare", //https://github.com/jsdelivr/jsdelivr/issues/18163
         'news.ycombinator.com': "cloudflare",
-        'static.twitchcdn.net': "fastly",
         'www.bbc.com': "2a04:4e42::81",
         'cdn.statically.io': "bunnycdn",
-		'twitter.com': "cloudfront",
-		'api.twitter.com': "cloudfront",
-		'mobile.twitter.com': "cloudfront",
+        'twitter.com': "cloudfront",
+        'api.twitter.com': "cloudfront",
+        'mobile.twitter.com': "cloudfront",
         'production.cloudflare.docker.com ': "cloudflare",
     };
 }
 
 //from http://d7uri8nf7uskq.cloudfront.net/tools/list-cloudfront-ips
 var cloudfrontiplist = {
-	"CLOUDFRONT_GLOBAL_IP_LIST": ["120.52.22.96/27", "205.251.249.0/24", "180.163.57.128/26", "204.246.168.0/22", "205.251.252.0/23", "54.192.0.0/16", "204.246.173.0/24", "54.230.200.0/21", "120.253.240.192/26", "116.129.226.128/26", "130.176.0.0/17", "99.86.0.0/16", "205.251.200.0/21", "223.71.71.128/25", "13.32.0.0/15", "120.253.245.128/26", "13.224.0.0/14", "70.132.0.0/18", "13.249.0.0/16", "205.251.208.0/20", "65.9.128.0/18", "130.176.128.0/18", "58.254.138.0/25", "54.230.208.0/20", "116.129.226.0/25", "52.222.128.0/17", "64.252.128.0/18", "205.251.254.0/24", "54.230.224.0/19", "71.152.0.0/17", "216.137.32.0/19", "204.246.172.0/24", "120.52.39.128/27", "118.193.97.64/26", "223.71.71.96/27", "54.240.128.0/18", "205.251.250.0/23", "180.163.57.0/25", "52.46.0.0/18", "223.71.11.0/27", "52.82.128.0/19", "54.230.0.0/17", "54.230.128.0/18", "54.239.128.0/18", "130.176.224.0/20", "36.103.232.128/26", "52.84.0.0/15", "143.204.0.0/16", "144.220.0.0/16", "120.52.153.192/26", "119.147.182.0/25", "120.232.236.0/25", "54.182.0.0/16", "58.254.138.128/26", "120.253.245.192/27", "54.239.192.0/19", "120.52.12.64/26", "99.84.0.0/16", "130.176.192.0/19", "52.124.128.0/17", "204.246.164.0/22", "13.35.0.0/16", "204.246.174.0/23", "36.103.232.0/25", "119.147.182.128/26", "118.193.97.128/25", "120.232.236.128/26", "204.246.176.0/20", "65.8.0.0/16", "65.9.0.0/17", "120.253.241.160/27", "64.252.64.0/18"],
-	"CLOUDFRONT_REGIONAL_EDGE_IP_LIST": ["13.113.196.64/26", "13.113.203.0/24", "52.199.127.192/26", "13.124.199.0/24", "3.35.130.128/25", "52.78.247.128/26", "13.233.177.192/26", "15.207.13.128/25", "15.207.213.128/25", "52.66.194.128/26", "13.228.69.0/24", "52.220.191.0/26", "13.210.67.128/26", "13.54.63.128/26", "99.79.169.0/24", "18.192.142.0/23", "35.158.136.0/24", "52.57.254.0/24", "13.48.32.0/24", "18.200.212.0/23", "52.212.248.0/26", "3.10.17.128/25", "3.11.53.0/24", "52.56.127.0/25", "15.188.184.0/24", "52.47.139.0/24", "18.229.220.192/26", "54.233.255.128/26", "3.231.2.0/25", "3.234.232.224/27", "3.236.169.192/26", "3.236.48.0/23", "34.195.252.0/24", "34.226.14.0/24", "13.59.250.0/26", "18.216.170.128/25", "3.128.93.0/24", "3.134.215.0/24", "52.15.127.128/26", "52.52.191.128/26", "34.216.51.0/25", "34.223.12.224/27", "34.223.80.192/26", "35.162.63.192/26", "35.167.191.128/26", "44.227.178.0/24", "44.234.108.128/25", "44.234.90.252/30"]
+    "CLOUDFRONT_GLOBAL_IP_LIST": ["120.52.22.96/27", "205.251.249.0/24", "180.163.57.128/26", "204.246.168.0/22", "205.251.252.0/23", "54.192.0.0/16", "204.246.173.0/24", "54.230.200.0/21", "120.253.240.192/26", "116.129.226.128/26", "130.176.0.0/17", "108.156.0.0/14", "99.86.0.0/16", "205.251.200.0/21", "223.71.71.128/25", "13.32.0.0/15", "120.253.245.128/26", "13.224.0.0/14", "70.132.0.0/18", "15.158.0.0/16", "13.249.0.0/16", "205.251.208.0/20", "65.9.128.0/18", "130.176.128.0/18", "58.254.138.0/25", "54.230.208.0/20", "116.129.226.0/25", "52.222.128.0/17", "64.252.128.0/18", "205.251.254.0/24", "54.230.224.0/19", "71.152.0.0/17", "216.137.32.0/19", "204.246.172.0/24", "120.52.39.128/27", "118.193.97.64/26", "223.71.71.96/27", "54.240.128.0/18", "205.251.250.0/23", "180.163.57.0/25", "52.46.0.0/18", "223.71.11.0/27", "52.82.128.0/19", "54.230.0.0/17", "54.230.128.0/18", "54.239.128.0/18", "130.176.224.0/20", "36.103.232.128/26", "52.84.0.0/15", "143.204.0.0/16", "144.220.0.0/16", "120.52.153.192/26", "119.147.182.0/25", "120.232.236.0/25", "54.182.0.0/16", "58.254.138.128/26", "120.253.245.192/27", "54.239.192.0/19", "18.64.0.0/14", "120.52.12.64/26", "99.84.0.0/16", "130.176.192.0/19", "52.124.128.0/17", "204.246.164.0/22", "13.35.0.0/16", "204.246.174.0/23", "36.103.232.0/25", "119.147.182.128/26", "118.193.97.128/25", "120.232.236.128/26", "204.246.176.0/20", "65.8.0.0/16", "65.9.0.0/17", "108.138.0.0/15", "120.253.241.160/27", "64.252.64.0/18"],
+    "CLOUDFRONT_REGIONAL_EDGE_IP_LIST": ["13.113.196.64/26", "13.113.203.0/24", "52.199.127.192/26", "13.124.199.0/24", "3.35.130.128/25", "52.78.247.128/26", "13.233.177.192/26", "15.207.13.128/25", "15.207.213.128/25", "52.66.194.128/26", "13.228.69.0/24", "52.220.191.0/26", "13.210.67.128/26", "13.54.63.128/26", "99.79.169.0/24", "18.192.142.0/23", "35.158.136.0/24", "52.57.254.0/24", "13.48.32.0/24", "18.200.212.0/23", "52.212.248.0/26", "3.10.17.128/25", "3.11.53.0/24", "52.56.127.0/25", "15.188.184.0/24", "52.47.139.0/24", "18.229.220.192/26", "54.233.255.128/26", "3.231.2.0/25", "3.234.232.224/27", "3.236.169.192/26", "3.236.48.0/23", "34.195.252.0/24", "34.226.14.0/24", "13.59.250.0/26", "18.216.170.128/25", "3.128.93.0/24", "3.134.215.0/24", "52.15.127.128/26", "3.101.158.0/23", "52.52.191.128/26", "34.216.51.0/25", "34.223.12.224/27", "34.223.80.192/26", "35.162.63.192/26", "35.167.191.128/26", "44.227.178.0/24", "44.234.108.128/25", "44.234.90.252/30"]
 };
 
 //cache fastly range
@@ -114,7 +111,7 @@ function handleRequest(request, response) {
 
     // do the proxying in parallel
     // when done, respond to the request by sending the response
-    async.parallel(f, function() {
+    async.parallel(f, function () {
         //console.log('response', response);
         response.send();
     });
@@ -129,7 +126,7 @@ function proxy(question, response, cb) {
         timeout: 500
     });
 
-    request.on('timeout', function() {
+    request.on('timeout', function () {
         //console.log('Timeout in making request no forwarding', question.name);
     });
 
@@ -223,7 +220,7 @@ function proxy(question, response, cb) {
             if (ak) {
                 matched = true;
                 resolver.resolve6(ak, (err, addresses) => {
-                   if (addresses!=undefined) handleResponse(last_type, response, generate_aaaa(ak, addresses[0]), cb); else return;
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(ak, addresses[0]), cb); else return;
                 });
                 return;
             }
@@ -233,7 +230,7 @@ function proxy(question, response, cb) {
             if (s3) {
                 matched = true;
                 resolver.resolve6(s3, (err, addresses) => {
-                   if (addresses!=undefined) handleResponse(last_type, response, generate_aaaa(s3, addresses[0]), cb); else return;
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(s3, addresses[0]), cb); else return;
                 });
                 return;
             }
@@ -263,7 +260,7 @@ function proxy(question, response, cb) {
                 handleResponse(last_type, response, generate_aaaa(last_hostname, '2a04:4e42::133'), cb);
                 return;
             }
-						
+
             if (!fsta) fsta = check_for_fastly_a(authority);
             if (fsta) {
                 matched = true;
@@ -282,15 +279,15 @@ function proxy(question, response, cb) {
             }
 
             if (!fsta) var fsta1 = check_for_fastly_hostname(last_hostname);
-			if (fsta1 && fsta1[0]=="d") {
-				//console.log(fsta1);
+            if (fsta1 && fsta1[0] == "d") {
+                //console.log(fsta1);
                 matched = true; fsta = fsta1;
                 resolver.resolve6(fsta1, (err, addresses) => {
-                   if (addresses!=undefined) handleResponse(last_type, response, generate_aaaa(fsta1, addresses[0]), cb); else return;
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(fsta1, addresses[0]), cb); else return;
                 });
                 return;
             }
-			
+
             if (!mse) mse = check_for_microsoftedge_a(authorityname);
             if (mse) {
                 matched = true;
@@ -357,7 +354,7 @@ function proxy(question, response, cb) {
                     if ((check_for_stackexchange_ip(ansaddr)) && (!aggressive_v6)) noaaaa.push(qhostname);
 
                     if (!check_for_fastly_hostname(qhostname)) addaaaa[qhostname] = "fastly";
-                    response.answer.forEach(function(item, index) {
+                    response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
                     });
                     cb();
@@ -367,7 +364,7 @@ function proxy(question, response, cb) {
                 if (check_for_cloudfront_ip(ansaddr) === true) {
                     //console.log("added to cloudfront object");
                     if (!check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
-                    response.answer.forEach(function(item, index) {
+                    response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
                     });
                     cb();
@@ -377,7 +374,7 @@ function proxy(question, response, cb) {
                 if (check_for_cloudflare_ip(ansaddr) === true) {
                     //console.log("added to cloudflare object");
                     addaaaa[qhostname] = "cloudflare";
-                    response.answer.forEach(function(item, index) {
+                    response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 5;
                     });
                     cb();
@@ -388,7 +385,7 @@ function proxy(question, response, cb) {
                     //console.log("added to github.io object");
                     addaaaa[qhostname] = "githubio";
 
-                    response.answer.forEach(function(item, index) {
+                    response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
                     });
                     cb();
@@ -409,8 +406,8 @@ function proxy(question, response, cb) {
             if (addresses === undefined || addresses[0] === undefined) {
                 request.send();
             } else {
-				response.header.rcode = 0;
-				/*response.answer = [{
+                response.header.rcode = 0;
+                /*response.answer = [{
                             name: question.name,
                             type: 1,
                             class: 1,
@@ -420,7 +417,7 @@ function proxy(question, response, cb) {
                 cb();
             }
         });
-		
+
     } else request.send();
 
 }
@@ -493,7 +490,7 @@ function check_for_highwinds_hostname(hostname) {
     var dp2 = sdomains.indexOf("hwcdn");
     var dp3 = sdomains.indexOf("com");
     var dp4 = sdomains.indexOf("stackpathcdn");
-	
+
     if ((dp1 === 0 && dp2 == 1) || (dp3 === 0 && dp4 == 1)) {
         //console.log("highwinds matched");
         var fixedhostname = sdomains.reverse().join(".");
@@ -542,7 +539,7 @@ function check_for_s3_hostname(hostname) {
 
         if (dp6 === 2) { //matched s3-accelerate domains
             //sdomains.splice(2, 0, "s3-accelerate");
-			sdomains.splice(2, 0, "dualstack");
+            sdomains.splice(2, 0, "dualstack");
             //console.log(sdomains);
             //console.log("s3 matched 1");
         } else if (dp7 === 3) { //matched s3-accesspoint domains
@@ -560,8 +557,8 @@ function check_for_s3_hostname(hostname) {
             sdomains.splice(4, 0, "s3-w");
             //console.log("s3 matched 4");
         } else if (ssdomains.length > 1) { //matched  **.s3-[region].amazonaws.com
-			if(ssdomains[0]!=="s3") return false;
-			
+            if (ssdomains[0] !== "s3") return false;
+
             sdomains.splice(2, 1); //remove matched s3 region
 
             if (ssdomains.length == 0 && dp1 !== 0) {
@@ -579,8 +576,8 @@ function check_for_s3_hostname(hostname) {
             sdomains.splice(2, 0, "us-east-1");
             //console.log("s3 matched 6");
         } else return false;
-		
-        if(sdomains[2]!=="dualstack") sdomains.splice(3, 0, "dualstack");
+
+        if (sdomains[2] !== "dualstack") sdomains.splice(3, 0, "dualstack");
 
         //matched china region, add the china tld back
         if (dp1 == 0) sdomains.splice(0, 0, "cn");
@@ -602,7 +599,7 @@ function check_for_fastly_hostname(hostname) {
     var dp3 = sdomains.indexOf("fastlylb");
 
     if (dp1 === 0 && (dp2 == 1 || dp3 == 1)) {
-		if(sdomains.length==4) sdomains[4] = "dualstack";
+        if (sdomains.length == 4) sdomains[4] = "dualstack";
         //console.log("fastly matched");
         var fixedhostname = sdomains.reverse().join(".");
         return fixedhostname;
@@ -666,15 +663,14 @@ function fastlyv4tov6(ipv4) {
     var fastly_range = getfastlyv6address();
     var v6hex;
 
-	if(octets[0]=="151")
-	{
-		if (ipv4.length == 1) {
-			v6hex = ((octets[2] % 4) * 256 + (octets[3] * 1));
-		} else {
-			v6hex = ((octets[2] % 64) * 256 + (octets[3] * 1)); //huge thanks @tambry for this expression
-		}
-	} else v6hex = octets[3];
-	
+    if (octets[0] == "151") {
+        if (ipv4.length == 1) {
+            v6hex = ((octets[2] % 4) * 256 + (octets[3] * 1));
+        } else {
+            v6hex = ((octets[2] % 64) * 256 + (octets[3] * 1)); //huge thanks @tambry for this expression
+        }
+    } else v6hex = octets[3];
+
     return fastly_range + v6hex;
 }
 
@@ -685,9 +681,9 @@ function getfastlyv6address() {
     if (!v6range) {
         //console.log("not cached");
         resolver.resolve6(aaaa_fastly_domain, (err, addresses) => {
-			if(err) { console.log(err); return; }
+            if (err) { console.log(err); return; }
             var v6range = addresses[0].slice(0, -3);
-			//console.log(v6range);
+            //console.log(v6range);
             localStorageMemory.setItem('fastlyv6range', v6range);
             return v6range;
         });
@@ -702,7 +698,7 @@ function getbunnycdnv6address() {
     if (!v6range) {
         //console.log("not cached");
         resolver.resolve6(aaaa_bunny_domain, (err, addresses) => {
-			if(err) { console.log(err); return; }
+            if (err) { console.log(err); return; }
             var v6range = addresses[0];
             localStorageMemory.setItem('bunnycdnv6range', v6range);
             return v6range;
@@ -718,7 +714,7 @@ function getcloudfrontv6address() {
     if (!v6range) {
         //console.log("not cached");
         resolver.resolve6(aaaa_cloudfront_domain, (err, addresses) => {
-			if(err) { console.log(err); return; }
+            if (err) { console.log(err); return; }
             var v6range = addresses[0].slice(0, -4);
             localStorageMemory.setItem('cloudfrontv6range', v6range);
             return v6range + rand_hex();
@@ -763,7 +759,7 @@ function check_for_fastly_ip(ipv4) {
     //console.log('fastly ip check', ipv4);
     if (!ipv4) return false;
 
-    return ipRangeCheck(ipv4, ["151.101.0.0/16","199.232.0.0/16"]);
+    return ipRangeCheck(ipv4, ["151.101.0.0/16", "199.232.0.0/16"]);
 }
 
 function check_for_cloudfront_ip(ipv4) {
@@ -790,9 +786,10 @@ function check_for_githubpages_ip(ipv4) {
 
     if (!ipRangeCheck(ipv4, "185.199.108.0/22")) return false;
 
-    var octets = ipv4.split(".");
+    /*var octets = ipv4.split(".");
     if (octets[3] == 153) return true;
-    else return false;
+    else return false;*/
+    return true;
 }
 
 function check_for_stackexchange_ip(ipv4) {
