@@ -105,11 +105,10 @@ Change the `v6_only` variable to true in the app.js file.
 
 ## Github.io (Fastly)
 
-* Test domains: twitter.github.io
+* Test domains: twitter.github.io, www.jruby.org
 * IPv6 Type: Anycast
-* Coverage: Only *.github.io domains. All on Aggressive mode.
+* Coverage: All
 * Usability: Stable
-* Aggressive mode: HTTPS breaks on custom domains
 
 ## Stack Exchange sites (Fastly)
 

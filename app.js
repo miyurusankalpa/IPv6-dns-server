@@ -257,7 +257,7 @@ function proxy(question, response, cb) {
             if (!gio) gio = check_for_githubio_a(authorityname);
             if (gio) {
                 matched = true;
-                handleResponse(last_type, response, generate_aaaa(last_hostname, '2a04:4e42::133'), cb);
+                handleResponse(last_type, response, generate_aaaa(last_hostname, '2606:50c0:8000::153'), cb);
                 return;
             }
 
@@ -381,7 +381,7 @@ function proxy(question, response, cb) {
                     return;
                 }
 
-                if ((check_for_githubpages_ip(ansaddr) === true) && (aggressive_v6)) {
+                if ((check_for_githubpages_ip(ansaddr) === true)) {
                     //console.log("added to github.io object");
                     addaaaa[qhostname] = "githubio";
 
