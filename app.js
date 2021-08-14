@@ -251,13 +251,6 @@ function proxy(question, response, cb) {
             if (msg.authority[0]) var authorityname = msg.authority[0].name;
             else var authorityname = 'none';
 
-            if (!cfl && aggressive_v6) cfl = check_for_cloudflare_a(authority);
-            if (cfl) {
-                matched = true;
-                handleResponse(last_type, response, generate_aaaa(last_hostname, getcloudflarev6address()), cb);
-                return;
-            }
-
             if (!gio) gio = check_for_githubio_a(authorityname);
             if (gio) {
                 matched = true;
@@ -336,11 +329,17 @@ function proxy(question, response, cb) {
                 });
             }
 
-            if (!sui) sui = check_for_sucuri_ip(last_hostname);
             if (sui) {
                 matched = true;
                 var sv6address = getsucuriv6address();
                 handleResponse(last_type, response, generate_aaaa(last_hostname, sv6address), cb);
+                return;
+            }
+
+            if (!cfl && aggressive_v6) cfl = check_for_cloudflare_a(authority);
+            if (cfl) {
+                matched = true;
+                handleResponse(last_type, response, generate_aaaa(last_hostname, getcloudflarev6address()), cb);
                 return;
             }
 
@@ -383,16 +382,6 @@ function proxy(question, response, cb) {
                     return;
                 }
 
-                if (check_for_cloudflare_ip(ansaddr) === true) {
-                    //console.log("added to cloudflare object");
-                    addaaaa[qhostname] = "cloudflare";
-                    response.answer.forEach(function (item, index) {
-                        response.answer[index].ttl = 0;
-                    });
-                    cb();
-                    return;
-                }
-
                 if (check_for_sucuri_ip(ansaddr) === true) {
                     //console.log("added to sucuri object");
                     addaaaa[qhostname] = "sucuri";
@@ -407,6 +396,16 @@ function proxy(question, response, cb) {
                     //console.log("added to github.io object");
                     addaaaa[qhostname] = "githubio";
 
+                    response.answer.forEach(function (item, index) {
+                        response.answer[index].ttl = 0;
+                    });
+                    cb();
+                    return;
+                }
+
+                if (check_for_cloudflare_ip(ansaddr) === true) {
+                    //console.log("added to cloudflare object");
+                    addaaaa[qhostname] = "cloudflare";
                     response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
                     });
