@@ -103,6 +103,13 @@ Change the `v6_only` variable to true in the app.js file.
 * Coverage: Only on some services
 * Usability: Unknown
 
+## Sucuri
+
+* Test domains: www.exploit-db.com
+* IPv6 Type: Anycast
+* Coverage: Only on some services
+* Usability: Unknown
+
 ## Github.io (Fastly)
 
 * Test domains: twitter.github.io, www.jruby.org

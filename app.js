@@ -159,6 +159,7 @@ function proxy(question, response, cb) {
             var gio;
             var hw;
             var bun;
+            var sui;
 
             if (getcdn) {
                 var providers = addaaaa[question.name].split("|");
@@ -195,6 +196,9 @@ function proxy(question, response, cb) {
                         break;
                     case 'bunnycdn':
                         bun = true;
+                        break;
+                    case 'sucuri':
+                        sui = true;
                         break;
                     default: {
                         handleResponse(5, response, generate_aaaa(question.name, provider_name), cb);
@@ -332,6 +336,14 @@ function proxy(question, response, cb) {
                 });
             }
 
+            if (!sui) sui = check_for_sucuri_ip(last_hostname);
+            if (sui) {
+                matched = true;
+                var sv6address = getsucuriv6address();
+                handleResponse(last_type, response, generate_aaaa(last_hostname, sv6address), cb);
+                return;
+            }
+
             if (!matched) cb();
         } else {
 
@@ -375,7 +387,17 @@ function proxy(question, response, cb) {
                     //console.log("added to cloudflare object");
                     addaaaa[qhostname] = "cloudflare";
                     response.answer.forEach(function (item, index) {
-                        response.answer[index].ttl = 5;
+                        response.answer[index].ttl = 0;
+                    });
+                    cb();
+                    return;
+                }
+
+                if (check_for_sucuri_ip(ansaddr) === true) {
+                    //console.log("added to sucuri object");
+                    addaaaa[qhostname] = "sucuri";
+                    response.answer.forEach(function (item, index) {
+                        response.answer[index].ttl = 0;
                     });
                     cb();
                     return;
@@ -690,6 +712,22 @@ function getfastlyv6address() {
     } else return v6range;
 }
 
+function getsucuriv6address() {
+    //sucuri ipv6 enabled domain
+    var aaaa_sucuri_domain = 'sucuri.net';
+    var v6range = localStorageMemory.getItem('sucuriv6range');
+
+    if (!v6range) {
+        //console.log("not cached");
+        resolver.resolve6(aaaa_sucuri_domain, (err, addresses) => {
+            if (err) { console.log(err); return; }
+            var v6range = addresses[0];
+            localStorageMemory.setItem('sucuriv6range', v6range);
+            return v6range;
+        });
+    } else return v6range;
+}
+
 function getbunnycdnv6address() {
     //crtlblog ipv6 enabled domain
     var aaaa_bunny_domain = 'ctrl.b-cdn.net';
@@ -778,6 +816,13 @@ function check_for_cloudflare_ip(ipv4) {
     if (!ipv4) return false;
 
     return ipRangeCheck(ipv4, "104.16.0.0/12");
+}
+
+function check_for_sucuri_ip(ipv4) {
+    //console.log('sucuri ip check', ipv4);
+    if (!ipv4) return false;
+
+    return ipRangeCheck(ipv4, "192.124.249.0/24");
 }
 
 function check_for_githubpages_ip(ipv4) {
