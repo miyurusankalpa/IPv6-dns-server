@@ -254,8 +254,10 @@ function proxy(question, response, cb) {
             if (!gio) gio = check_for_githubio_a(authorityname);
             if (gio) {
                 matched = true;
-                handleResponse(last_type, response, generate_aaaa(last_hostname, '2606:50c0:8000::153'), cb);
-                return;
+				fsta = true;
+				
+                /*handleResponse(last_type, response, generate_aaaa(last_hostname, '2606:50c0:8000::153'), cb);
+                return;*/
             }
 
             if (!fsta) fsta = check_for_fastly_a(authority);
@@ -675,13 +677,17 @@ function check_for_microsoftedge_a(authority) {
 function fastlyv4tov6(ipv4) {
     //console.log('f', ipv4);
     if (!ipv4 || !ipv4[0]) return false;
-    if (!check_for_fastly_ip(ipv4[0])) return false;
+		
+    if (check_for_fastly_ip(ipv4[0])) var cust = "fastly";
+    if (check_for_githubpages_ip(ipv4[0])) var cust = "github";
+
+    if (!cust) return false;
 
     var octets = ipv4[0].split(".");
 
     //'last octets', octets[3]);
 
-    var fastly_range = getfastlyv6address();
+    var v6_range = getfastlyv6address(cust);
     var v6hex;
 
     if (octets[0] == "151") {
@@ -692,10 +698,12 @@ function fastlyv4tov6(ipv4) {
         }
     } else v6hex = octets[3];
 
-    return fastly_range + v6hex;
+    return v6_range + v6hex;
 }
 
-function getfastlyv6address() {
+function getfastlyv6address(customer) {
+    if(customer=="github") return "2606:50c0:8000::";
+
     var aaaa_fastly_domain = 'dualstack.g.shared.global.fastly.net';
     var v6range = localStorageMemory.getItem('fastlyv6range');
 

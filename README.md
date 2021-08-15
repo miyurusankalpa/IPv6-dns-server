@@ -112,7 +112,7 @@ Change the `v6_only` variable to true in the app.js file.
 
 ## Github.io (Fastly)
 
-* Test domains: twitter.github.io, www.jruby.org
+* Test domains: twitter.github.io, www.jruby.org, avatars.githubusercontent.com	
 * IPv6 Type: Anycast
 * Coverage: All
 * Usability: Stable
