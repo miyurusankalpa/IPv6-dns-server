@@ -782,9 +782,14 @@ function msev4tov6(ipv4, hostname) {
     //console.log('last octets', octets[3]);
 
     //anycasted range
+	if (mseid[0] == 'a') var mse_range = '2620:1ec:c11::';
+	if (mseid[0] == 'b') var mse_range = '2620:1ec:a92::';
+	if (mseid[0] == 'c') var mse_range = '2a01:111:2003::';
     if (mseid[0] == 'l') var mse_range = '2620:1ec:21::';
-    //if (mseid[0] == 'a') var mse_range = '2620:1ec:c11::';
     if (mseid[0] == 's') var mse_range = '2620:1ec:6::';
+    if (mseid[0] == 'k') var mse_range = '2620:1ec:c::';
+    if (mseid[0] == 't') var mse_range = '2620:1ec:bdf::';
+
     if (mseid[0] == 'spo') {
         var mse_range = '2620:1ec:8f8::';
         if (octets[3] == 9) octets[3] = 8;
