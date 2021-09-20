@@ -366,7 +366,7 @@ function proxy(question, response, cb) {
                     //console.log("added to fastly object");
                     if ((check_for_stackexchange_ip(ansaddr)) && (!aggressive_v6)) noaaaa.push(qhostname);
 
-                    if (!check_for_fastly_hostname(qhostname)) addaaaa[qhostname] = "fastly";
+                    if (check_for_fastly_hostname(qhostname)) addaaaa[qhostname] = "fastly";
                     response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
                     });
@@ -376,7 +376,7 @@ function proxy(question, response, cb) {
 
                 if (check_for_cloudfront_ip(ansaddr) === true) {
                     //console.log("added to cloudfront object");
-                    if (!check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
+                    if (check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
                     response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
                     });
@@ -414,6 +414,8 @@ function proxy(question, response, cb) {
                     cb();
                     return;
                 }
+
+                if (check_for_slack_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
             }
             cb();
         }
@@ -627,6 +629,20 @@ function check_for_fastly_hostname(hostname) {
         var fixedhostname = sdomains.reverse().join(".");
         return fixedhostname;
     } else return false;
+}
+
+function check_for_slack_hostname(hostname) {
+    if (!hostname) return false;
+    var sdomains = hostname.split(".");
+    sdomains.reverse();
+    var dp1 = sdomains.indexOf("com");
+    var dp2 = sdomains.indexOf("slack");
+
+    if (dp1 === 0 && dp2 == 1) {
+        //console.log("slack matched");
+        var fixedhostname = sdomains.reverse().join(".");
+        return fixedhostname;
+    }
 }
 
 function check_for_cloudflare_a(authority) {
