@@ -254,8 +254,8 @@ function proxy(question, response, cb) {
             if (!gio) gio = check_for_githubio_a(authorityname);
             if (gio) {
                 matched = true;
-				fsta = true;
-				
+                fsta = true;
+
                 /*handleResponse(last_type, response, generate_aaaa(last_hostname, '2606:50c0:8000::153'), cb);
                 return;*/
             }
@@ -638,6 +638,17 @@ function check_for_slack_hostname(hostname) {
     var dp1 = sdomains.indexOf("com");
     var dp2 = sdomains.indexOf("slack");
 
+    if (sdomains[2]) {
+        //check for edgeapi.slack.com
+        var dp3 = sdomains.indexOf("edgeapi");
+
+        //check for wss-primary.slack.com
+        var wsscheck = sdomains[2].split("-");
+        var dp4 = wsscheck.indexOf("wss");
+
+        if (dp3 === 2 || dp4 === 0) return false;
+    }
+
     if (dp1 === 0 && dp2 == 1) {
         //console.log("slack matched");
         var fixedhostname = sdomains.reverse().join(".");
@@ -693,7 +704,7 @@ function check_for_microsoftedge_a(authority) {
 function fastlyv4tov6(ipv4) {
     //console.log('f', ipv4);
     if (!ipv4 || !ipv4[0]) return false;
-		
+
     if (check_for_fastly_ip(ipv4[0])) var cust = "fastly";
     if (check_for_githubpages_ip(ipv4[0])) var cust = "github";
 
@@ -718,7 +729,7 @@ function fastlyv4tov6(ipv4) {
 }
 
 function getfastlyv6address(customer) {
-    if(customer=="github") return "2606:50c0:8000::";
+    if (customer == "github") return "2606:50c0:8000::";
 
     var aaaa_fastly_domain = 'dualstack.g.shared.global.fastly.net';
     var v6range = localStorageMemory.getItem('fastlyv6range');
@@ -798,9 +809,9 @@ function msev4tov6(ipv4, hostname) {
     //console.log('last octets', octets[3]);
 
     //anycasted range
-	if (mseid[0] == 'a') var mse_range = '2620:1ec:c11::';
-	if (mseid[0] == 'b') var mse_range = '2620:1ec:a92::';
-	if (mseid[0] == 'c') var mse_range = '2a01:111:2003::';
+    if (mseid[0] == 'a') var mse_range = '2620:1ec:c11::';
+    if (mseid[0] == 'b') var mse_range = '2620:1ec:a92::';
+    if (mseid[0] == 'c') var mse_range = '2a01:111:2003::';
     if (mseid[0] == 'l') var mse_range = '2620:1ec:21::';
     if (mseid[0] == 's') var mse_range = '2620:1ec:6::';
     if (mseid[0] == 'k') var mse_range = '2620:1ec:c::';
