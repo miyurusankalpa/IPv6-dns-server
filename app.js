@@ -375,8 +375,8 @@ function proxy(question, response, cb) {
                 }
 
                 if (check_for_cloudfront_ip(ansaddr) === true) {
-                    //console.log("added to cloudfront object");
-                    if (check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
+					//console.log("added to cloudfront object");
+					addaaaa[qhostname] = "cloudfront";
                     response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
                     });
@@ -415,6 +415,7 @@ function proxy(question, response, cb) {
                     return;
                 }
 
+				if (check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
                 if (check_for_slack_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
             }
             cb();
