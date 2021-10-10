@@ -78,9 +78,8 @@ Change the `v6_only` variable to true in the app.js file.
 
 * Test domains: cdn-b-east.streamable.com
 * IPv6 Type: Unicast
-* Coverage: IPv6 is not available in some locations. All on Aggressive mode.
+* Coverage: All
 * Usability: Stable
-* Aggressive mode: When IPv6 address is not available, adds AMS POP IPv6 address in aggressive mode.
 
 ## Highwinds
 

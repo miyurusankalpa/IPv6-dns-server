@@ -246,7 +246,8 @@ function proxy(question, response, cb) {
             if (!hw) hw = check_for_highwinds_hostname(last_hostname);
             if (hw) {
                 matched = true;
-                handleResponse(last_type, response, generate_aaaa(last_hostname, '2001:4de0:ac19::1:b:2a'), cb);
+                var hwv6address = gethighwindv6address();
+                handleResponse(last_type, response, generate_aaaa(last_hostname, hwv6address), cb);
                 return;
             }
 
@@ -321,7 +322,6 @@ function proxy(question, response, cb) {
             if (bun) {
                 matched = true;
                 var bv6address = getbunnycdnv6address();
-                if ((bv6address == undefined) && (aggressive_v6)) bv6address = '2a02:6ea0:c020::2'; //bunnycdn AMS POP IP
                 handleResponse(last_type, response, generate_aaaa(last_hostname, bv6address), cb);
                 return;
             }
@@ -378,7 +378,6 @@ function proxy(question, response, cb) {
                     //console.log("added to fastly object");
                     if ((check_for_stackexchange_ip(ansaddr)) && (!aggressive_v6)) noaaaa.push(qhostname);
 
-                    if (check_for_fastly_hostname(qhostname)) addaaaa[qhostname] = "fastly";
                     response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
                     });
@@ -437,6 +436,7 @@ function proxy(question, response, cb) {
                     return;
                 }
 
+                if (check_for_fastly_hostname(qhostname)) addaaaa[qhostname] = "fastly";
                 if (check_for_weebly_hostname(qhostname)) addaaaa[qhostname] = "weebly";
                 if (check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
                 if (check_for_slack_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
@@ -803,17 +803,19 @@ function getsucuriv6address() {
 function getbunnycdnv6address() {
     //crtlblog ipv6 enabled domain
     var aaaa_bunny_domain = 'ctrl.b-cdn.net';
-    var v6range = localStorageMemory.getItem('bunnycdnv6range');
+    var v6adddy = localStorageMemory.getItem('bunnycdnv6addy');
+    var bunny_fixed_address = '2a02:6ea0:c020::2'; //bunnycdn AMS POP IP
 
-    if (!v6range) {
+    if (!v6adddy) {
         //console.log("not cached");
         resolver.resolve6(aaaa_bunny_domain, (err, addresses) => {
-            if (err) { console.log(err); return; }
-            var v6range = addresses[0];
-            localStorageMemory.setItem('bunnycdnv6range', v6range);
-            return v6range;
+            if (err) { console.log(err); return bunny_fixed_address; }
+            var v6adddy = addresses[0];
+            if (bv6address == undefined) v6adddy = bunny_fixed_address;
+            localStorageMemory.setItem('bunnycdnv6addy', v6adddy);
+            return v6adddy;
         });
-    } else return v6range;
+    } else return v6adddy;
 }
 
 function getcloudfrontv6address() {
@@ -839,6 +841,11 @@ function getcloudflarev6address() {
 function getweeblyv6address() {
     return '2620:11c:1:e4::36';
 }
+
+function gethighwindv6address() {
+    return '2001:4de0:ac19::1:b:2a';
+}
+
 function msev4tov6(ipv4, hostname) {
     //console.log('f', ipv4);
     if (!ipv4[0]) return false;
