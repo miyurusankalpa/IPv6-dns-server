@@ -160,6 +160,7 @@ function proxy(question, response, cb) {
             var hw;
             var bun;
             var sui;
+            var wb;
 
             if (getcdn) {
                 var providers = addaaaa[question.name].split("|");
@@ -199,6 +200,9 @@ function proxy(question, response, cb) {
                         break;
                     case 'sucuri':
                         sui = true;
+                        break;
+                    case 'weebly':
+                        wb = true;
                         break;
                     default: {
                         handleResponse(5, response, generate_aaaa(question.name, provider_name), cb);
@@ -322,6 +326,14 @@ function proxy(question, response, cb) {
                 return;
             }
 
+            if (!wb) wb = check_for_weebly_hostname(last_hostname);
+            if (wb) {
+                matched = true;
+                var wbv6address = getweeblyv6address();
+                handleResponse(last_type, response, generate_aaaa(last_hostname, wbv6address), cb);
+                return;
+            }
+
             if (!v0c) v0c = check_for_v0cdn_hostname(last_hostname);
             if (v0c) {
                 matched = true;
@@ -375,8 +387,8 @@ function proxy(question, response, cb) {
                 }
 
                 if (check_for_cloudfront_ip(ansaddr) === true) {
-					//console.log("added to cloudfront object");
-					addaaaa[qhostname] = "cloudfront";
+                    //console.log("added to cloudfront object");
+                    addaaaa[qhostname] = "cloudfront";
                     response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
                     });
@@ -387,6 +399,16 @@ function proxy(question, response, cb) {
                 if (check_for_sucuri_ip(ansaddr) === true) {
                     //console.log("added to sucuri object");
                     addaaaa[qhostname] = "sucuri";
+                    response.answer.forEach(function (item, index) {
+                        response.answer[index].ttl = 0;
+                    });
+                    cb();
+                    return;
+                }
+
+                if (check_for_weebly_ip(ansaddr) === true) {
+                    //console.log("added to weebly object");
+                    addaaaa[qhostname] = "weebly";
                     response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
                     });
@@ -415,7 +437,8 @@ function proxy(question, response, cb) {
                     return;
                 }
 
-				if (check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
+                if (check_for_weebly_hostname(qhostname)) addaaaa[qhostname] = "weebly";
+                if (check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
                 if (check_for_slack_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
             }
             cb();
@@ -657,6 +680,20 @@ function check_for_slack_hostname(hostname) {
     }
 }
 
+function check_for_weebly_hostname(hostname) {
+    if (!hostname) return false;
+    var sdomains = hostname.split(".");
+    sdomains.reverse();
+    var dp1 = sdomains.indexOf("com");
+    var dp2 = sdomains.indexOf("weebly");
+
+    if (dp1 === 0 && dp2 == 1) {
+        //console.log("weebly matched");
+        var fixedhostname = sdomains.reverse().join(".");
+        return fixedhostname;
+    } else return false;
+}
+
 function check_for_cloudflare_a(authority) {
     //console.log('a', authority);
     if (!authority) return false;
@@ -799,6 +836,9 @@ function getcloudflarev6address() {
     return '2606:4700::6810:bad'; //will give SSL_ERROR_NO_CYPHER_OVERLAP on non cloudflare sites on aggressive mode
 }
 
+function getweeblyv6address() {
+    return '2620:11c:1:e4::36';
+}
 function msev4tov6(ipv4, hostname) {
     //console.log('f', ipv4);
     if (!ipv4[0]) return false;
@@ -863,6 +903,13 @@ function check_for_sucuri_ip(ipv4) {
     if (!ipv4) return false;
 
     return ipRangeCheck(ipv4, "192.124.249.0/24");
+}
+
+function check_for_weebly_ip(ipv4) {
+    //console.log('weebly ip check', ipv4);
+    if (!ipv4) return false;
+
+    return ipRangeCheck(ipv4, "199.34.228.0/22");
 }
 
 function check_for_githubpages_ip(ipv4) {

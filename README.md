@@ -110,6 +110,13 @@ Change the `v6_only` variable to true in the app.js file.
 * Coverage: Only on some services
 * Usability: Unknown
 
+## Weebly
+
+* Test domains: www.weebly.com
+* IPv6 Type: Unicast
+* Coverage: Unknown
+* Usability: Unknown
+
 ## Github.io (Fastly)
 
 * Test domains: www.jruby.org
