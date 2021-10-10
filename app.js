@@ -256,13 +256,9 @@ function proxy(question, response, cb) {
             if (msg.authority[0]) var authorityname = msg.authority[0].name;
             else var authorityname = 'none';
 
-            if (!gio) gio = check_for_githubio_a(authorityname);
             if (gio) {
                 matched = true;
                 fsta = true;
-
-                /*handleResponse(last_type, response, generate_aaaa(last_hostname, '2606:50c0:8000::153'), cb);
-                return;*/
             }
 
             if (!fsta) fsta = check_for_fastly_a(authority);
@@ -717,15 +713,6 @@ function check_for_cdn77_a(authority) {
     if (!authority) return false;
     if (authority == 'cdn77.org') {
         //console.log("cdn77 matched");
-        return true;
-    } else return false;
-}
-
-function check_for_githubio_a(authority) {
-    //console.log('a', authority);
-    if (!authority) return false;
-    if (authority == 'github.io') {
-        //console.log("githubio matched");
         return true;
     } else return false;
 }

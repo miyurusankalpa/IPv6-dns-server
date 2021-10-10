@@ -118,9 +118,9 @@ Change the `v6_only` variable to true in the app.js file.
 
 ## Github.io (Fastly)
 
-* Test domains: www.jruby.org
+* Test domains: sadh.life
 * IPv6 Type: Anycast
-* Coverage: All
+* Coverage: Only IPv4 match
 * Usability: Stable
 
 ## Stack Exchange sites (Fastly)
@@ -135,8 +135,16 @@ Change the `v6_only` variable to true in the app.js file.
 
 * Test domains: slack.com
 * IPv6 Type: Unicast
-* Coverage: All+Only on Aggressive mode.
+* Coverage: Some Domains+Only on Aggressive mode.
 * Usability: Stable
+
+## Twitter (Cloudfront)
+
+* Test domains: twitter.com
+* IPv6 Type: Unicast
+* Coverage: Some Domains+Only on Aggressive mode.
+* Usability: Logout or delete cookies
+* Aggressive mode: Errors on some pages
 
 # Credits
 * [Pēteris Ņikiforovs](https://peteris.rocks/)
