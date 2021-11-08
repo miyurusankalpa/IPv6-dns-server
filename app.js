@@ -435,7 +435,7 @@ function proxy(question, response, cb) {
                 if (check_for_fastly_hostname(qhostname)) addaaaa[qhostname] = "fastly";
                 if (check_for_weebly_hostname(qhostname)) addaaaa[qhostname] = "weebly";
                 if (check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
-                if (check_for_slack_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
+                //if (check_for_slack_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
             }
             cb();
         }

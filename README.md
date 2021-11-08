@@ -131,13 +131,6 @@ Change the `v6_only` variable to true in the app.js file.
 * Usability: Logout or delete cookies
 * Aggressive mode: Errors on some pages
 
-## Slack (Cloudfront)
-
-* Test domains: slack.com
-* IPv6 Type: Unicast
-* Coverage: Some Domains+Only on Aggressive mode.
-* Usability: Stable
-
 ## Twitter (Cloudfront)
 
 * Test domains: twitter.com
