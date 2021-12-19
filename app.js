@@ -371,10 +371,10 @@ function proxy(question, response, cb) {
                 if (check_for_fastly_ip(ansaddr) === true) {
                     if ((check_for_stackexchange_ip(ansaddr)) && (!aggressive_v6)) {
                         no_aaaa.push(qhostname);
-                        console.log("added to stackexchange noipv6 object");
+                        //console.log("added to stackexchange noipv6 object");
                     } else {
                         add_aaaa[qhostname] = "fastly";
-                        console.log("added to fastly object");
+                        //console.log("added to fastly object");
                     }
 
                     response.answer.forEach(function (item, index) {
@@ -437,7 +437,7 @@ function proxy(question, response, cb) {
 
 
                 if (check_for_wordpressvip_ip(ansaddr) === true) {
-                    console.log("added to wordpressvip ip");
+                    //console.log("added to wordpressvip ip");
 
                     add_aaaa[qhostname] = wpvipv4to6(ansaddr);
                     response.answer.forEach(function (item, index) {
@@ -883,18 +883,18 @@ function msev4tov6(ipv4, hostname) {
 }
 
 function wpvipv4to6(ipv4) {
-    console.log('f', ipv4);
+    //console.log('f', ipv4);
     if (!ipv4) return false;
 
     var octets = ipv4.split(".");
 
-    console.log('octets', octets);
+    //console.log('octets', octets);
 
     //anycasted range
     var wpvip_range = '2a04:fa87:fffd::';
 
     var last_hex = decimalToHex(octets[0]) + decimalToHex(octets[1]) + ":" + decimalToHex(octets[2]) + decimalToHex(octets[3])
-    console.log('generated hex', last_hex);
+    //console.log('generated hex', last_hex);
 
     return wpvip_range + last_hex;
 }
@@ -907,7 +907,7 @@ function check_for_fastly_ip(ipv4) {
 }
 
 function check_for_wordpressvip_ip(ipv4) {
-    console.log('wordpress vip ip check', ipv4);
+    //console.log('wordpress vip ip check', ipv4);
     if (!ipv4) return false;
 
     return ipRangeCheck(ipv4, ["192.0.66.0/24"]);
