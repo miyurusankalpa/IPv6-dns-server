@@ -39,15 +39,15 @@ let authority = {
     type: 'udp6'
 };
 
-var noaaaa = [];
-var addaaaa = {};
+var no_aaaa = [];
+var add_aaaa = {};
 
 var aggressive_v6 = false;
 var v6_only = false;
 var remove_v4_if_v6_exist = false;
 
 if (aggressive_v6) {
-    var addaaaa = {
+    var add_aaaa = {
         'registry.npmjs.org': "cloudflare",
         'news.ycombinator.com': "cloudflare",
         'www.bbc.com': "2a04:4e42::81",
@@ -81,7 +81,7 @@ function handleRequest(request, response) {
 
         if (question.type === 28) //AAAA records
         {
-            if (noaaaa.indexOf(question.name) !== -1) {
+            if (no_aaaa.indexOf(question.name) !== -1) {
                 response.header.rcode = 0;
                 response.send();
                 return;
@@ -145,9 +145,9 @@ function proxy(question, response, cb) {
                 response.answer.push(a);
             }
 
-            var getcdn = addaaaa[question.name];
+            var getcdn = add_aaaa[question.name];
 
-            //console.log(addaaaa);
+            //console.log(add_aaaa);
 
             var fsta;
             var ak;
@@ -163,7 +163,7 @@ function proxy(question, response, cb) {
             var wb;
 
             if (getcdn) {
-                var providers = addaaaa[question.name].split("|");
+                var providers = add_aaaa[question.name].split("|");
                 var provider_name = providers[0];
 
                 //console.log('custom', provider_name);
@@ -369,13 +369,13 @@ function proxy(question, response, cb) {
                 qhostname = question.name;
 
                 if (check_for_fastly_ip(ansaddr) === true) {
-						if ((check_for_stackexchange_ip(ansaddr)) && (!aggressive_v6)) {
-							noaaaa.push(qhostname);
-							console.log("added to stackexchange noipv6 object");
-						} else {
-							addaaaa[qhostname] = "fastly";
-							console.log("added to fastly object");
-						}
+                    if ((check_for_stackexchange_ip(ansaddr)) && (!aggressive_v6)) {
+                        no_aaaa.push(qhostname);
+                        console.log("added to stackexchange noipv6 object");
+                    } else {
+                        add_aaaa[qhostname] = "fastly";
+                        console.log("added to fastly object");
+                    }
 
                     response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
@@ -386,7 +386,7 @@ function proxy(question, response, cb) {
 
                 if (check_for_cloudfront_ip(ansaddr) === true) {
                     //console.log("added to cloudfront object");
-                    addaaaa[qhostname] = "cloudfront";
+                    add_aaaa[qhostname] = "cloudfront";
                     response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
                     });
@@ -396,7 +396,7 @@ function proxy(question, response, cb) {
 
                 if (check_for_sucuri_ip(ansaddr) === true) {
                     //console.log("added to sucuri object");
-                    addaaaa[qhostname] = "sucuri";
+                    add_aaaa[qhostname] = "sucuri";
                     response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
                     });
@@ -406,7 +406,7 @@ function proxy(question, response, cb) {
 
                 if (check_for_weebly_ip(ansaddr) === true) {
                     //console.log("added to weebly object");
-                    addaaaa[qhostname] = "weebly";
+                    add_aaaa[qhostname] = "weebly";
                     response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
                     });
@@ -416,7 +416,7 @@ function proxy(question, response, cb) {
 
                 if ((check_for_githubpages_ip(ansaddr) === true)) {
                     //console.log("added to github.io object");
-                    addaaaa[qhostname] = "githubio";
+                    add_aaaa[qhostname] = "githubio";
 
                     response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
@@ -427,7 +427,7 @@ function proxy(question, response, cb) {
 
                 if (check_for_cloudflare_ip(ansaddr) === true) {
                     //console.log("added to cloudflare object");
-                    addaaaa[qhostname] = "cloudflare";
+                    add_aaaa[qhostname] = "cloudflare";
                     response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
                     });
@@ -439,7 +439,7 @@ function proxy(question, response, cb) {
                 if (check_for_wordpressvip_ip(ansaddr) === true) {
                     console.log("added to wordpressvip ip");
 
-                    addaaaa[qhostname] = wpvipv4to6(ansaddr);
+                    add_aaaa[qhostname] = wpvipv4to6(ansaddr);
                     response.answer.forEach(function (item, index) {
                         response.answer[index].ttl = 0;
                     });
@@ -447,10 +447,10 @@ function proxy(question, response, cb) {
                     return;
                 }
 
-                if (check_for_fastly_hostname(qhostname)) addaaaa[qhostname] = "fastly";
-                if (check_for_weebly_hostname(qhostname)) addaaaa[qhostname] = "weebly";
-                if (check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
-                if (check_for_slack_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
+                if (check_for_fastly_hostname(qhostname)) add_aaaa[qhostname] = "fastly";
+                if (check_for_weebly_hostname(qhostname)) add_aaaa[qhostname] = "weebly";
+                if (check_for_cloudfront_hostname(qhostname)) add_aaaa[qhostname] = "cloudfront";
+                if (check_for_slack_hostname(qhostname)) add_aaaa[qhostname] = "cloudfront";
             }
             cb();
         }
@@ -893,7 +893,7 @@ function wpvipv4to6(ipv4) {
     //anycasted range
     var wpvip_range = '2a04:fa87:fffd::';
 
-    var last_hex = decimalToHex(octets[0])+decimalToHex(octets[1])+":"+decimalToHex(octets[2])+decimalToHex(octets[3])
+    var last_hex = decimalToHex(octets[0]) + decimalToHex(octets[1]) + ":" + decimalToHex(octets[2]) + decimalToHex(octets[3])
     console.log('generated hex', last_hex);
 
     return wpvip_range + last_hex;

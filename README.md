@@ -22,11 +22,11 @@ Change the `dns_resolver` variable in the app.js file.
 
 ### Disable IPv6 for a domain
 
-Add the domain to `noaaaa` array in the app.js file.
+Add the domain to `no_aaaa` array in the app.js file.
 
 ### Add a custom IPv6 for a domain
 
-Add the domain to `addaaaa` object with IPv6 address in the app.js file.
+Add the domain to `add_aaaa` object with IPv6 address in the app.js file.
 
 ### Turn off aggressive mode
 
