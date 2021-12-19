@@ -116,6 +116,13 @@ Change the `v6_only` variable to true in the app.js file.
 * Coverage: Unknown
 * Usability: Unknown
 
+## Wordpress VIP
+
+* Test domains: nielsen.com
+* IPv6 Type: Anycast
+* Coverage: Unknown
+* Usability: Unknown
+
 ## Github.io (Fastly)
 
 * Test domains: sadh.life

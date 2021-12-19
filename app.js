@@ -219,7 +219,6 @@ function proxy(question, response, cb) {
             if (last_hostname == undefined) {
                 last_hostname = question.name;
                 last_type = 5;
-                var topdcheck = last_hostname.split(".");
             }
 
             //console.log('lh', last_hostname);
@@ -232,7 +231,6 @@ function proxy(question, response, cb) {
                 });
                 return;
             }
-
 
             if (!s3) s3 = check_for_s3_hostname(question.name);
             if (s3) {
@@ -371,8 +369,6 @@ function proxy(question, response, cb) {
                 qhostname = question.name;
 
                 if (check_for_fastly_ip(ansaddr) === true) {
-                    //console.log("added to fastly object");
-   
 						if ((check_for_stackexchange_ip(ansaddr)) && (!aggressive_v6)) {
 							noaaaa.push(qhostname);
 							console.log("added to stackexchange noipv6 object");
@@ -381,6 +377,9 @@ function proxy(question, response, cb) {
 							console.log("added to fastly object");
 						}
 
+                    response.answer.forEach(function (item, index) {
+                        response.answer[index].ttl = 0;
+                    });
                     cb();
                     return;
                 }
@@ -436,10 +435,22 @@ function proxy(question, response, cb) {
                     return;
                 }
 
+
+                if (check_for_wordpressvip_ip(ansaddr) === true) {
+                    console.log("added to wordpressvip ip");
+
+                    addaaaa[qhostname] = wpvipv4to6(ansaddr);
+                    response.answer.forEach(function (item, index) {
+                        response.answer[index].ttl = 0;
+                    });
+                    cb();
+                    return;
+                }
+
                 if (check_for_fastly_hostname(qhostname)) addaaaa[qhostname] = "fastly";
                 if (check_for_weebly_hostname(qhostname)) addaaaa[qhostname] = "weebly";
                 if (check_for_cloudfront_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
-                //if (check_for_slack_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
+                if (check_for_slack_hostname(qhostname)) addaaaa[qhostname] = "cloudfront";
             }
             cb();
         }
@@ -871,11 +882,35 @@ function msev4tov6(ipv4, hostname) {
     }
 }
 
+function wpvipv4to6(ipv4) {
+    console.log('f', ipv4);
+    if (!ipv4) return false;
+
+    var octets = ipv4.split(".");
+
+    console.log('octets', octets);
+
+    //anycasted range
+    var wpvip_range = '2a04:fa87:fffd::';
+
+    var last_hex = decimalToHex(octets[0])+decimalToHex(octets[1])+":"+decimalToHex(octets[2])+decimalToHex(octets[3])
+    console.log('generated hex', last_hex);
+
+    return wpvip_range + last_hex;
+}
+
 function check_for_fastly_ip(ipv4) {
     //console.log('fastly ip check', ipv4);
     if (!ipv4) return false;
 
     return ipRangeCheck(ipv4, ["151.101.0.0/16", "199.232.0.0/16"]);
+}
+
+function check_for_wordpressvip_ip(ipv4) {
+    console.log('wordpress vip ip check', ipv4);
+    if (!ipv4) return false;
+
+    return ipRangeCheck(ipv4, ["192.0.66.0/24"]);
 }
 
 function check_for_cloudfront_ip(ipv4) {
@@ -945,4 +980,15 @@ function generate_aaaa(hostname, ipv6) {
 
 function rand_hex() {
     return Math.random().toString(16).slice(2, 6);
+}
+
+function decimalToHex(d, padding) {
+    var hex = Number(d).toString(16);
+    padding = typeof (padding) === "undefined" || padding === null ? padding = 2 : padding;
+
+    while (hex.length < padding) {
+        hex = "0" + hex;
+    }
+
+    return hex;
 }
