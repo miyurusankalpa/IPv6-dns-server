@@ -372,11 +372,15 @@ function proxy(question, response, cb) {
 
                 if (check_for_fastly_ip(ansaddr) === true) {
                     //console.log("added to fastly object");
-                    if ((check_for_stackexchange_ip(ansaddr)) && (!aggressive_v6)) noaaaa.push(qhostname);
+   
+						if ((check_for_stackexchange_ip(ansaddr)) && (!aggressive_v6)) {
+							noaaaa.push(qhostname);
+							console.log("added to stackexchange noipv6 object");
+						} else {
+							addaaaa[qhostname] = "fastly";
+							console.log("added to fastly object");
+						}
 
-                    response.answer.forEach(function (item, index) {
-                        response.answer[index].ttl = 0;
-                    });
                     cb();
                     return;
                 }
