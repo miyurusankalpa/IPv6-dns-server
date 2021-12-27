@@ -118,7 +118,7 @@ Change the `v6_only` variable to true in the app.js file.
 
 ## Wordpress VIP
 
-* Test domains: nielsen.com
+* Test domains: wpvip.com, nielsen.com
 * IPv6 Type: Anycast
 * Coverage: Unknown
 * Usability: Unknown

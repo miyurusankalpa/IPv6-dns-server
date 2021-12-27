@@ -4,6 +4,7 @@
 var dns_resolver = '2001:4860:4860::8888'; //Google
 //var dns_resolver = '2606:4700:4700::1111'; //Cloudflare
 //var dns_resolver = '2a02:6b8::feed:0ff'; //Yandedx
+//var dns_resolver = '2001:678:ed0:f000::'; //ffmuc
 //var dns_resolver = '8.8.8.8'; //Google
 
 let dns = require('native-dns');
@@ -59,14 +60,12 @@ var remove_v4_if_v6_exist = false;
 
 if (aggressive_v6) {
     var add_aaaa = {
-        'registry.npmjs.org': "cloudflare",
         'news.ycombinator.com': "cloudflare",
         'www.bbc.com': "2a04:4e42::81",
         'cdn.statically.io': "bunnycdn",
         'twitter.com': "cloudfront",
         'api.twitter.com': "cloudfront",
-        'mobile.twitter.com': "cloudfront",
-        'production.cloudflare.docker.com ': "cloudflare",
+        'mobile.twitter.com': "cloudfront"
     };
 }
 
