@@ -280,7 +280,7 @@ function proxy(question, response, cb) {
                 return;
             }
 
-            if (!fsta) var fsta1 = fastly.fastly.check_for_fastly_hostname(last_hostname);
+            if (!fsta) var fsta1 = fastly.check_for_fastly_hostname(last_hostname);
             if (fsta1 && fsta1[0] == "d") {
                 //console.log(fsta1);
                 matched = true; fsta = fsta1;
@@ -454,7 +454,6 @@ function proxy(question, response, cb) {
                 if (fastly.check_for_fastly_hostname(qhostname)) add_aaaa[qhostname] = "fastly";
                 if (weebly.check_for_weebly_hostname(qhostname)) add_aaaa[qhostname] = "weebly";
                 if (cloudfront.check_for_cloudfront_hostname(qhostname)) add_aaaa[qhostname] = "cloudfront";
-                if (check_for_slack_hostname(qhostname)) add_aaaa[qhostname] = "cloudfront";
             }
             cb();
         }
