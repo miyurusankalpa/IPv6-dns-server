@@ -16,6 +16,7 @@ module.exports = {
         var dp5 = sdomains.indexOf("s3-w");
         var dp6 = sdomains.indexOf("s3-accelerate");
         var dp7 = sdomains.indexOf("s3-accesspoint");
+        var dp8 = sdomains.indexOf("s3-website");
 
         if (dp2 == 1) {
             //console.log(hostname+" amazon matched");		
@@ -26,22 +27,30 @@ module.exports = {
             if (dp6 === 2) { //matched s3-accelerate domains
                 //sdomains.splice(2, 0, "s3-accelerate");
                 sdomains.splice(2, 0, "dualstack");
+                dp1 = -1 //break china domain match
                 //console.log(sdomains);
                 //console.log("s3 matched 1");
             } else if (dp7 === 3) { //matched s3-accesspoint domains
                 sdomains.splice(4, 1);
                 //console.log("s3 matched 7");
+            } else if (dp8 === 3) { //matched s3-website domains
+                sdomains.splice(4, 1);
+                dp1 = -1 //break china domain match
+                //console.log("s3 matched 8");
             } else if (ssdomains[0] === 's3' && ssdomains[1] === '1' && dp1 !== 0) { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
                 sdomains.splice(2, 0, "us-east-1");
                 sdomains.splice(4, 0, "s3");
                 //console.log("s3 matched 2");
             } else if (dp3 === 3 || dp4 === 3) {
-                //console.log(sdomains);
                 sdomains.splice(4, 1);
                 //console.log("s3 matched 3");
             } else if (dp5 === 3) {
                 sdomains.splice(4, 0, "s3-w");
                 //console.log("s3 matched 4");
+            } else if (ssdomains[0] === 's3' && ssdomains[1] === 'website') { //matched s3-website-us-east-1.amazonaws.com
+                sdomains.splice(2, 1, "us-east-1");
+                sdomains.splice(3, 1, "s3-website");
+                //console.log("s3 matched 5");
             } else if (ssdomains.length > 1) { //matched  **.s3-[region].amazonaws.com
                 if (ssdomains[0] !== "s3") return false;
 

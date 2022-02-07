@@ -17,6 +17,7 @@ function check_for_s3_hostname(hostname) {
     var dp5 = sdomains.indexOf("s3-w");
     var dp6 = sdomains.indexOf("s3-accelerate");
     var dp7 = sdomains.indexOf("s3-accesspoint");
+    var dp8 = sdomains.indexOf("s3-website");
 
     if (dp2 == 1) {
         //console.log(hostname+" amazon matched");		
@@ -27,22 +28,30 @@ function check_for_s3_hostname(hostname) {
         if (dp6 === 2) { //matched s3-accelerate domains
             //sdomains.splice(2, 0, "s3-accelerate");
 			sdomains.splice(2, 0, "dualstack");
+            dp1 = -1 //break china domain match
             //console.log(sdomains);
             //console.log("s3 matched 1");
         } else if (dp7 === 3) { //matched s3-accesspoint domains
             sdomains.splice(4, 1);
             //console.log("s3 matched 7");
+        } else if (dp8 === 3) { //matched s3-website domains
+            sdomains.splice(4, 1);
+            dp1 = -1 //break china domain match
+            //console.log("s3 matched 8");
         } else if (ssdomains[0] === 's3' && ssdomains[1] === '1' && dp1 !== 0) { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
             sdomains.splice(2, 0, "us-east-1");
             sdomains.splice(4, 0, "s3");
             //console.log("s3 matched 2");
         } else if (dp3 === 3 || dp4 === 3) {
-            //console.log(sdomains);
             sdomains.splice(4, 1);
             //console.log("s3 matched 3");
         } else if (dp5 === 3) {
             sdomains.splice(4, 0, "s3-w");
             //console.log("s3 matched 4");
+        } else if (ssdomains[0] === 's3' && ssdomains[1] === 'website') { //matched s3-website-us-east-1.amazonaws.com
+            sdomains.splice(2, 1, "us-east-1");
+            sdomains.splice(3, 1, "s3-website");
+            //console.log("s3 matched 5");
         } else if (ssdomains.length > 1) { //matched  **.s3-[region].amazonaws.com
 			if(ssdomains[0]!=="s3") return false;
 			
@@ -83,11 +92,12 @@ assert.notEqual(check_for_s3_hostname("s3.amazonaws.com.cn"), "s3.dualstack.us-e
 assert.equal(check_for_s3_hostname("redditstatic.s3.amazonaws.com"), "redditstatic.s3.dualstack.us-east-1.amazonaws.com");
 assert.equal(check_for_s3_hostname("github-production-release-asset-2e65be.s3.amazonaws.com"), "github-production-release-asset-2e65be.s3.dualstack.us-east-1.amazonaws.com");
 assert.equal(check_for_s3_hostname("2020awsreinvent.s3-us-west-2.amazonaws.com"), "2020awsreinvent.s3.dualstack.us-west-2.amazonaws.com");
-assert.notEqual(check_for_s3_hostname("2020awsreinvent.s3-us-west-2.amazonaws.com.cn"), "2020awsreinvent.s3.dualstack.us-west-2.amazonaws.com.cn");
+assert.notEqual(check_for_s3_hostname("2020awsreinvent.s3-us-west-2.amazonaws.com.cn"), "2020awsreinvent.s3.dualstack.us-west-2.amazonaws.com.cn"); //china domain invalid region
 assert.equal(check_for_s3_hostname("s3-accesspoint.us-east-2.amazonaws.com"), "s3-accesspoint.dualstack.us-east-2.amazonaws.com");
 
 assert.equal(check_for_s3_hostname("s3-accelerate-speedtest.s3-accelerate.amazonaws.com"), "s3-accelerate-speedtest.s3-accelerate.dualstack.amazonaws.com");
 assert.equal(check_for_s3_hostname("cheetah-test-us-east-1-02.s3-accelerate.amazonaws.com"), "cheetah-test-us-east-1-02.s3-accelerate.dualstack.amazonaws.com");
+assert.notEqual(check_for_s3_hostname("s3-accelerate.amazonaws.com.cn"), "s3-accelerate.dualstack.amazonaws.com.cn"); //no dualstack domain
 
 assert.equal(check_for_s3_hostname("s3.eu-central-1.amazonaws.com"), "s3.dualstack.eu-central-1.amazonaws.com");
 assert.equal(check_for_s3_hostname("account-id.s3-control.eu-central-1.amazonaws.com"), "account-id.s3-control.dualstack.eu-central-1.amazonaws.com");
@@ -105,6 +115,13 @@ assert.equal(check_for_s3_hostname("web.s3-accesspoint.ap-southeast-1.amazonaws.
 
 assert.equal(check_for_s3_hostname("download.opencontent.netflix.com.s3.amazonaws.com"), "download.opencontent.netflix.com.s3.dualstack.us-east-1.amazonaws.com");
 
+assert.equal(check_for_s3_hostname("s3-website-us-east-1.amazonaws.com"), "s3-website.dualstack.us-east-1.amazonaws.com");
+assert.equal(check_for_s3_hostname("s3-website.ap-southeast-3.amazonaws.com"), "s3-website.dualstack.ap-southeast-3.amazonaws.com");
+assert.notEqual(check_for_s3_hostname("s3-website.cn-northwest-1.amazonaws.com.cn"), "s3-website.dualstack.cn-northwest-1.amazonaws.com.cn"); //no dualstack domain
+
 assert.equal(check_for_s3_hostname("pub-web-4b45fc8aac32a800.elb.eu-central-1.amazonaws.com"), false);
 assert.equal(check_for_s3_hostname("cdn.assets.as2.amazonaws.com"), false);
 assert.equal(check_for_s3_hostname("dynamodb.us-east-2.amazonaws.com"), false);
+
+console.log("All Tests Passed")
+

@@ -64,7 +64,7 @@ Change the `v6_only` variable to true in the app.js file.
 
 * Test domains: s3.amazonaws.com, github-production-release-asset-2e65be.s3.amazonaws.com
 * IPv6 Type: Unicast
-* Coverage: *.s3.amazonaws.com hostnames/cnames only.
+* Coverage: *.s3.amazonaws.com and s3 websites hostnames/cnames only.
 * Usability: Stable
 
 ## Amazon Cloudfront 
