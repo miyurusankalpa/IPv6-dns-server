@@ -22,8 +22,8 @@ module.exports = {
         //console.log('f', ipv4);
         if (!ipv4 || !ipv4[0]) return false;
 
-        if (check_for_fastly_ip(ipv4[0])) var cust = "fastly";
-        if (check_for_githubpages_ip(ipv4[0])) var cust = "github";
+        if (module.exports.check_for_fastly_ip(ipv4[0])) var cust = "fastly";
+        if (module.exports.check_for_githubpages_ip(ipv4[0])) var cust = "github";
 
         if (!cust) return false;
 
@@ -31,7 +31,7 @@ module.exports = {
 
         //'last octets', octets[3]);
 
-        var v6_range = getfastlyv6address(cust);
+        var v6_range = module.exports.getfastlyv6address(cust);
         var v6hex;
 
         if (octets[0] == "151") {
