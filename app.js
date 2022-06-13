@@ -268,7 +268,7 @@ function proxy(question, response, cb) {
                 matched = true;
                 resolver.resolve4(last_hostname, (err, v4addresses) => {
                     //console.log(v4addresses);
-                    var fv6 = fastly.fastlyv4tov6(v4addresses);
+                    var fv6 = fastly.fastlyv4tov6(v4addresses, resolver, localStorageMemory);
 
                     if (!fv6) {
                         cb();

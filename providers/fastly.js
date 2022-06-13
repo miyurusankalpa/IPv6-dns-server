@@ -18,7 +18,7 @@ module.exports = {
             });
         } else return v6range;
     },
-    fastlyv4tov6: function (ipv4) {
+    fastlyv4tov6: function (ipv4, resolver, localStorageMemory) {
         //console.log('f', ipv4);
         if (!ipv4 || !ipv4[0]) return false;
 
@@ -31,7 +31,7 @@ module.exports = {
 
         //'last octets', octets[3]);
 
-        var v6_range = module.exports.getfastlyv6address(cust);
+        var v6_range = module.exports.getfastlyv6address(cust, resolver, localStorageMemory);
         var v6hex;
 
         if (octets[0] == "151") {
