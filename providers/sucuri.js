@@ -7,7 +7,7 @@ module.exports = {
 
         return ipRangeCheck(ipv4, "192.124.249.0/24");
     },
-    getsucuriv6address: function () {
+    getsucuriv6address: function (resolver, localStorageMemory) {
         //sucuri ipv6 enabled domain
         var aaaa_sucuri_domain = 'sucuri.net';
         var v6range = localStorageMemory.getItem('sucuriv6range');

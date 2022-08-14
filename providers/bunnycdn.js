@@ -3,7 +3,7 @@ module.exports = {
         //crtlblog ipv6 enabled domain
         var aaaa_bunny_domain = 'ctrl.b-cdn.net';
         var v6adddy = localStorageMemory.getItem('bunnycdnv6addy');
-        var bunny_fixed_address = '2a02:6ea0:c020::2'; //bunnycdn AMS POP IP
+        var bunny_fixed_address = '2400:52e0:1e01::883:1'; //bunnycdn AMS POP IP
 
         if (!v6adddy) {
             //console.log("not cached");

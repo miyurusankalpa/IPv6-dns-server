@@ -343,7 +343,7 @@ function proxy(question, response, cb) {
 
             if (sui) {
                 matched = true;
-                var sv6address = sucuri.getsucuriv6address();
+                var sv6address = sucuri.getsucuriv6address(resolver, localStorageMemory);
                 handleResponse(last_type, response, generate_aaaa(last_hostname, sv6address), cb);
                 return;
             }
