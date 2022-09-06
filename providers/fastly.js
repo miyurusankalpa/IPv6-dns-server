@@ -34,13 +34,11 @@ module.exports = {
         var v6_range = module.exports.getfastlyv6address(cust, resolver, localStorageMemory);
         var v6hex;
 
-        if (octets[0] == "151") {
-            if (ipv4.length == 1) {
-                v6hex = ((octets[2] % 4) * 256 + (octets[3] * 1));
-            } else {
-                v6hex = ((octets[2] % 64) * 256 + (octets[3] * 1)); //huge thanks @tambry for this expression
-            }
-        } else v6hex = octets[3];
+        if (ipv4.length == 1) {
+            v6hex = ((octets[2] % 4) * 256 + (octets[3] * 1));
+        } else {
+            v6hex = ((octets[2] % 64) * 256 + (octets[3] * 1)); //huge thanks @tambry for this expression
+        }
 
         return v6_range + v6hex;
     },
@@ -77,12 +75,11 @@ module.exports = {
         //console.log('githubio ip check', ipv4);
         if (!ipv4) return false;
 
-        if (!ipRangeCheck(ipv4, "185.199.108.0/22")) return false;
+        if (!ipRangeCheck(ipv4, "185.199.108.0/22")) return false; else return true;
 
         /*var octets = ipv4.split(".");
         if (octets[3] == 153) return true;
         else return false;*/
-        return true;
     },
     check_for_stackexchange_ip: function (ipv4) {
         if (!ipv4) return false;
