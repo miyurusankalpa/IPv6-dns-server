@@ -29,12 +29,14 @@ module.exports = {
 
         var octets = ipv4[0].split(".");
 
-        //'last octets', octets[3]);
+        //console.log('last octets', octets[3]);
 
         var v6_range = module.exports.getfastlyv6address(cust, resolver, localStorageMemory);
         var v6hex;
 
-        if (ipv4.length == 1) {
+        if (cust == "github") {
+            v6hex = octets[3];
+        } else if (ipv4.length == 1) {
             v6hex = ((octets[2] % 4) * 256 + (octets[3] * 1));
         } else {
             v6hex = ((octets[2] % 64) * 256 + (octets[3] * 1)); //huge thanks @tambry for this expression
