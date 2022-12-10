@@ -11,7 +11,7 @@ module.exports = {
                 resolver.resolve6(aaaa_bunny_domain, (err, addresses) => {
                     if (err) { console.log(err); return bunny_fixed_address; }
                     var v6adddy = addresses[0];
-                    if (bv6address == undefined) v6adddy = bunny_fixed_address;
+                    if (typeof bv6address == 'undefined') v6adddy = bunny_fixed_address;
                     localStorageMemory.setItem('bunnycdnv6addy', v6adddy);
                     return v6adddy;
                 });
