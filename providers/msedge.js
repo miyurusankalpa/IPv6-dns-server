@@ -28,9 +28,9 @@ module.exports = {
             return;
         }
 
-        if (ipv4.length == 1) {
+        //if (ipv4.length == 1) {
             return mse_range + octets[3];
-        }
+        //}
     },
     check_for_microsoftedge_a: function (authority) {
         //console.log('a', authority);
