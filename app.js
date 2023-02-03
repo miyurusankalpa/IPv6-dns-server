@@ -231,7 +231,7 @@ function proxy(question, response, cb) {
             if (ak) {
                 matched = true;
                 resolver.resolve6(ak, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(ak, addresses[0]), cb); else return;
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
                 });
                 return;
             }
@@ -240,7 +240,7 @@ function proxy(question, response, cb) {
             if (s3) {
                 matched = true;
                 resolver.resolve6(s3, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(s3, addresses[0]), cb); else return;
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
                 });
                 return;
             }
@@ -285,7 +285,7 @@ function proxy(question, response, cb) {
                 //console.log(fsta1);
                 matched = true; fsta = fsta1;
                 resolver.resolve6(fsta1, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(fsta1, addresses[0]), cb); else return;
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
                 });
                 return;
             }
