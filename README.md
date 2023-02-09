@@ -116,6 +116,13 @@ Change the `v6_only` variable to true in the app.js file.
 * Coverage: Unknown
 * Usability: Unknown
 
+## CDN77
+
+* Test domains: img-b.udemycdn.com
+* IPv6 Type: Unicast
+* Coverage: All+Only on Aggressive mode.
+* Usability: Some protected content may not work.
+
 ## Wordpress VIP
 
 * Test domains: wpvip.com, nielsen.com

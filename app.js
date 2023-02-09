@@ -23,6 +23,7 @@ var bunnycdn = require('./providers/bunnycdn');
 var sucuri = require('./providers/sucuri');
 var weebly = require('./providers/weebly');
 var wpvip = require('./providers/wpvip');
+var cdn77 = require('./providers/cdn77');
 
 const {
     Resolver
@@ -165,6 +166,7 @@ function proxy(question, response, cb) {
             var bun;
             var sui;
             var wb;
+            var c77;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -207,6 +209,9 @@ function proxy(question, response, cb) {
                         break;
                     case 'weebly':
                         wb = true;
+                        break;
+                    case 'cdn77':
+                        c77 = true;
                         break;
                     default: {
                         handleResponse(5, response, generate_aaaa(question.name, provider_name), cb);
@@ -321,6 +326,14 @@ function proxy(question, response, cb) {
                 matched = true;
                 var bv6address = bunnycdn.getbunnycdnv6address(resolver, localStorageMemory);
                 handleResponse(last_type, response, generate_aaaa(last_hostname, bv6address), cb);
+                return;
+            }
+
+            if (!c77 && aggressive_v6) c77 = cdn77.check_for_cdn77_a(authority);
+            if (c77) {
+                matched = true;
+                var cv6address = cdn77.get_cdn77_v6address(resolver, localStorageMemory);
+                handleResponse(last_type, response, generate_aaaa(last_hostname, cv6address), cb);
                 return;
             }
 
