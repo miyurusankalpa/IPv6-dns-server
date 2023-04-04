@@ -330,6 +330,7 @@ function proxy(question, response, cb) {
             }
 
             if (!c77 && aggressive_v6) c77 = cdn77.check_for_cdn77_a(authority);
+            if (!c77 && aggressive_v6) c77 = cdn77.check_for_cdn77_hostname(last_hostname);
             if (c77) {
                 matched = true;
                 var cv6address = cdn77.get_cdn77_v6address(resolver, localStorageMemory);
