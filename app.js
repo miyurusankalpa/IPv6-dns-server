@@ -156,7 +156,7 @@ function proxy(question, response, cb) {
                 response.answer.push(a);
             }
 
-            if (!dns64 && msg.answer.length > 0) { //skip if there are AAAA records
+            if (!dns64 && last_type === 28) { //skip if there are AAAA records
                 cb();
                 return;
             }
@@ -229,11 +229,6 @@ function proxy(question, response, cb) {
                         return;
                     }
                 }
-            }
-
-            if (last_type === 28) {
-                cb();
-                return;
             }
 
             if (last_hostname == undefined) {
