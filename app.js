@@ -9,7 +9,8 @@ var dns_resolver = '2001:4860:4860::8888'; //Google
 
 let dns = require('native-dns');
 let async = require('async');
-var localStorageMemory = require('localstorage-memory');
+let localStorageMemory = require('localstorage-memory');
+let ipaddr = require('ipaddr.js');
 
 var akamai = require('./providers/akamai');
 var fastly = require('./providers/fastly');
@@ -58,6 +59,9 @@ var add_aaaa = {};
 var aggressive_v6 = false;
 var v6_only = false;
 var remove_v4_if_v6_exist = false;
+var dns64 = false;
+
+var dns64_range = "64:ff9b::";
 
 if (aggressive_v6) {
     var add_aaaa = {
@@ -140,6 +144,8 @@ function proxy(question, response, cb) {
 
         if (question.type === 28) //AAAA records
         {
+            //console.log(msg);
+
             var last_hostname;
             var last_type;
             var matched = false;
@@ -148,6 +154,11 @@ function proxy(question, response, cb) {
                 last_hostname = a.data;
                 last_type = a.type;
                 response.answer.push(a);
+            }
+
+            if (!dns64 && msg.answer.length > 0) { //skip if there are AAAA records
+                cb();
+                return;
             }
 
             var getcdn = add_aaaa[question.name];
@@ -369,108 +380,125 @@ function proxy(question, response, cb) {
                 return;
             }
 
-            if (!matched) cb();
-        } else {
 
-            if (question.type === 1) //A records
-            {
+            if (!matched && dns64) {
+                resolver.resolve(question.name, (err, addresses) => {
+                    //console.log('a check', addresses);
 
-                var ansaddr;
-                var qhostname;
-
-                msg.answer.forEach(a => {
-                    response.answer.push(a);
-                    //console.log('remote DNS response: ', a)
-                    ansaddr = a.address;
-                });
-
-                qhostname = question.name;
-
-                if (fastly.check_for_fastly_ip(ansaddr) === true) {
-                    if ((fastly.check_for_stackexchange_ip(ansaddr)) && (!aggressive_v6)) {
-                        no_aaaa.push(qhostname);
-                        //console.log("added to stackexchange noipv6 object");
+                    if (addresses === undefined || addresses[0] === undefined) {
+                        request.send();
+                        return;
                     } else {
-                        add_aaaa[qhostname] = "fastly";
-                        //console.log("added to fastly object");
+                        matched = true;
+                        var mapaddr = (ipaddr.parse('::ffff:' + addresses[0])).toString();
+                        //console.log(mapaddr);
+
+                        handleResponse(last_type, response, generate_aaaa(last_hostname, mapaddr.replace("::ffff:", dns64_range)), cb);
+                        return;
                     }
+                });
+            } else if (!matched) cb();
 
-                    response.answer.forEach(function (item, index) {
-                        response.answer[index].ttl = 0;
-                    });
-                    cb();
-                    return;
-                }
-
-                if (cloudfront.check_for_cloudfront_ip(ansaddr) === true) {
-                    //console.log("added to cloudfront object");
-                    add_aaaa[qhostname] = "cloudfront";
-                    response.answer.forEach(function (item, index) {
-                        response.answer[index].ttl = 0;
-                    });
-                    cb();
-                    return;
-                }
-
-                if (sucuri.check_for_sucuri_ip(ansaddr) === true) {
-                    //console.log("added to sucuri object");
-                    add_aaaa[qhostname] = "sucuri";
-                    response.answer.forEach(function (item, index) {
-                        response.answer[index].ttl = 0;
-                    });
-                    cb();
-                    return;
-                }
-
-                if (weebly.check_for_weebly_ip(ansaddr) === true) {
-                    //console.log("added to weebly object");
-                    add_aaaa[qhostname] = "weebly";
-                    response.answer.forEach(function (item, index) {
-                        response.answer[index].ttl = 0;
-                    });
-                    cb();
-                    return;
-                }
-
-                if ((fastly.check_for_githubpages_ip(ansaddr) === true)) {
-                    //console.log("added to github.io object");
-                    add_aaaa[qhostname] = "githubio";
-
-                    response.answer.forEach(function (item, index) {
-                        response.answer[index].ttl = 0;
-                    });
-                    cb();
-                    return;
-                }
-
-                if (cloudflare.check_for_cloudflare_ip(ansaddr) === true) {
-                    //console.log("added to cloudflare object");
-                    add_aaaa[qhostname] = "cloudflare";
-                    response.answer.forEach(function (item, index) {
-                        response.answer[index].ttl = 0;
-                    });
-                    cb();
-                    return;
-                }
-
-
-                if (wpvip.check_for_wordpressvip_ip(ansaddr) === true) {
-                    //console.log("added to wordpressvip ip");
-
-                    add_aaaa[qhostname] = wpvip.wpvipv4to6(ansaddr);
-                    response.answer.forEach(function (item, index) {
-                        response.answer[index].ttl = 0;
-                    });
-                    cb();
-                    return;
-                }
-
-                if (fastly.check_for_fastly_hostname(qhostname)) add_aaaa[qhostname] = "fastly";
-                if (weebly.check_for_weebly_hostname(qhostname)) add_aaaa[qhostname] = "weebly";
-                if (cloudfront.check_for_cloudfront_hostname(qhostname)) add_aaaa[qhostname] = "cloudfront";
-            }
-            cb();
         }
+        else if (question.type === 1) //A records
+        {
+
+            var ansaddr;
+            var qhostname;
+
+            msg.answer.forEach(a => {
+                response.answer.push(a);
+                //console.log('remote DNS response: ', a)
+                ansaddr = a.address;
+            });
+
+            qhostname = question.name;
+
+            if (fastly.check_for_fastly_ip(ansaddr) === true) {
+                if ((fastly.check_for_stackexchange_ip(ansaddr)) && (!aggressive_v6)) {
+                    no_aaaa.push(qhostname);
+                    //console.log("added to stackexchange noipv6 object");
+                } else {
+                    add_aaaa[qhostname] = "fastly";
+                    //console.log("added to fastly object");
+                }
+
+                response.answer.forEach(function (item, index) {
+                    response.answer[index].ttl = 0;
+                });
+                cb();
+                return;
+            }
+
+            if (cloudfront.check_for_cloudfront_ip(ansaddr) === true) {
+                //console.log("added to cloudfront object");
+                add_aaaa[qhostname] = "cloudfront";
+                response.answer.forEach(function (item, index) {
+                    response.answer[index].ttl = 0;
+                });
+                cb();
+                return;
+            }
+
+            if (sucuri.check_for_sucuri_ip(ansaddr) === true) {
+                //console.log("added to sucuri object");
+                add_aaaa[qhostname] = "sucuri";
+                response.answer.forEach(function (item, index) {
+                    response.answer[index].ttl = 0;
+                });
+                cb();
+                return;
+            }
+
+            if (weebly.check_for_weebly_ip(ansaddr) === true) {
+                //console.log("added to weebly object");
+                add_aaaa[qhostname] = "weebly";
+                response.answer.forEach(function (item, index) {
+                    response.answer[index].ttl = 0;
+                });
+                cb();
+                return;
+            }
+
+            if ((fastly.check_for_githubpages_ip(ansaddr) === true)) {
+                //console.log("added to github.io object");
+                add_aaaa[qhostname] = "githubio";
+
+                response.answer.forEach(function (item, index) {
+                    response.answer[index].ttl = 0;
+                });
+                cb();
+                return;
+            }
+
+            if (cloudflare.check_for_cloudflare_ip(ansaddr) === true) {
+                //console.log("added to cloudflare object");
+                add_aaaa[qhostname] = "cloudflare";
+                response.answer.forEach(function (item, index) {
+                    response.answer[index].ttl = 0;
+                });
+                cb();
+                return;
+            }
+
+
+            if (wpvip.check_for_wordpressvip_ip(ansaddr) === true) {
+                //console.log("added to wordpressvip ip");
+
+                add_aaaa[qhostname] = wpvip.wpvipv4to6(ansaddr);
+                response.answer.forEach(function (item, index) {
+                    response.answer[index].ttl = 0;
+                });
+                cb();
+                return;
+            }
+
+            if (fastly.check_for_fastly_hostname(qhostname)) add_aaaa[qhostname] = "fastly";
+            if (weebly.check_for_weebly_hostname(qhostname)) add_aaaa[qhostname] = "weebly";
+            if (cloudfront.check_for_cloudfront_hostname(qhostname)) add_aaaa[qhostname] = "cloudfront";
+
+            cb();
+        } else cb();
 
         //console.log('m', msg);
     });
@@ -494,7 +522,6 @@ function proxy(question, response, cb) {
                 cb();
             }
         });
-
     } else request.send();
 
 }

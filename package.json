@@ -17,6 +17,7 @@
   "dependencies": {
     "async": "^1.5.2",
     "ip-range-check": "^0.2.0",
+    "ipaddr.js": "^2.0.1",
     "localstorage-memory": "^1.0.3",
     "native-dns": "^0.7.0"
   }
