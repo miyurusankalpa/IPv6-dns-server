@@ -61,6 +61,8 @@ var v6_only = false;
 var remove_v4_if_v6_exist = false;
 var dns64 = false;
 
+var dns64_range = "64:ff9b::";
+
 if (aggressive_v6) {
     var add_aaaa = {
         'news.ycombinator.com': "cloudflare",
@@ -390,7 +392,7 @@ function proxy(question, response, cb) {
                         var mapaddr = (ipaddr.parse('::ffff:' + addresses[0])).toString();
                         //console.log(mapaddr);
 
-                        handleResponse(last_type, response, generate_aaaa(last_hostname, mapaddr.replace("::ffff:", "64:ff9b::")), cb);
+                        handleResponse(last_type, response, generate_aaaa(last_hostname, mapaddr.replace("::ffff:", dns64_range)), cb);
                         return;
                     }
                 });
