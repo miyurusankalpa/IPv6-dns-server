@@ -59,7 +59,7 @@ var add_aaaa = {};
 var aggressive_v6 = false;
 var v6_only = false;
 var remove_v4_if_v6_exist = false;
-var dns64 = false;
+var dns64 = true;
 
 var dns64_range = "64:ff9b::";
 
@@ -156,7 +156,7 @@ function proxy(question, response, cb) {
                 response.answer.push(a);
             }
 
-            if (!dns64 && last_type === 28) { //skip if there are AAAA records
+            if (last_type === 28) { //skip if there are AAAA records
                 cb();
                 return;
             }
@@ -375,9 +375,8 @@ function proxy(question, response, cb) {
                 return;
             }
 
-
             if (!matched && dns64) {
-                resolver.resolve(question.name, (err, addresses) => {
+                resolver.resolve4(question.name, (err, addresses) => {
                     //console.log('a check', addresses);
 
                     if (addresses === undefined || addresses[0] === undefined) {
