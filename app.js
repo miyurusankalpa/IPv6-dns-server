@@ -11,6 +11,7 @@ let dns = require('native-dns');
 let async = require('async');
 let localStorageMemory = require('localstorage-memory');
 let ipaddr = require('ipaddr.js');
+let ipRangeCheck = require("ip-range-check");
 
 var akamai = require('./providers/akamai');
 var fastly = require('./providers/fastly');
@@ -61,7 +62,7 @@ var v6_only = false;
 var remove_v4_if_v6_exist = false;
 var dns64 = false;
 
-var dns64_range = "64:ff9b::";
+var dns64_range = "64:ff9b::"; // "/96 CIDR assumed by default"
 
 if (aggressive_v6) {
     var add_aaaa = {
@@ -132,11 +133,11 @@ function proxy(question, response, cb) {
     var request = dns.Request({
         question: question, // forwarding the question
         server: authority, // this is the DNS server we are asking
-        timeout: 500
+        timeout: 1000
     });
 
     request.on('timeout', function () {
-        //console.log('Timeout in making request no forwarding', question.name);
+        console.log('Timeout in making request no forwarding', question.name);
     });
 
     // when we get answers, append them to the response
@@ -156,7 +157,7 @@ function proxy(question, response, cb) {
                 response.answer.push(a);
             }
 
-            if (!dns64 && last_type === 28) { //skip if there are AAAA records
+            if (last_type === 28) { //skip if there are AAAA records
                 cb();
                 return;
             }
@@ -375,9 +376,8 @@ function proxy(question, response, cb) {
                 return;
             }
 
-
             if (!matched && dns64) {
-                resolver.resolve(question.name, (err, addresses) => {
+                resolver.resolve4(question.name, (err, addresses) => {
                     //console.log('a check', addresses);
 
                     if (addresses === undefined || addresses[0] === undefined) {
@@ -502,10 +502,12 @@ function proxy(question, response, cb) {
     {
         resolver_own.resolve6(question.name, (err, addresses) => {
             //console.log('aaaa check', addresses);
+            //console.log('64 check', ipRangeCheck(addresses[0], dns64_range+"/96"));
 
-            if (addresses === undefined || addresses[0] === undefined) {
+            if (addresses === undefined || addresses[0] === undefined || ipRangeCheck(addresses[0], dns64_range+"/96")) {
                 request.send();
             } else {
+                //AAAA exist remove A
                 response.header.rcode = 0;
                 /*response.answer = [{
                             name: question.name,
