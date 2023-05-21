@@ -59,8 +59,8 @@ var add_aaaa = {};
 
 var aggressive_v6 = false;
 var v6_only = false;
-var remove_v4_if_v6_exist = true;
-var dns64 = true;
+var remove_v4_if_v6_exist = false;
+var dns64 = false;
 
 var dns64_range = "64:ff9b::"; // "/96 CIDR assumed by default"
 
@@ -133,11 +133,11 @@ function proxy(question, response, cb) {
     var request = dns.Request({
         question: question, // forwarding the question
         server: authority, // this is the DNS server we are asking
-        timeout: 500
+        timeout: 1000
     });
 
     request.on('timeout', function () {
-        //console.log('Timeout in making request no forwarding', question.name);
+        console.log('Timeout in making request no forwarding', question.name);
     });
 
     // when we get answers, append them to the response
