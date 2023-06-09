@@ -283,8 +283,9 @@ function proxy(question, response, cb) {
                     var fv6 = fastly.fastlyv4tov6(v4addresses, resolver, localStorageMemory);
 
                     if (!fv6) {
-                        cb();
-                        return;
+                        fastly_fallback();
+                        //cb();
+                        //return;
                     }
 
                     handleResponse(last_type, response, generate_aaaa(last_hostname, fv6), cb);
@@ -292,14 +293,19 @@ function proxy(question, response, cb) {
                 return;
             }
 
-            if (!fsta) var fsta1 = fastly.check_for_fastly_hostname(last_hostname);
-            if (fsta1 && fsta1[0] == "d") {
+            if (!fsta) fastly_fallback(); //check the hostname if authority is not matched
+
+            function fastly_fallback() {
+                var fsta1 = fastly.check_for_fastly_hostname(last_hostname);
                 //console.log(fsta1);
-                matched = true; fsta = fsta1;
-                resolver.resolve6(fsta1, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
-                });
-                return;
+
+                if (fsta1 && fsta1[0] == "d") { //check for "d"ualstack in the hostname
+                    matched = true; fsta = fsta1;
+                    resolver.resolve6(fsta1, (err, addresses) => {
+                        if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
+                    });
+                    return;
+                }
             }
 
             if (!mse) mse = msedge.check_for_microsoftedge_a(authorityname);

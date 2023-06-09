@@ -60,9 +60,11 @@ module.exports = {
         var dp2 = sdomains.indexOf("fastly");
         var dp3 = sdomains.indexOf("fastlylb");
 
+       //console.log(sdomains);
+
         if (dp1 === 0 && (dp2 == 1 || dp3 == 1)) {
-            if (sdomains.length == 4) sdomains[4] = "dualstack";
             //console.log("fastly matched");
+            sdomains[sdomains.length] = "dualstack";
             var fixedhostname = sdomains.reverse().join(".");
             return fixedhostname;
         } else return false;
