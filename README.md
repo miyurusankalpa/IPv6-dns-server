@@ -48,7 +48,7 @@ Change the `v6_only` variable to true in the app.js file.
 
 ## Akamai
 
-* Test domains: www.last.fm, www.amd.com
+* Test domains: www.nvidia.com, www.amd.com
 * IPv6 Type: Unicast
 * Coverage: All
 * Usability: Stable
@@ -69,7 +69,7 @@ Change the `v6_only` variable to true in the app.js file.
 
 ## Amazon Cloudfront 
 
-* Test domains: www.amazon.com, vod-secure.twitch.tv
+* Test domains: www.figma.com, vod-secure.twitch.tv
 * IPv6 Type: Unicast
 * Coverage: All
 * Usability: Stable
@@ -83,7 +83,7 @@ Change the `v6_only` variable to true in the app.js file.
 
 ## Highwinds
 
-* Test domains: code.jquery.com
+* Test domains: map2.hwcdn.net
 * IPv6 Type: Anycast
 * Coverage: All
 * Usability: Stable
@@ -132,7 +132,7 @@ Change the `v6_only` variable to true in the app.js file.
 
 ## Github.io (Fastly)
 
-* Test domains: sadh.life
+* Test domains: willettjf.com
 * IPv6 Type: Anycast
 * Coverage: Only IPv4 match
 * Usability: Stable
