@@ -153,5 +153,23 @@ Change the `v6_only` variable to true in the app.js file.
 * Usability: Logout or delete cookies
 * Aggressive mode: Errors on some pages
 
+# how does this work
+
+One thing this app does is use only the DNS data returned by the DNS provider to synthesize the requests.
+
+For that we use the following information
+
+- A - IPv4 records, match known provider IP
+- Hostname - CDN usually have a domain they provide the users which we can use to detect the provider
+- DNS Authority - Some CDN providers provide they own DNS, which we can use to detect the provider.
+
+
+The next part is getting IPv6 address, for this below mthods are used
+
+- Synthesize the IPv6 from IPv4 adddress (fastlly)
+- Use known IPv6 addresss - (MSEDGE)
+- Use any IPv6 address -  (Cloudfront)
+- Generate IPv6 enabled hostname (Akamai)
+
 # Credits
 * [Pēteris Ņikiforovs](https://peteris.rocks/)
