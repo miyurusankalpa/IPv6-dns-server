@@ -143,10 +143,10 @@ function proxy(question, response, cb) {
     // when we get answers, append them to the response
     request.on('message', (err, msg) => {
 
+        console.log('message', msg);
+
         if (question.type === 28) //AAAA records
         {
-            //console.log(msg);
-
             var last_hostname;
             var last_type;
             var matched = false;
@@ -499,9 +499,16 @@ function proxy(question, response, cb) {
             if (cloudfront.check_for_cloudfront_hostname(qhostname)) add_aaaa[qhostname] = "cloudfront";
 
             cb();
-        } else cb();
+        } else {
+            // when we get answers, append them to the response
+            msg.answer.forEach(a => {
+                    response.answer.push(a);
+                    console.log('remote DNS response: ', a)
+            });
+            console.log(response);
 
-        //console.log('m', msg);
+            request.on('end', cb);
+        }
     });
 
     if (question.type === 1 && (remove_v4_if_v6_exist)) //A records
