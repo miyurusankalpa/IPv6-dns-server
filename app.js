@@ -143,7 +143,7 @@ function proxy(question, response, cb) {
     // when we get answers, append them to the response
     request.on('message', (err, msg) => {
 
-        console.log('message', msg);
+        //console.log('message', msg);
 
         if (question.type === 28) //AAAA records
         {
@@ -503,9 +503,9 @@ function proxy(question, response, cb) {
             // when we get answers, append them to the response
             msg.answer.forEach(a => {
                     response.answer.push(a);
-                    console.log('remote DNS response: ', a)
+                    //console.log('remote DNS response: ', a)
             });
-            console.log(response);
+            //console.log(response);
 
             request.on('end', cb);
         }
