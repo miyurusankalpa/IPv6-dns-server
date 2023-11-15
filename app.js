@@ -3,7 +3,7 @@
 //use a EDNS enabled DNS resolver for best results
 var dns_resolver = '2001:4860:4860::8888'; //Google
 //var dns_resolver = '2606:4700:4700::1111'; //Cloudflare
-//var dns_resolver = '2a02:6b8::feed:0ff'; //Yandedx
+//var dns_resolver = '2a02:6b8::feed:0ff'; //Yandex
 //var dns_resolver = '2001:678:ed0:f000::'; //ffmuc
 //var dns_resolver = '8.8.8.8'; //Google
 
