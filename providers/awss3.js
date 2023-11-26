@@ -17,6 +17,7 @@ module.exports = {
         var dp6 = sdomains.indexOf("s3-accelerate");
         var dp7 = sdomains.indexOf("s3-accesspoint");
         var dp8 = sdomains.indexOf("s3-website");
+        var dp9 = sdomains.indexOf("console-l");
 
         if (dp2 == 1) {
             //console.log(hostname+" amazon matched");		
@@ -37,6 +38,9 @@ module.exports = {
                 sdomains.splice(4, 1);
                 dp1 = -1 //break china domain match
                 //console.log("s3 matched 8");
+            } else if (dp9 === 2) { //matched console domains
+                return false;
+                //console.log("s3 matched 9");
             } else if (ssdomains[0] === 's3' && ssdomains[1] === '1' && dp1 !== 0) { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
                 sdomains.splice(2, 0, "us-east-1");
                 sdomains.splice(4, 0, "s3");

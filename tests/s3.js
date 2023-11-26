@@ -18,6 +18,7 @@ function check_for_s3_hostname(hostname) {
     var dp6 = sdomains.indexOf("s3-accelerate");
     var dp7 = sdomains.indexOf("s3-accesspoint");
     var dp8 = sdomains.indexOf("s3-website");
+    var dp9 = sdomains.indexOf("console-l");
 
     if (dp2 == 1) {
         //console.log(hostname+" amazon matched");		
@@ -38,6 +39,9 @@ function check_for_s3_hostname(hostname) {
             sdomains.splice(4, 1);
             dp1 = -1 //break china domain match
             //console.log("s3 matched 8");
+        } else if (dp9 === 2) { //matched console domains
+            return false;
+            //console.log("s3 matched 9");
         } else if (ssdomains[0] === 's3' && ssdomains[1] === '1' && dp1 !== 0) { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
             sdomains.splice(2, 0, "us-east-1");
             sdomains.splice(4, 0, "s3");
@@ -122,6 +126,7 @@ assert.notEqual(check_for_s3_hostname("s3-website.cn-northwest-1.amazonaws.com.c
 assert.equal(check_for_s3_hostname("pub-web-4b45fc8aac32a800.elb.eu-central-1.amazonaws.com"), false);
 assert.equal(check_for_s3_hostname("cdn.assets.as2.amazonaws.com"), false);
 assert.equal(check_for_s3_hostname("dynamodb.us-east-2.amazonaws.com"), false);
+assert.equal(check_for_s3_hostname("lbr-optimized.s3.console-l.amazonaws.com"), false);
 
 console.log("All Tests Passed")
 
