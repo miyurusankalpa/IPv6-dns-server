@@ -102,6 +102,13 @@ Change the `v6_only` variable to true in the app.js file.
 * Coverage: Only on some services
 * Usability: Unknown
 
+## Limelight Networks
+
+* Test domains: fota-ll-dn.ospserver.net, dmotion.s.llnwi.net
+* IPv6 Type: Unicast
+* Coverage: Only on some services
+* Usability: Unknown
+
 ## Sucuri
 
 * Test domains: www.exploit-db.com
