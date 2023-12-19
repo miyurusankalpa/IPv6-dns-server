@@ -180,7 +180,7 @@ function proxy(question, response, cb) {
             var sui;
             var wb;
             var c77;
-            var ln;
+            var ll;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -228,7 +228,7 @@ function proxy(question, response, cb) {
                         c77 = true;
                         break;
                     case 'limelight':
-                        ln = true;
+                        ll = true;
                         break;
                     default: {
                         handleResponse(5, response, generate_aaaa(question.name, provider_name), cb);
@@ -373,10 +373,10 @@ function proxy(question, response, cb) {
                 });
             }
 
-            if (!ln) ln = limelight.check_for_llnwi_hostname(last_hostname);
-            if (ln) {
+            if (!ll) ll = limelight.check_for_lln_hostname(last_hostname);
+            if (ll) {
                 matched = true;
-                resolver.resolve6(ln, (err, addresses) => {
+                resolver.resolve6(ll, (err, addresses) => {
                     handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb);
                     return;
                 });
