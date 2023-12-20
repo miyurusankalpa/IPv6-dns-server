@@ -16,13 +16,12 @@ module.exports = {
 
         if (dp1 === 0 && dp2 == 1) {
             //console.log("cdn77 matched");
-            //var fixedhostname = sdomains.reverse().join(".");
-            return hostname;
+            return true;
         } else return false;
     },
     get_cdn77_v6address: function (resolver, localStorageMemory) {
-        var aaaa_cdn77_domain = 'www.cdn77.com';
-        //var aaaa_cdn77_domain = 'hls-b.udemycdn.com';
+        var aaaa_cdn77_domain = 'www.cdn77.com'; //static content
+        //var aaaa_cdn77_domain = 'hls-b.udemycdn.com'; //for video content
 
         var v6adddy = localStorageMemory.getItem('cdn77v6addy');
  
