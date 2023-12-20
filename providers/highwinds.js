@@ -10,8 +10,7 @@ module.exports = {
 
         if ((dp1 === 0 && dp2 == 1) || (dp3 === 0 && dp4 == 1)) {
             //console.log("highwinds matched");
-            var fixedhostname = sdomains.reverse().join(".");
-            return fixedhostname;
+            return true;
         } else return false;
     },
     gethighwindv6address: function () {

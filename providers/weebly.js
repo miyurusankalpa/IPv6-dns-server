@@ -16,8 +16,7 @@ module.exports = {
 
         if (dp1 === 0 && dp2 == 1) {
             //console.log("weebly matched");
-            var fixedhostname = sdomains.reverse().join(".");
-            return fixedhostname;
+            return true;
         } else return false;
     },
     getweeblyv6address: function () {

@@ -30,8 +30,7 @@ module.exports = {
 
         if (dp1 === 0 && dp2 == 1) {
             //console.log("bunnycdn matched");
-            var fixedhostname = sdomains.reverse().join(".");
-            return fixedhostname;
+            return true;
         } else return false;
     }
 };

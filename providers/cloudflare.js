@@ -19,8 +19,7 @@ module.exports = {
 
         if (dp1 === 0 && dp2 == 1 && dp3 == 2) {
             //console.log("cloudflare matched");
-            var fixedhostname = sdomains.reverse().join(".");
-            return fixedhostname;
+            return true;
         } else return false;
     },
     check_for_cloudflare_ip: function (ipv4) {
