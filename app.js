@@ -390,6 +390,7 @@ function proxy(question, response, cb) {
             }
 
             if (!cfl && aggressive_v6) cfl = cloudflare.check_for_cloudflare_a(authority);
+            if (!cfl) cfl = cloudflare.check_for_cloudflare_hostname(last_hostname);
             if (cfl) {
                 matched = true;
                 handleResponse(last_type, response, generate_aaaa(last_hostname, cloudflare.getcloudflarev6address()), cb);
