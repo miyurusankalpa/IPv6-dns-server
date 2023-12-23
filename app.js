@@ -1,11 +1,9 @@
 'use strict';
 
+const config = require('./config.json');
+
 //use a EDNS enabled DNS resolver for best results
-var dns_resolver = '2001:4860:4860::8888'; //Google
-//var dns_resolver = '2606:4700:4700::1111'; //Cloudflare
-//var dns_resolver = '2a02:6b8::feed:0ff'; //Yandex
-//var dns_resolver = '2001:678:ed0:f000::'; //ffmuc
-//var dns_resolver = '8.8.8.8'; //Google
+var dns_resolver = config.dns_resolver;
 
 let dns = require('native-dns');
 let async = require('async');
@@ -36,7 +34,7 @@ const resolver = new Resolver();
 const resolver_own = new Resolver();
 
 resolver.setServers([dns_resolver]);
-resolver_own.setServers(['[::1]']);
+resolver_own.setServers([config.self_resolver]);
 
 let server6 = dns.createServer({
     dgram_type: 'udp6',
@@ -55,24 +53,24 @@ let authority = {
     type: 'udp6'
 };
 
-var no_aaaa = [];
-var add_aaaa = {};
+var no_aaaa = config.no_aaaa;
+var add_aaaa = config.add_aaaa;
 
-var aggressive_v6 = false;
-var v6_only = false;
-var remove_v4_if_v6_exist = false;
-var dns64 = false;
+var aggressive_v6 = config.aggressive_v6;
+var v6_only = config.v6_only;
+var remove_v4_if_v6_exist = config.remove_v4_if_v6_exist;
+var dns64 = config.dns64;
 
-var dns64_range = "64:ff9b::"; // "/96 CIDR assumed by default"
+var dns64_range = config.dns64_range; // "/96 CIDR assumed by default"
 
 if (aggressive_v6) {
     var add_aaaa = {
-        'news.ycombinator.com': "cloudflare",
-        'www.bbc.com': "2a04:4e42::81",
-        'cdn.statically.io': "bunnycdn",
-        'twitter.com': "cloudfront",
-        'api.twitter.com': "cloudfront",
-        'mobile.twitter.com': "cloudfront"
+        "news.ycombinator.com": "cloudflare",
+        "www.bbc.com": "2a04:4e42::81",
+        "cdn.statically.io": "bunnycdn",
+        "twitter.com": "cloudfront",
+        "api.twitter.com": "cloudfront",
+        "mobile.twitter.com": "cloudfront"
     };
 }
 
