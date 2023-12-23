@@ -64,14 +64,12 @@ var dns64 = config.dns64;
 var dns64_range = config.dns64_range; // "/96 CIDR assumed by default"
 
 if (aggressive_v6) {
-    var add_aaaa = {
-        "news.ycombinator.com": "cloudflare",
-        "www.bbc.com": "2a04:4e42::81",
-        "cdn.statically.io": "bunnycdn",
-        "twitter.com": "cloudfront",
-        "api.twitter.com": "cloudfront",
-        "mobile.twitter.com": "cloudfront"
-    };
+    add_aaaa["news.ycombinator.com"] = "cloudflare";
+    add_aaaa["www.bbc.com"] = "2a04:4e42::81";
+    add_aaaa["cdn.statically.io"] = "bunnycdn";
+    add_aaaa["twitter.com"] = "cloudfront";
+    add_aaaa["api.twitter.com"] = "cloudfront";
+    add_aaaa["mobile.twitter.com"] = "cloucloudfrontdflare";
 }
 
 //cache fastly range
