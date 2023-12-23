@@ -1,0 +1,11 @@
+{
+  "dns_resolver":"2606:4700:4700::1111",
+  "self_resolver":"[::1]",
+  "dns64_range":"64:ff9b::",
+  "aggressive_v6":false,
+  "v6_only":false,
+  "remove_v4_if_v6_exist":false,
+  "dns64":false,
+  "no_aaaa":[],
+  "add_aaaa":{}
+}
