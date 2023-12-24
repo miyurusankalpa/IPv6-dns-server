@@ -14,6 +14,7 @@ let ipRangeCheck = require("ip-range-check");
 var akamai = require('./providers/akamai');
 var fastly = require('./providers/fastly');
 var awss3 = require('./providers/awss3');
+var awselbclassic = require('./providers/awselbclassic');
 var cloudflare = require('./providers/cloudflare');
 var cloudfront = require('./providers/cloudfront');
 var msedge = require('./providers/msedge');
@@ -177,6 +178,7 @@ function proxy(question, response, cb) {
             var wb;
             var c77;
             var ll;
+            var elbc;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -225,6 +227,9 @@ function proxy(question, response, cb) {
                         break;
                     case 'limelight':
                         ll = true;
+                        break;
+                    case 'elbclassic':
+                        elbc = true;
                         break;
                     default: {
                         handleResponse(5, response, generate_aaaa(question.name, provider_name), cb);
@@ -392,6 +397,15 @@ function proxy(question, response, cb) {
                 handleResponse(last_type, response, generate_aaaa(last_hostname, cloudflare.getcloudflarev6address()), cb);
                 return;
             }
+
+            /*if (!elbc && aggressive_v6) elbc = awselbclassic.check_for_elbclassic_hostname(question.name);
+            if (elbc) {
+                matched = true;
+                resolver.resolve6(elbc, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
+                });
+                return;
+            }*/
 
             if (!matched && dns64) {
                 resolver.resolve4(question.name, (err, addresses) => {

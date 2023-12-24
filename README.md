@@ -160,6 +160,14 @@ Change the `v6_only` variable to true in the app.js file.
 * Usability: Logout or delete cookies
 * Aggressive mode: Errors on some pages
 
+## AWS ELB Classic
+
+* Test domains: N/A
+* IPv6 Type: Unicast
+* Coverage: Some Domains+Only on Aggressive mode.
+* Usability: Unstable
+* Aggressive mode: Yes, but need to manually uncomment it in code.
+
 # How does this work
 
 One thing this app does is use only the DNS data returned by the DNS provider to synthesize the requests.
