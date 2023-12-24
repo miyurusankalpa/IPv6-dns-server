@@ -69,7 +69,7 @@ if (aggressive_v6) {
     add_aaaa["cdn.statically.io"] = "bunnycdn";
     add_aaaa["twitter.com"] = "cloudfront";
     add_aaaa["api.twitter.com"] = "cloudfront";
-    add_aaaa["mobile.twitter.com"] = "cloucloudfrontdflare";
+    add_aaaa["mobile.twitter.com"] = "cloudfront";
 }
 
 //cache fastly range
