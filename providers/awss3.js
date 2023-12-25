@@ -11,6 +11,11 @@ module.exports = {
         if (dp1 == 0) sdomains.splice(0, 1);
 
         var dp2 = sdomains.indexOf("amazonaws");
+        var dpff = sdomains.indexOf("dualstack");  
+    
+        //match dualstacked domains
+        if(dpff === 3 && dp2 === 1) return false;
+
         var dp3 = sdomains.indexOf("s3");
         var dp4 = sdomains.indexOf("s3-control");
         var dp5 = sdomains.indexOf("s3-w");

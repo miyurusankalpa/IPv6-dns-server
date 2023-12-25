@@ -12,6 +12,11 @@ function check_for_s3_hostname(hostname) {
     if (dp1 == 0) sdomains.splice(0, 1);
 
     var dp2 = sdomains.indexOf("amazonaws");
+    var dpff = sdomains.indexOf("dualstack");  
+
+    //match dualstacked domains
+    if(dpff === 3 && dp2 === 1) return false;
+
     var dp3 = sdomains.indexOf("s3");
     var dp4 = sdomains.indexOf("s3-control");
     var dp5 = sdomains.indexOf("s3-w");
@@ -93,6 +98,8 @@ function check_for_s3_hostname(hostname) {
 assert.equal(check_for_s3_hostname("s3.amazonaws.com"), "s3.dualstack.us-east-1.amazonaws.com");
 assert.notEqual(check_for_s3_hostname("s3.amazonaws.com.cn"), "s3.dualstack.us-east-1.amazonaws.com.cn");
 
+//assert.equal(check_for_s3_hostname("dualstack.s3.amazonaws.com"), "dualstack.s3.dualstack.us-east-1.amazonaws.com"); //own owns this bucket?
+
 assert.equal(check_for_s3_hostname("redditstatic.s3.amazonaws.com"), "redditstatic.s3.dualstack.us-east-1.amazonaws.com");
 assert.equal(check_for_s3_hostname("github-production-release-asset-2e65be.s3.amazonaws.com"), "github-production-release-asset-2e65be.s3.dualstack.us-east-1.amazonaws.com");
 assert.equal(check_for_s3_hostname("2020awsreinvent.s3-us-west-2.amazonaws.com"), "2020awsreinvent.s3.dualstack.us-west-2.amazonaws.com");
@@ -118,6 +125,10 @@ assert.equal(check_for_s3_hostname("s3-accesspoint.ap-southeast-1.amazonaws.com"
 assert.equal(check_for_s3_hostname("web.s3-accesspoint.ap-southeast-1.amazonaws.com"), "web.s3-accesspoint.dualstack.ap-southeast-1.amazonaws.com");
 
 assert.equal(check_for_s3_hostname("download.opencontent.netflix.com.s3.amazonaws.com"), "download.opencontent.netflix.com.s3.dualstack.us-east-1.amazonaws.com");
+
+assert.equal(check_for_s3_hostname("s3.dualstack.us-east-1.amazonaws.com"), false);
+assert.equal(check_for_s3_hostname("download.opencontent.netflix.com.s3.dualstack.us-east-1.amazonaws.com"), false);
+assert.equal(check_for_s3_hostname("s3.dualstack.cn-north-1.amazonaws.com.cn"), false);
 
 assert.equal(check_for_s3_hostname("s3-website-us-east-1.amazonaws.com"), "s3-website.dualstack.us-east-1.amazonaws.com");
 assert.equal(check_for_s3_hostname("s3-website.ap-southeast-3.amazonaws.com"), "s3-website.dualstack.ap-southeast-3.amazonaws.com");
