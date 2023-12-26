@@ -230,7 +230,7 @@ function proxy(question, response, cb) {
                         break;
                     case 'oss':
                         oss = true;
-                        break;    
+                        break;
                     default: {
                         handleResponse(5, response, generate_aaaa(question.name, provider_name), cb);
                         return;
@@ -263,7 +263,7 @@ function proxy(question, response, cb) {
                 return;
             }
 
-            if (!oss) s3 = alibabaoss.check_for_oss_hostname(question.name);
+            if (!oss) oss = alibabaoss.check_for_oss_hostname(question.name);
             if (oss) {
                 matched = true;
                 resolver.resolve6(oss, (err, addresses) => {
