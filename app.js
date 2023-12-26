@@ -25,6 +25,7 @@ var sucuri = require('./providers/sucuri');
 var weebly = require('./providers/weebly');
 var wpvip = require('./providers/wpvip');
 var cdn77 = require('./providers/cdn77');
+var alibabaoss = require('./providers/alibabaoss');
 
 const {
     Resolver
@@ -177,6 +178,7 @@ function proxy(question, response, cb) {
             var wb;
             var c77;
             var ll;
+            var oss;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -226,6 +228,9 @@ function proxy(question, response, cb) {
                     case 'limelight':
                         ll = true;
                         break;
+                    case 'oss':
+                        oss = true;
+                        break;    
                     default: {
                         handleResponse(5, response, generate_aaaa(question.name, provider_name), cb);
                         return;
@@ -253,6 +258,15 @@ function proxy(question, response, cb) {
             if (s3) {
                 matched = true;
                 resolver.resolve6(s3, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
+                });
+                return;
+            }
+
+            if (!oss) s3 = alibabaoss.check_for_oss_hostname(question.name);
+            if (oss) {
+                matched = true;
+                resolver.resolve6(oss, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
                 });
                 return;
