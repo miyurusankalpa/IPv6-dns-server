@@ -29,7 +29,10 @@ module.exports = {
             if(dpff2==0)
             {
                 //console.log(ssdomains);
-    
+                
+                //delete bucketname
+                if(sdomains.length==4 && dpff1<0) sdomains.splice(3, 1);
+
                 ssdomains.splice(0, 1); //delete oss from region domain
     
                // console.log(ssdomains);
