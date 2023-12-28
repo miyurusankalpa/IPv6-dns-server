@@ -1,6 +1,7 @@
 {
   "dns_resolver":"2606:4700:4700::1111",
   "self_resolver":"[::1]",
+  "self_port":"53",
   "dns64_range":"64:ff9b::",
   "aggressive_v6":false,
   "v6_only":false,

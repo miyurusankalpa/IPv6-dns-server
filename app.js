@@ -33,8 +33,10 @@ const {
 const resolver = new Resolver();
 const resolver_own = new Resolver();
 
+const self_server_and_port = config.self_resolver+":"+config.self_port;
+
 resolver.setServers([dns_resolver]);
-resolver_own.setServers([config.self_resolver]);
+resolver_own.setServers(self_server_and_port);
 
 let server6 = dns.createServer({
     dgram_type: 'udp6',
@@ -45,7 +47,7 @@ server6.on('close', () => console.log('server closed', server6.address()));
 server6.on('error', (err, buff, req, res) => console.error(err.stack));
 server6.on('socketError', (err, socket) => console.error(err));
 
-server6.serve(53);
+server6.serve(config.self_port);
 
 let authority = {
     address: dns_resolver,
