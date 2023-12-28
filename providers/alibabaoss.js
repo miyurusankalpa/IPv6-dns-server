@@ -7,8 +7,12 @@ module.exports = {
     
         var dp0 = sdomains.indexOf("com");
         var dp1 = sdomains.indexOf("aliyuncs");
+        var dp2 = sdomains.indexOf("aliyun-inc");
     
-        if (dp0 == 0 && dp1 == 1) {
+        //change the domain
+        if (dp2 == 1) sdomains[1] = "aliyuncs";
+    
+        if (dp0 == 0 && (dp1 == 1 || dp2 == 1)) {
             //console.log(hostname+" aliyuncs matched");	
     
             var dpff1 = sdomains.indexOf("oss");
@@ -29,13 +33,13 @@ module.exports = {
             if(dpff2==0)
             {
                 //console.log(ssdomains);
-                
+    
                 //delete bucketname
                 if(sdomains.length==4 && dpff1<0) sdomains.splice(3, 1);
-
+    
                 ssdomains.splice(0, 1); //delete oss from region domain
     
-               // console.log(ssdomains);
+               //console.log(sdomains);
     
                 /*if(dpff1 == 2 && ssdomains.length == 1) { //match oss.aliyuncs.com
                     ssdomains[0] = "cn";

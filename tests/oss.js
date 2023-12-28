@@ -8,8 +8,12 @@ function check_for_oss_hostname(hostname) {
 
     var dp0 = sdomains.indexOf("com");
     var dp1 = sdomains.indexOf("aliyuncs");
+    var dp2 = sdomains.indexOf("aliyun-inc");
 
-    if (dp0 == 0 && dp1 == 1) {
+    //change the domain
+    if (dp2 == 1) sdomains[1] = "aliyuncs";
+
+    if (dp0 == 0 && (dp1 == 1 || dp2 == 1)) {
         //console.log(hostname+" aliyuncs matched");	
 
         var dpff1 = sdomains.indexOf("oss");
@@ -78,6 +82,11 @@ assert.equal(check_for_oss_hostname("examplebucket.oss-cn-hangzhou.aliyuncs.com"
 assert.equal(check_for_oss_hostname("examplebucket.oss-cn-beijing.aliyuncs.com"), "cn-beijing.oss.aliyuncs.com");
 assert.equal(check_for_oss_hostname("examplebucket.oss-ap-southeast-1.aliyuncs.com"), "ap-southeast-1.oss.aliyuncs.com");
 assert.equal(check_for_oss_hostname("examplebucket.oss-eu-central-1.aliyuncs.com"), "eu-central-1.oss.aliyuncs.com");
+
+assert.equal(check_for_oss_hostname("examplebucket.cn-hangzhou.oss.aliyun-inc.com"), "examplebucket.cn-hangzhou.oss.aliyuncs.com");
+assert.equal(check_for_oss_hostname("examplebucket.cn-beijing.oss.aliyun-inc.com"), "examplebucket.cn-beijing.oss.aliyuncs.com");
+assert.equal(check_for_oss_hostname("examplebucket.ap-southeast-1.oss.aliyun-inc.com"), "examplebucket.ap-southeast-1.oss.aliyuncs.com");
+assert.equal(check_for_oss_hostname("examplebucket.eu-central-1.oss.aliyun-inc.com"), "examplebucket.eu-central-1.oss.aliyuncs.com");
 
 assert.equal(check_for_oss_hostname("cn-hangzhou.oss.aliyuncs.com"), "cn-hangzhou.oss.aliyuncs.com");
 assert.equal(check_for_oss_hostname("cn-beijing.oss.aliyuncs.com"), "cn-beijing.oss.aliyuncs.com");
