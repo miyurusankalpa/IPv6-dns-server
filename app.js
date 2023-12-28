@@ -33,10 +33,10 @@ const {
 const resolver = new Resolver();
 const resolver_own = new Resolver();
 
-const self_server_and_port = [config.self_resolver]+":"+config.self_port;
+const self_server_and_port = "["+config.self_resolver+"]:"+config.self_port;
 
 resolver.setServers([dns_resolver]);
-resolver_own.setServers(self_server_and_port);
+resolver_own.setServers([self_server_and_port]);
 
 let server6 = dns.createServer({
     dgram_type: 'udp6',
