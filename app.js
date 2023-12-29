@@ -26,6 +26,7 @@ var weebly = require('./providers/weebly');
 var wpvip = require('./providers/wpvip');
 var cdn77 = require('./providers/cdn77');
 var alibabaoss = require('./providers/alibabaoss');
+var alicdn = require('./providers/alicdn');
 
 const {
     Resolver
@@ -179,6 +180,7 @@ function proxy(question, response, cb) {
             var c77;
             var ll;
             var oss;
+            var ali;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -230,6 +232,9 @@ function proxy(question, response, cb) {
                         break;
                     case 'oss':
                         oss = true;
+                        break;
+                    case 'alicdn':
+                        ali = true;
                         break;
                     default: {
                         handleResponse(5, response, generate_aaaa(question.name, provider_name), cb);
@@ -407,6 +412,14 @@ function proxy(question, response, cb) {
                 return;
             }
 
+            if (!ali) ali = alicdn.check_for_alicdn_hostname(last_hostname);
+            if (ali) {
+                matched = true;
+
+                handleResponse(last_type, response, generate_aaaa(last_hostname, alicdn.getalicdnv6address(resolver, localStorageMemory)), cb);
+                return;
+            }
+
             if (!matched && dns64) {
                 resolver.resolve4(question.name, (err, addresses) => {
                     //console.log('a check', addresses);
@@ -522,6 +535,7 @@ function proxy(question, response, cb) {
             if (fastly.check_for_fastly_hostname(qhostname)) add_aaaa[qhostname] = "fastly";
             if (weebly.check_for_weebly_hostname(qhostname)) add_aaaa[qhostname] = "weebly";
             if (cloudfront.check_for_cloudfront_hostname(qhostname)) add_aaaa[qhostname] = "cloudfront";
+            if (alicdn.check_for_alicdn_hostname(qhostname)) add_aaaa[qhostname] = "alicdn";
 
             cb();
         } else {
