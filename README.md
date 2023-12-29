@@ -78,7 +78,7 @@ Change the `v6_only` variable to true in the app.js file.
 
 * Test domains: oss.aliyuncs.com, alicloud-common.oss-ap-southeast-1.aliyuncs.com, docs-aliyun.cn-hangzhou.oss.aliyun-inc.com
 * IPv6 Type: Unicast
-* Coverage: All from aliyuncs.com and aliyun-inc.com except examplebucket.oss.aliyuncs.com format. (check tests for more info)
+* Coverage: All from aliyuncs.com and aliyun-inc.com
 * Usability: Stable
 
 ## AliCDN 
