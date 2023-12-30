@@ -92,10 +92,14 @@ function handleRequest(request, response) {
 
         if (question.type === 28) //AAAA records
         {
-            if (no_aaaa.indexOf(question.name) !== -1) {
+            if (no_aaaa.indexOf(question.name) !== -1 & !dns64) {
                 response.header.rcode = 0;
                 response.send();
                 return;
+            }
+            
+            if (question.name.startsWith("_noaaaa.")) { //subdomain with _noaaa
+                no_aaaa.push(question.name.substr(8)); //add it to list without noaaaa subdomain
             }
 
             var cachedaaaaresponse = JSON.parse(localStorageMemory.getItem(question.name));

@@ -36,6 +36,10 @@ Change the `aggressive_v6` variable to false in the app.js file. See individual 
 
 Change the `v6_only` variable to true in the app.js file.
 
+### Temporarily disable AAAA records for a domain
+
+If the domain gives a system error, append `_noaaaa` to the domain and the doamin with be IPv4 only for the rest of the session.
+
 # Testing if DNS proxy is working
 
 ## Cloudflare
