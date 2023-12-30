@@ -534,9 +534,13 @@ function proxy(question, response, cb) {
                 return;
             }
 
+            if (akamai.check_for_akamai_hostname(qhostname)) add_aaaa[qhostname] = "akamai";
             if (fastly.check_for_fastly_hostname(qhostname)) add_aaaa[qhostname] = "fastly";
             if (weebly.check_for_weebly_hostname(qhostname)) add_aaaa[qhostname] = "weebly";
             if (cloudfront.check_for_cloudfront_hostname(qhostname)) add_aaaa[qhostname] = "cloudfront";
+            if (awss3.check_for_s3_hostname(qhostname)) add_aaaa[qhostname] = "s3";
+            if (bunnycdn.check_for_bunnycdn_hostname(qhostname)) add_aaaa[qhostname] = "bunnycdn";
+            if (highwinds.check_for_highwinds_hostname(qhostname)) add_aaaa[qhostname] = "highwinds";
             if (alicdn.check_for_alicdn_hostname(qhostname)) add_aaaa[qhostname] = "alicdn";
 
             cb();
