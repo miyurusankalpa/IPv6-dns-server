@@ -1,7 +1,7 @@
 module.exports = {
     msev4tov6: function (ipv4, hostname) {
         //console.log('f', ipv4);
-        if (!ipv4[0]) return false;
+        if (!ipv4 || !ipv4[0]) return false;
 
         var octets = ipv4[0].split(".");
         var mseid = hostname.split("-");
