@@ -24,7 +24,7 @@ module.exports = {
         var dp8 = sdomains.indexOf("s3-website");
         var dp9 = sdomains.indexOf("console-l");
 
-        if (dp2 == 1) {
+        if (dp2 == 1 && sdomains.length>2) {
             //console.log(hostname+" amazon matched");		
             var ssdomains = sdomains[2].split("-");
             if (sdomains.length == 5) sdomains[5] = sdomains[4];

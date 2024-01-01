@@ -46,5 +46,7 @@ assert.equal(awss3.check_for_s3_hostname("cdn.assets.as2.amazonaws.com"), false)
 assert.equal(awss3.check_for_s3_hostname("dynamodb.us-east-2.amazonaws.com"), false);
 assert.equal(awss3.check_for_s3_hostname("lbr-optimized.s3.console-l.amazonaws.com"), false);
 
+assert.equal(awss3.check_for_s3_hostname("amazonaws.com"), false); //https://gitlab.com/miyurusankalpa/IPv6-dns-server/-/issues/8
+
 console.log("All Tests Passed")
 
