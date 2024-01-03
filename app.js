@@ -389,18 +389,18 @@ function proxy(question, response, cb) {
             if (v0c) {
                 matched = true;
                 resolver.resolve6(v0c, (err, addresses) => {
-                    handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb);
-                    return;
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
                 });
+                return;
             }
 
             if (!ll) ll = limelight.check_for_lln_hostname(last_hostname);
             if (ll) {
                 matched = true;
                 resolver.resolve6(ll, (err, addresses) => {
-                    handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb);
-                    return;
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
                 });
+                return;
             }
 
             if (sui) {
