@@ -5,6 +5,9 @@ var awss3 = require('../providers/awss3');
 assert.equal(awss3.check_for_s3_hostname("s3.amazonaws.com"), "s3.dualstack.us-east-1.amazonaws.com");
 assert.notEqual(awss3.check_for_s3_hostname("s3.amazonaws.com.cn"), "s3.dualstack.us-east-1.amazonaws.com.cn");
 
+assert.equal(awss3.check_for_s3_hostname("s3-1-w.amazonaws.com"), "s3-1-w.dualstack.us-east-1.amazonaws.com");
+assert.equal(awss3.check_for_s3_hostname("s3-r-w.amazonaws.com"), "s3-r-w.dualstack.us-east-1.amazonaws.com");
+
 //assert.equal(awss3.check_for_s3_hostname("dualstack.s3.amazonaws.com"), "dualstack.s3.dualstack.us-east-1.amazonaws.com"); //own owns this bucket?
 
 assert.equal(awss3.check_for_s3_hostname("redditstatic.s3.amazonaws.com"), "redditstatic.s3.dualstack.us-east-1.amazonaws.com");

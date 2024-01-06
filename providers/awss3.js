@@ -44,11 +44,11 @@ module.exports = {
                 dp1 = -1 //break china domain match
                 //console.log("s3 matched 8");
             } else if (dp9 === 2) { //matched console domains
-                return false;
                 //console.log("s3 matched 9");
-            } else if (ssdomains[0] === 's3' && ssdomains[1] === '1' && dp1 !== 0) { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
+                return false;
+            } else if (ssdomains[0] === 's3' && ssdomains.length === 3 && dp1 !== 0) { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
                 sdomains.splice(2, 0, "us-east-1");
-                sdomains.splice(4, 0, "s3");
+                //sdomains.splice(4, 0, "s3");
                 //console.log("s3 matched 2");
             } else if (dp3 === 3 || dp4 === 3) {
                 sdomains.splice(4, 1);
