@@ -18,7 +18,7 @@ module.exports = {
 
         var dp3 = sdomains.indexOf("s3");
         var dp4 = sdomains.indexOf("s3-control");
-        var dp5 = sdomains.indexOf("s3-w");
+        //var dp5 = sdomains.indexOf("s3-w");
         var dp6 = sdomains.indexOf("s3-accelerate");
         var dp7 = sdomains.indexOf("s3-accesspoint");
         var dp8 = sdomains.indexOf("s3-website");
@@ -46,7 +46,7 @@ module.exports = {
             } else if (dp9 === 2) { //matched console domains
                 //console.log("s3 matched 9");
                 return false;
-            } else if (ssdomains[0] === 's3' && ssdomains.length === 3 && dp1 !== 0) { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
+            } else if (ssdomains[0] === 's3' && (ssdomains.length === 3 || ssdomains.length === 2) && dp1 !== 0) { //matched  s3-1-w.amazonaws.com or s3-w.amazonaws.com
                 sdomains.splice(2, 0, "us-east-1");
                 if(ssdomains[1] == '1') sdomains[3] = 's3-r-w'; //s3-1-w.dualstack.us-east-1.amazonaws.com does not AAAA, hmm
                 //sdomains.splice(4, 0, "s3");
@@ -54,9 +54,6 @@ module.exports = {
             } else if (dp3 === 3 || dp4 === 3) {
                 sdomains.splice(4, 1);
                 //console.log("s3 matched 3");
-            } else if (dp5 === 3) {
-                sdomains.splice(4, 0, "s3-w");
-                //console.log("s3 matched 4");
             } else if (ssdomains[0] === 's3' && ssdomains[1] === 'website') { //matched s3-website-us-east-1.amazonaws.com
                 sdomains.splice(2, 1, "us-east-1");
                 sdomains.splice(3, 1, "s3-website");
