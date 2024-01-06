@@ -48,6 +48,7 @@ module.exports = {
                 return false;
             } else if (ssdomains[0] === 's3' && ssdomains.length === 3 && dp1 !== 0) { //matched  s3-1-w.amazonaws.com or s3-1.amazonaws.com
                 sdomains.splice(2, 0, "us-east-1");
+                if(ssdomains[1] == '1') sdomains[3] = 's3-r-w'; //s3-1-w.dualstack.us-east-1.amazonaws.com does not AAAA, hmm
                 //sdomains.splice(4, 0, "s3");
                 //console.log("s3 matched 2");
             } else if (dp3 === 3 || dp4 === 3) {
