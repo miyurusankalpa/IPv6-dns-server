@@ -97,7 +97,7 @@ function handleRequest(request, response) {
                 response.send();
                 return;
             }
-            
+
             if (question.name.startsWith("_noaaaa.")) { //subdomain with _noaaa
                 no_aaaa.push(question.name.substr(8)); //add it to list without noaaaa subdomain
             }
@@ -261,15 +261,18 @@ function proxy(question, response, cb) {
                 matched = true;
                 resolver.resolve6(ak, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
+                    if (err) return;
                 });
                 return;
             }
 
             if (!s3) s3 = awss3.check_for_s3_hostname(question.name);
+            if (!s3 && aggressive_v6) s3 = awss3.check_for_s3_hostname(last_hostname);
             if (s3) {
                 matched = true;
                 resolver.resolve6(s3, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
+                    if (err) return;
                 });
                 return;
             }
@@ -279,6 +282,7 @@ function proxy(question, response, cb) {
                 matched = true;
                 resolver.resolve6(oss, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
+                    if (err) return;
                 });
                 return;
             }
@@ -329,6 +333,7 @@ function proxy(question, response, cb) {
                     matched = true; fsta = fsta1;
                     resolver.resolve6(fsta1, (err, addresses) => {
                         if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
+                        if (err) return;
                     });
                     return;
                 }
@@ -542,7 +547,6 @@ function proxy(question, response, cb) {
             if (fastly.check_for_fastly_hostname(qhostname)) add_aaaa[qhostname] = "fastly";
             if (weebly.check_for_weebly_hostname(qhostname)) add_aaaa[qhostname] = "weebly";
             if (cloudfront.check_for_cloudfront_hostname(qhostname)) add_aaaa[qhostname] = "cloudfront";
-            if (awss3.check_for_s3_hostname(qhostname)) add_aaaa[qhostname] = "s3";
             if (bunnycdn.check_for_bunnycdn_hostname(qhostname)) add_aaaa[qhostname] = "bunnycdn";
             if (highwinds.check_for_highwinds_hostname(qhostname)) add_aaaa[qhostname] = "highwinds";
             if (alicdn.check_for_alicdn_hostname(qhostname)) add_aaaa[qhostname] = "alicdn";
