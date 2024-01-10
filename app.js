@@ -260,8 +260,8 @@ function proxy(question, response, cb) {
             if (ak) {
                 matched = true;
                 resolver.resolve6(ak, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
-                    if (err) return;
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else cb();
+                    if (err) cb();
                 });
                 return;
             }
@@ -271,8 +271,8 @@ function proxy(question, response, cb) {
             if (s3) {
                 matched = true;
                 resolver.resolve6(s3, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
-                    if (err) return;
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else cb();
+                    if (err) cb();
                 });
                 return;
             }
@@ -281,8 +281,8 @@ function proxy(question, response, cb) {
             if (oss) {
                 matched = true;
                 resolver.resolve6(oss, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
-                    if (err) return;
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else cb();
+                    if (err) cb();
                 });
                 return;
             }
@@ -332,8 +332,8 @@ function proxy(question, response, cb) {
                 if (fsta1 && fsta1[0] == "d") { //check for "d"ualstack in the hostname
                     matched = true; fsta = fsta1;
                     resolver.resolve6(fsta1, (err, addresses) => {
-                        if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
-                        if (err) return;
+                        if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else cb();
+                        if (err) cb();
                     });
                     return;
                 }
