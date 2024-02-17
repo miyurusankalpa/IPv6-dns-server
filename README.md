@@ -18,27 +18,32 @@ Starting the server
 
 ### Changing DNS Resolvers
 
-Change the `dns_resolver` variable in the app.js file.
-
-### Disable IPv6 for a domain
-
-Add the domain to `no_aaaa` array in the app.js file.
-
-### Add a custom IPv6 for a domain
-
-Add the domain to `add_aaaa` object with IPv6 address in the app.js file.
-
-### Turn off aggressive mode
-
-Change the `aggressive_v6` variable to false in the app.js file. See individual services below to see what aggressive mode does.
-
-### Turn on IPv6 only mode
-
-Change the `v6_only` variable to true in the app.js file.
+Change the `dns_resolver` variable in the `config.json` file.
 
 ### Temporarily disable AAAA records for a domain
 
 If the domain gives a system error, append `_noaaaa` to the domain and the doamin with be IPv4 only for the rest of the session.
+
+### Disable IPv6 for a domain permanently
+
+Add the domain to `no_aaaa` array in the `config.json` file.
+
+### Add a custom IPv6 for a domain
+
+Add the domain to `add_aaaa` object with IPv6 address in the `config.json` file.
+
+### Turn On aggressive mode
+
+Change the `aggressive_v6` variable to true in the `config.json` file. See individual services below to see what aggressive mode does.
+
+### Enable DNS64 support 
+
+Change the `dns64` variable to true in the `config.json` file. If the prefix is diffrent from the default, one change the `dns64_range` as well.
+
+### Turn on IPv6 only mode
+
+Change the `v6_only` variable to true in the `config.json` file.
+
 
 # Testing if DNS proxy is working
 
