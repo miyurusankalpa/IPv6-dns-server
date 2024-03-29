@@ -84,12 +84,5 @@ module.exports = {
         /*var octets = ipv4.split(".");
         if (octets[3] == 153) return true;
         else return false;*/
-    },
-    check_for_stackexchange_ip: function (ipv4) {
-        if (!ipv4) return false;
-
-        var octets = ipv4.split(".");
-        if (octets[3] == 69) return true;
-        else return false;
     }
 };

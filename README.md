@@ -167,14 +167,6 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: Only IPv4 match
 * Usability: Stable
 
-## Stack Exchange sites (Fastly)
-
-* Test domains: stackoverflow.com
-* IPv6 Type: Anycast
-* Coverage: All+Only on Aggressive mode.
-* Usability: Logout or delete cookies
-* Aggressive mode: Errors on some pages
-
 ## Twitter (Cloudfront)
 
 * Test domains: twitter.com
