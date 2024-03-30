@@ -1,3 +1,6 @@
+| :exclamation:  Project moved to GitLab, due to GitHub's lack of IPv6 support. https://gitlab.com/miyurusankalpa/IPv6-dns-server |
+|-----------------------------------------|
+
 # Introduction
 
 A simple Node DNS Server proxy based on [Peteris Rocks tutorial](https://peteris.rocks/blog/dns-proxy-server-in-node-js-with-ui/), which serves IPv6 records if a CDN is matched.
