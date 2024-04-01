@@ -175,6 +175,13 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Usability: Logout or delete cookies
 * Aggressive mode: Errors on some pages
 
+## Shopify (Cloudflare)
+
+* Test domains: shopify.com, shopify-debug.com
+* IPv6 Type: Anycast
+* Coverage: All
+* Usability: Unknown
+
 ## msidentity (Microsoft)
 
 * Test domains: login.live.com (#10)

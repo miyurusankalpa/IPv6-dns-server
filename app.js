@@ -187,6 +187,7 @@ function proxy(question, response, cb) {
             var oss;
             var ali;
             var msi;
+            var shp;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -245,6 +246,9 @@ function proxy(question, response, cb) {
                     case 'msidentity':
                         msi = true;
                         break;
+                    case 'shopify':
+                        shp = true;
+                        break;    
                     default: {
                         handleResponse(5, response, generate_aaaa(question.name, provider_name), cb);
                         return;
@@ -423,6 +427,13 @@ function proxy(question, response, cb) {
                 return;
             }
 
+            if (!shp) shp = cloudflare.check_for_shopify_hostname(last_hostname);
+            if (shp) {
+                matched = true;
+                handleResponse(last_type, response, generate_aaaa(last_hostname, cloudflare.getshopifyv6address()), cb);
+                return;
+            }
+
             if (!cfl && aggressive_v6) cfl = cloudflare.check_for_cloudflare_a(authority);
             if (!cfl) cfl = cloudflare.check_for_cloudflare_hostname(last_hostname);
             if (cfl) {
@@ -523,6 +534,16 @@ function proxy(question, response, cb) {
                 return;
             }
 
+            if (cloudflare.check_for_shopify_ip(ansaddr) === true) {
+                //console.log("added to shopify object");
+                add_aaaa[qhostname] = "shopify";
+                response.answer.forEach(function (item, index) {
+                    response.answer[index].ttl = 0;
+                });
+                cb();
+                return;
+            }
+
             if (cloudflare.check_for_cloudflare_ip(ansaddr) === true) {
                 //console.log("added to cloudflare object");
                 add_aaaa[qhostname] = "cloudflare";
@@ -532,7 +553,6 @@ function proxy(question, response, cb) {
                 cb();
                 return;
             }
-
 
             if (wpvip.check_for_wordpressvip_ip(ansaddr) === true) {
                 //console.log("added to wordpressvip ip");
