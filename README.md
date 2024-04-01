@@ -175,6 +175,12 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Usability: Logout or delete cookies
 * Aggressive mode: Errors on some pages
 
+## msidentity (Microsoft)
+
+* Test domains: login.live.com (#10)
+* IPv6 Type: Unicast
+* Coverage: Some Domains.
+
 # How does this work
 
 One thing this app does is use only the DNS data returned by the DNS provider to synthesize the requests.

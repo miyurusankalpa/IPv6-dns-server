@@ -27,6 +27,7 @@ var wpvip = require('./providers/wpvip');
 var cdn77 = require('./providers/cdn77');
 var alibabaoss = require('./providers/alibabaoss');
 var alicdn = require('./providers/alicdn');
+var msidentity = require('./providers/msidentity');
 
 const {
     Resolver
@@ -185,6 +186,7 @@ function proxy(question, response, cb) {
             var ll;
             var oss;
             var ali;
+            var msi;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -240,6 +242,9 @@ function proxy(question, response, cb) {
                     case 'alicdn':
                         ali = true;
                         break;
+                    case 'msidentity':
+                        msi = true;
+                        break;
                     default: {
                         handleResponse(5, response, generate_aaaa(question.name, provider_name), cb);
                         return;
@@ -258,6 +263,15 @@ function proxy(question, response, cb) {
             if (ak) {
                 matched = true;
                 resolver.resolve6(ak, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
+                });
+                return;
+            }
+
+            if (!msi) msi = msidentity.check_for_msidentity_hostname(last_hostname);
+            if (msi) {
+                matched = true;
+                resolver.resolve6(msi, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
                 });
                 return;
