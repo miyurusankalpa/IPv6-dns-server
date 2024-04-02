@@ -8,11 +8,11 @@ Clone the repo
 
 	git clone https://gitlab.com/miyurusankalpa/IPv6-dns-server.git
 
-Build the project 
+Build the project
 
 	npm install
 
-Starting the server 
+Starting the server
 
 	npm start
 
@@ -36,7 +36,7 @@ Add the domain to `add_aaaa` object with IPv6 address in the `config.json` file.
 
 Change the `aggressive_v6` variable to true in the `config.json` file. See individual services below to see what aggressive mode does.
 
-### Enable DNS64 support 
+### Enable DNS64 support
 
 Change the `dns64` variable to true in the `config.json` file. If the prefix is diffrent from the default, one change the `dns64_range` as well.
 
@@ -62,35 +62,35 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: All
 * Usability: Stable
 
-## Fastly 
+## Fastly
 
 * Test domains: imgur.com, www.twitch.tv
 * IPv6 Type: Anycast, Unicast
 * Coverage: All
 * Usability: Stable
 
-## Amazon S3 
+## Amazon S3
 
 * Test domains: s3.amazonaws.com, github-production-release-asset-2e65be.s3.amazonaws.com
 * IPv6 Type: Unicast
 * Coverage: *.s3.amazonaws.com and s3 websites hostnames/cnames only.
 * Usability: Stable
 
-## Amazon Cloudfront 
+## Amazon Cloudfront
 
 * Test domains: www.figma.com, vod-secure.twitch.tv
 * IPv6 Type: Unicast
 * Coverage: All
 * Usability: Stable
 
-## Alibaba OSS 
+## Alibaba OSS
 
 * Test domains: oss.aliyuncs.com, alicloud-common.oss-ap-southeast-1.aliyuncs.com, docs-aliyun.cn-hangzhou.oss.aliyun-inc.com
 * IPv6 Type: Unicast
 * Coverage: All from aliyuncs.com and aliyun-inc.com
 * Usability: Stable
 
-## AliCDN 
+## AliCDN
 
 * Test domains: gd1.alicdn.com
 * IPv6 Type: Unicast
@@ -186,7 +186,8 @@ Change the `v6_only` variable to true in the `config.json` file.
 
 * Test domains: login.live.com (#10)
 * IPv6 Type: Unicast
-* Coverage: Some Domains.
+* Coverage: Some Domains+Only on Aggressive mode.
+* Usability: Sometimes the domain gives out "Too many requests" error.
 
 # How does this work
 

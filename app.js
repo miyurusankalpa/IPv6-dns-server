@@ -248,7 +248,7 @@ function proxy(question, response, cb) {
                         break;
                     case 'shopify':
                         shp = true;
-                        break;    
+                        break;
                     default: {
                         handleResponse(5, response, generate_aaaa(question.name, provider_name), cb);
                         return;
@@ -272,7 +272,7 @@ function proxy(question, response, cb) {
                 return;
             }
 
-            if (!msi) msi = msidentity.check_for_msidentity_hostname(last_hostname);
+            if (!msi && aggressive_v6) msi = msidentity.check_for_msidentity_hostname(last_hostname);
             if (msi) {
                 matched = true;
                 resolver.resolve6(msi, (err, addresses) => {
