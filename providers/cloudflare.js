@@ -51,6 +51,6 @@ module.exports = {
         return ipRangeCheck(ipv4, [ "23.227.37.0/24", "23.227.38.0/23", "23.227.60.0/24", "185.146.172.0/23" ]);
     },
     getshopifyv6address: function () {
-        return '2620:127:f00f:6666::';
+        return '2620:127:f00f::';
     }
 };
