@@ -26,7 +26,7 @@ module.exports = {
         //console.log('cloudflare ip check', ipv4);
         if (!ipv4) return false;
 
-        return ipRangeCheck(ipv4, "104.16.0.0/12");
+        return ipRangeCheck(ipv4, ["104.16.0.0/12", "162.159.128.0/17"]);
     },
     getcloudflarev6address: function () {
         return '2606:4700::6810:bad'; //will give SSL_ERROR_NO_CYPHER_OVERLAP on non cloudflare sites on aggressive mode
@@ -48,7 +48,7 @@ module.exports = {
         //console.log('shopify ip check', ipv4);
         if (!ipv4) return false;
 
-        return ipRangeCheck(ipv4, [ "23.227.37.0/24", "23.227.38.0/23", "23.227.60.0/24", "185.146.172.0/23" ]);
+        return ipRangeCheck(ipv4, ["23.227.37.0/24", "23.227.38.0/23", "23.227.60.0/24", "185.146.172.0/23"]);
     },
     getshopifyv6address: function () {
         return '2620:127:f00f::';
