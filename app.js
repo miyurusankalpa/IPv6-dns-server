@@ -101,7 +101,7 @@ function handleRequest(request, response) {
                 no_aaaa.push(question.name.substr(8)); //add it to list without noaaaa subdomain
             }
 
-            var cachedaaaaresponse = JSON.parse(localStorageMemory.getItem(question.name));
+            if(!dns64) var cachedaaaaresponse = JSON.parse(localStorageMemory.getItem(question.name));
 
             if (cachedaaaaresponse) {
                 //console.log(question.name, 'cached');
