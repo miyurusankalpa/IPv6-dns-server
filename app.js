@@ -72,6 +72,13 @@ if (aggressive_v6) {
     add_aaaa["store.steampowered.com"] = "akamai|e11698.b.akamai.net";
 }
 
+// Block AAAA records for www.jbl.com and *.jbl.com subdomains: for #15
+function isBlockedDomain(name) {
+    if (name === "www.jbl.com") return true;
+    if (/^[a-z]{2}\.jbl\.com$/.test(name)) return true;
+    return false;
+}
+
 //cache fastly range
 fastly.getfastlyv6address('fastly', resolver, localStorageMemory);
 
@@ -92,6 +99,10 @@ function handleRequest(request, response) {
                 response.header.rcode = 0;
                 response.send();
                 return;
+            }
+
+            if (isBlockedDomain(question.name)) {   // Block AAAA records from isBlockedDomain funtion
+                no_aaaa.push(question.name);
             }
 
             if (question.name.startsWith("_noaaaa.")) { //subdomain with _noaaa
