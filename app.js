@@ -69,9 +69,6 @@ var dns64 = config.dns64;
 var dns64_range = config.dns64_range; // "/96 CIDR assumed by default"
 
 if (aggressive_v6) {
-    add_aaaa["twitter.com"] = "cloudfront";
-    add_aaaa["api.twitter.com"] = "cloudfront";
-    add_aaaa["mobile.twitter.com"] = "cloudfront";
     add_aaaa["store.steampowered.com"] = "akamai|e11698.b.akamai.net";
 }
 

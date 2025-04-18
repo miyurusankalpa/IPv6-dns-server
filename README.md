@@ -167,14 +167,6 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: Only IPv4 match
 * Usability: Stable
 
-## Twitter (Cloudfront)
-
-* Test domains: twitter.com
-* IPv6 Type: Unicast
-* Coverage: Some Domains+Only on Aggressive mode.
-* Usability: Logout or delete cookies
-* Aggressive mode: Errors on some pages
-
 ## Shopify (Cloudflare)
 
 * Test domains: shopify.com, shopify-debug.com
