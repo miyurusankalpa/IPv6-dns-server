@@ -95,11 +95,6 @@ function handleRequest(request, response) {
 
         if (question.type === 28) //AAAA records
         {
-            if (no_aaaa.indexOf(question.name) !== -1 & !dns64) {
-                response.header.rcode = 0;
-                response.send();
-                return;
-            }
 
             if (isBlockedDomain(question.name)) {   // Block AAAA records from isBlockedDomain funtion
                 no_aaaa.push(question.name);
@@ -107,6 +102,12 @@ function handleRequest(request, response) {
 
             if (question.name.startsWith("_noaaaa.")) { //subdomain with _noaaa
                 no_aaaa.push(question.name.substr(8)); //add it to list without noaaaa subdomain
+            }
+
+            if (no_aaaa.indexOf(question.name) !== -1 & !dns64) {
+                response.header.rcode = 0;
+                response.send();
+                return;
             }
 
             if(!dns64) var cachedaaaaresponse = JSON.parse(localStorageMemory.getItem(question.name));
