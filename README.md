@@ -16,6 +16,10 @@ Starting the server
 
 	npm start
 
+or with pm2:
+
+	pm2 start app.js
+
 ### Changing DNS Resolvers
 
 Change the `dns_resolver` variable in the `config.json` file.
