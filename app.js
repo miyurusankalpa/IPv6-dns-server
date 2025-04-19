@@ -113,14 +113,14 @@ function handleRequest(request, response) {
             }
 
             //do not serve from cache if we have match from A
-            if(!add_aaaa[question.name]) var cachedaaaaresponse = JSON.parse(localStorageMemory.getItem(question.name));
+            /*if(!add_aaaa[question.name]) var cachedaaaaresponse = JSON.parse(localStorageMemory.getItem(question.name));
 
             if (cachedaaaaresponse) {
                 //console.log(question.name, 'cached');
                 response.answer = cachedaaaaresponse;
                 response.send();
                 return;
-            }
+            }*/
         }
 
         if (question.type === 1) //A records
@@ -673,7 +673,7 @@ function handleResponse(last_type, response, aaaaresponse, cb) {
     //console.log('cachekey', response.question[0].name);
     if ((last_type === 5) && (aaaaresponse)) { //cname
         response.answer.push(aaaaresponse);
-        localStorageMemory.setItem(response.question[0].name, JSON.stringify(response.answer));
+        //localStorageMemory.setItem(response.question[0].name, JSON.stringify(response.answer));
         //console.log('remote DNS response: ', aaaaresponse);
         cb();
     }
@@ -693,3 +693,4 @@ function generate_aaaa(hostname, ipv6) {
     //console.log(newaaaa);
     return newaaaa;
 }
+
