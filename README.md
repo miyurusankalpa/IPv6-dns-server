@@ -164,6 +164,13 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: Unknown
 * Usability: Unknown
 
+## Bearblog
+
+* Test domains: hypr.moe
+* IPv6 Type: Unicast
+* Coverage: All
+* Usability: Stable
+
 ## Wordpress VIP
 
 * Test domains: wpvip.com, nielsen.com

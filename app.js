@@ -29,6 +29,7 @@ var alibabaoss = require('./providers/alibabaoss');
 var alicdn = require('./providers/alicdn');
 var msidentity = require('./providers/msidentity');
 var netlify = require('./providers/netlify');
+var bearblog = require('./providers/bearblog');
 
 const {
     Resolver
@@ -199,6 +200,7 @@ function proxy(question, response, cb) {
             var msi;
             var shp;
             var net;
+            var bear;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -262,6 +264,9 @@ function proxy(question, response, cb) {
                         break;
                     case 'netlify':
                         net = true;
+                        break;
+                    case 'bearblog':
+                        bear = true;
                         break;
                     default: {
                         handleResponse(5, response, generate_aaaa(question.name, provider_name), cb);
@@ -449,6 +454,12 @@ function proxy(question, response, cb) {
                 return;
             }
 
+            if(bear) {
+                matched = true;
+                handleResponse(last_type, response, generate_aaaa(last_hostname, bearblog.getbearblogv6address(resolver, localStorageMemory)), cb);
+                return;
+            }
+
             if (!shp) shp = cloudflare.check_for_shopify_hostname(last_hostname);
             if (shp) {
                 matched = true;
@@ -560,6 +571,16 @@ function proxy(question, response, cb) {
             if (netlify.check_for_netlify_ip(ansaddr) === true) {
                 //console.log("added to netify ip");
                 add_aaaa[qhostname] = "netlify";
+                response.answer.forEach(function (item, index) {
+                    response.answer[index].ttl = 0;
+                });
+                cb();
+                return;
+            }
+
+            if(bearblog.check_for_bearblog_ip(ansaddr) === true) {
+                //console.log("added to bearblog ip");
+                add_aaaa[qhostname] = "bearblog";
                 response.answer.forEach(function (item, index) {
                     response.answer[index].ttl = 0;
                 });
