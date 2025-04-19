@@ -81,7 +81,7 @@ function isBlockedDomain(name) {
     return false;
 }
 
-//cache fastly range
+//cache fastly range on starup
 fastly.getfastlyv6address('fastly', resolver, localStorageMemory);
 
 function handleRequest(request, response) {
@@ -97,8 +97,7 @@ function handleRequest(request, response) {
 
         if (question.type === 28) //AAAA records
         {
-
-            if (isBlockedDomain(question.name)) {   // Block AAAA records from isBlockedDomain funtion
+            if (isBlockedDomain(question.name)) {   // add to doamin to NoAAAA if matched from block domain
                 no_aaaa.push(question.name);
             }
 
