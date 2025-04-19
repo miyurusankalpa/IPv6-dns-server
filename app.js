@@ -112,7 +112,8 @@ function handleRequest(request, response) {
                 return;
             }
 
-            if(!dns64) var cachedaaaaresponse = JSON.parse(localStorageMemory.getItem(question.name));
+            //do not serve from cache if we have match from A
+            if(!add_aaaa[question.name]) var cachedaaaaresponse = JSON.parse(localStorageMemory.getItem(question.name));
 
             if (cachedaaaaresponse) {
                 //console.log(question.name, 'cached');
