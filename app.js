@@ -28,6 +28,7 @@ var cdn77 = require('./providers/cdn77');
 var alibabaoss = require('./providers/alibabaoss');
 var alicdn = require('./providers/alicdn');
 var msidentity = require('./providers/msidentity');
+var netlify = require('./providers/netlify');
 
 const {
     Resolver
@@ -197,6 +198,7 @@ function proxy(question, response, cb) {
             var ali;
             var msi;
             var shp;
+            var net;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -257,6 +259,9 @@ function proxy(question, response, cb) {
                         break;
                     case 'shopify':
                         shp = true;
+                        break;
+                    case 'netlify':
+                        net = true;
                         break;
                     default: {
                         handleResponse(5, response, generate_aaaa(question.name, provider_name), cb);
@@ -436,6 +441,14 @@ function proxy(question, response, cb) {
                 return;
             }
 
+            if (!net) net = netlify.check_for_netlify_hostname(last_hostname);
+            if (net) {
+                matched = true;
+
+                handleResponse(last_type, response, generate_aaaa(last_hostname, netlify.getnetlifyv6address(resolver, localStorageMemory)), cb);
+                return;
+            }
+
             if (!shp) shp = cloudflare.check_for_shopify_hostname(last_hostname);
             if (shp) {
                 matched = true;
@@ -458,6 +471,7 @@ function proxy(question, response, cb) {
                 handleResponse(last_type, response, generate_aaaa(last_hostname, alicdn.getalicdnv6address(resolver, localStorageMemory)), cb);
                 return;
             }
+
 
             if (!matched && dns64) {
                 resolver.resolve4(question.name, (err, addresses) => {
@@ -543,6 +557,16 @@ function proxy(question, response, cb) {
                 return;
             }
 
+            if (netlify.check_for_netlify_ip(ansaddr) === true) {
+                //console.log("added to netify ip");
+                add_aaaa[qhostname] = "netlify";
+                response.answer.forEach(function (item, index) {
+                    response.answer[index].ttl = 0;
+                });
+                cb();
+                return;
+            }
+
             if (cloudflare.check_for_shopify_ip(ansaddr) === true) {
                 //console.log("added to shopify object");
                 add_aaaa[qhostname] = "shopify";
@@ -574,9 +598,11 @@ function proxy(question, response, cb) {
                 return;
             }
 
+
             if (akamai.check_for_akamai_hostname(qhostname)) add_aaaa[qhostname] = "akamai";
             if (fastly.check_for_fastly_hostname(qhostname)) add_aaaa[qhostname] = "fastly";
             if (weebly.check_for_weebly_hostname(qhostname)) add_aaaa[qhostname] = "weebly";
+            if (netlify.check_for_netlify_hostname(qhostname)) add_aaaa[qhostname] = "netlify";
             if (cloudfront.check_for_cloudfront_hostname(qhostname)) add_aaaa[qhostname] = "cloudfront";
             if (bunnycdn.check_for_bunnycdn_hostname(qhostname)) add_aaaa[qhostname] = "bunnycdn";
             if (highwinds.check_for_highwinds_hostname(qhostname)) add_aaaa[qhostname] = "highwinds";

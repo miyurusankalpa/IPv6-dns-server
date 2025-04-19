@@ -157,6 +157,13 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: All+Only on Aggressive mode.
 * Usability: Some protected content may not work.
 
+## Netlify
+
+* Test domains: apex-loadbalancer.netlify.com, 10minutetimers.com
+* IPv6 Type: Unicast
+* Coverage: Unknown
+* Usability: Unknown
+
 ## Wordpress VIP
 
 * Test domains: wpvip.com, nielsen.com
