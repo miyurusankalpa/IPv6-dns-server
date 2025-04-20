@@ -81,6 +81,20 @@ function isBlockedDomain(name) {
     return false;
 }
 
+function isApexDomain(domainName) {
+    // 1. Basic validation: ensure it's a non-empty string.
+    if (typeof domainName !== 'string' || domainName.length === 0) {
+      return false;
+    }
+
+    // 2. Split the domain name by the dot.
+    const parts = domainName.split('.');
+
+    // 3. An apex domain should split into exactly two parts,
+    //    and neither part should be empty.
+    return parts.length === 2 && parts[0].length > 0 && parts[1].length > 0;
+  }
+
 //cache fastly range on starup
 fastly.getfastlyv6address('fastly', resolver, localStorageMemory);
 
@@ -483,8 +497,20 @@ function proxy(question, response, cb) {
                 return;
             }
 
+            if (!matched && aggressive_v6 && isApexDomain(question.name)) {
+                resolver.resolve6("www."+question.name, (err, addresses) => {
+                    //console.log('aaaa check', addresses);
 
-            if (!matched && dns64) {
+                    if (addresses === undefined || addresses[0] === undefined) {
+                        request.send();
+                        return;
+                    } else {
+                        matched = true;
+                        handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb);
+                        return;
+                    }
+                });
+            } else if (!matched && dns64) {
                 resolver.resolve4(question.name, (err, addresses) => {
                     //console.log('a check', addresses);
 

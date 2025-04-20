@@ -199,6 +199,13 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: Some Domains+Only on Aggressive mode.
 * Usability: Sometimes the domain gives out "Too many requests" error.
 
+## AAAA WWW check (Experniment)
+
+* Test domains: live.com (#24)
+* IPv6 Type: NA
+* Coverage: Only on Aggressive mode.
+* Usability: Unknown
+
 # How does this work
 
 One thing this app does is use only the DNS data returned by the DNS provider to synthesize the requests.
