@@ -20,6 +20,28 @@ or with pm2:
 
 	pm2 start app.js
 
+## Use Docker Image [Testing]
+
+Build: `docker build -t miyurulk/ipv6-dns-proxy:latest .`
+
+Pull: `docker pull miyurulk/ipv6-dns-proxy:latest`
+
+Change the `self_resolver` to `::`
+
+Run:
+```
+docker run --privileged \
+  -p 53:53/tcp \
+  -p 53:53/udp \
+  --name ipv6-dns-proxy \
+  -v config.js:/usr/src/app/config.js \
+   miyurulk/ipv6-dns-proxy:latest
+   ```
+
+Get the container IP: `docker inspect -f '{{.NetworkSettings.Networks.bridge.GlobalIPv6Address}}' ipv6-dns-proxy`
+
+## Config Options
+
 ### Changing DNS Resolvers
 
 Change the `dns_resolver` variable in the `config.json` file.
@@ -47,7 +69,6 @@ Change the `dns64` variable to true in the `config.json` file. If the prefix is 
 ### Turn on IPv6 only mode
 
 Change the `v6_only` variable to true in the `config.json` file.
-
 
 # Testing if DNS proxy is working
 
