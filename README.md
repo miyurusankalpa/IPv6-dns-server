@@ -22,11 +22,11 @@ or with pm2:
 
 ## Use Docker Image [Testing]
 
-Build: `docker build -t miyurulk/ipv6-dns-proxy:latest .`
+Build: `docker build -t miyurulk/ipv6-dns-proxy .`
 
-Pull: `docker pull miyurulk/ipv6-dns-proxy:latest`
+Pull: `docker pull miyurulk/ipv6-dns-proxy`
 
-Change the `self_resolver` to `::`
+Change the `self_resolver` to `::` in `config.js`
 
 Run:
 ```
@@ -35,8 +35,8 @@ docker run --privileged \
   -p 53:53/udp \
   --name ipv6-dns-proxy \
   -v config.js:/usr/src/app/config.js \
-   miyurulk/ipv6-dns-proxy:latest
-   ```
+   miyurulk/ipv6-dns-proxy
+```
 
 Get the container IP: `docker inspect -f '{{.NetworkSettings.Networks.bridge.GlobalIPv6Address}}' ipv6-dns-proxy`
 
