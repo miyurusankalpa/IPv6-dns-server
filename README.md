@@ -213,12 +213,12 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: All
 * Usability: Unknown
 
-## msidentity (Microsoft)
+## msidentity (Microsoft) [DISABLED]
 
 * Test domains: login.live.com (#10)
 * IPv6 Type: Unicast
 * Coverage: Some Domains+Only on Aggressive mode.
-* Usability: Sometimes the domain gives out "Too many requests" error.
+* Usability: Unusable, HTTP 400
 
 ## AAAA WWW check (Experniment)
 

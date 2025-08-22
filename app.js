@@ -27,7 +27,7 @@ var wpvip = require('./providers/wpvip');
 var cdn77 = require('./providers/cdn77');
 var alibabaoss = require('./providers/alibabaoss');
 var alicdn = require('./providers/alicdn');
-var msidentity = require('./providers/msidentity');
+//var msidentity = require('./providers/msidentity');
 var netlify = require('./providers/netlify');
 var bearblog = require('./providers/bearblog');
 
@@ -305,14 +305,15 @@ function proxy(question, response, cb) {
                 return;
             }
 
-            if (!msi && aggressive_v6) msi = msidentity.check_for_msidentity_hostname(last_hostname);
+            //disabled due to bad request error
+            /*if (!msi && aggressive_v6) msi = msidentity.check_for_msidentity_hostname(last_hostname);
             if (msi) {
                 matched = true;
                 resolver.resolve6(msi, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
                 });
                 return;
-            }
+            }*/
 
             if (!s3) s3 = awss3.check_for_s3_hostname(question.name);
             if (!s3 && aggressive_v6) s3 = awss3.check_for_s3_hostname(last_hostname);
