@@ -70,6 +70,8 @@ var dns64 = config.dns64;
 
 var dns64_range = config.dns64_range; // "/96 CIDR assumed by default"
 
+add_aaaa["scholar.google.com"] = "scholar.googleusercontent.com"; //Thanks @Mynacol https://codeberg.org/IPv6-Monostack/delegacy-rpz/pulls/53
+
 if (aggressive_v6) {
     add_aaaa["store.steampowered.com"] = "akamai|e11698.b.akamai.net";
 }
