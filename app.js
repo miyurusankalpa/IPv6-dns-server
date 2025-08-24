@@ -513,7 +513,7 @@ function proxy(question, response, cb) {
                     //console.log('aaaa check', addresses);
 
                     if (addresses === undefined || addresses[0] === undefined) {
-                        request.send();
+                        cb();
                         return;
                     } else {
                         matched = true;
@@ -526,7 +526,7 @@ function proxy(question, response, cb) {
                     //console.log('a check', addresses);
 
                     if (addresses === undefined || addresses[0] === undefined) {
-                        request.send();
+                        cb();
                         return;
                     } else {
                         matched = true;
