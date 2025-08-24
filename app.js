@@ -285,8 +285,16 @@ function proxy(question, response, cb) {
                         bear = true;
                         break;
                     default: {
-                        handleResponse(5, response, generate_aaaa(question.name, provider_name), cb);
-                        return;
+                    //matched = true;
+                    if (ipaddr.isValid(provider_name) && ipaddr.parse(provider_name).kind() === 'ipv6') {
+                        handleResponse(5, response, generate_aaaa(question.name, provider_name), cb); // only ipv6 address
+                    } else {
+                        resolver.resolve6(provider_name, (err, addresses) => {
+                            if (addresses && addresses.length > 0) {
+                                handleResponse(5, response, generate_aaaa(question.name, addresses[0]), cb);
+                            }
+                        });
+                    }
                     }
                 }
             }
