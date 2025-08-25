@@ -196,7 +196,7 @@ function proxy(question, response, cb) {
 
             var getcdn = add_aaaa[question.name];
 
-            console.log(add_aaaa);
+            //console.log(add_aaaa);
 
             var fsta;
             var ak;
@@ -500,7 +500,7 @@ function proxy(question, response, cb) {
 
             if (aggressive_v6 & inx) {
                 matched = true;
-                console.log('ptr', inwx_ptr);
+                //console.log('ptr', inwx_ptr);
 
                 resolver.resolve6(inwx_ptr, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
@@ -652,12 +652,12 @@ function proxy(question, response, cb) {
             }
 
             if(aggressive_v6 && inwx.check_for_inwx_ip(ansaddr) === true) {
-                console.log("added to inwx ip");
+                //console.log("added to inwx ip");
 
                 var ptrdoamin = ansaddr.split('.').reverse().join('.') + ".in-addr.arpa";
 
                 resolver.resolvePtr(ptrdoamin, (err, addresses) => {
-                    console.log('ptr', addresses);
+                    //console.log('ptr', addresses);
                     if (addresses != undefined) add_aaaa[qhostname] = "inwx|"+addresses; else return;
                 });
 
