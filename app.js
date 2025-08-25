@@ -30,6 +30,7 @@ var alicdn = require('./providers/alicdn');
 //var msidentity = require('./providers/msidentity');
 var netlify = require('./providers/netlify');
 var bearblog = require('./providers/bearblog');
+var inwx = require('./providers/inwx');
 
 const {
     Resolver
@@ -195,7 +196,7 @@ function proxy(question, response, cb) {
 
             var getcdn = add_aaaa[question.name];
 
-            //console.log(add_aaaa);
+            console.log(add_aaaa);
 
             var fsta;
             var ak;
@@ -217,6 +218,7 @@ function proxy(question, response, cb) {
             var shp;
             var net;
             var bear;
+            var inx;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -283,6 +285,10 @@ function proxy(question, response, cb) {
                         break;
                     case 'bearblog':
                         bear = true;
+                        break;
+                    case 'inwx':
+                        inx = true;
+                        var inwx_ptr = providers[1];
                         break;
                     default: {
                     //matched = true;
@@ -492,6 +498,16 @@ function proxy(question, response, cb) {
                 return;
             }
 
+            if (aggressive_v6 & inx) {
+                matched = true;
+                console.log('ptr', inwx_ptr);
+
+                resolver.resolve6(inwx_ptr, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
+                });
+                return;
+            }
+
             if (!cfl && aggressive_v6) cfl = cloudflare.check_for_cloudflare_a(authority);
             if (!cfl) cfl = cloudflare.check_for_cloudflare_hostname(last_hostname);
             if (cfl) {
@@ -635,6 +651,23 @@ function proxy(question, response, cb) {
                 return;
             }
 
+            if(aggressive_v6 && inwx.check_for_inwx_ip(ansaddr) === true) {
+                console.log("added to inwx ip");
+
+                var ptrdoamin = ansaddr.split('.').reverse().join('.') + ".in-addr.arpa";
+
+                resolver.resolvePtr(ptrdoamin, (err, addresses) => {
+                    console.log('ptr', addresses);
+                    if (addresses != undefined) add_aaaa[qhostname] = "inwx|"+addresses; else return;
+                });
+
+                response.answer.forEach(function (item, index) {
+                    response.answer[index].ttl = 0;
+                });
+                cb();
+                return;
+            }
+
             if (cloudflare.check_for_cloudflare_ip(ansaddr) === true) {
                 //console.log("added to cloudflare object");
                 add_aaaa[qhostname] = "cloudflare";
@@ -655,7 +688,6 @@ function proxy(question, response, cb) {
                 cb();
                 return;
             }
-
 
             if (akamai.check_for_akamai_hostname(qhostname)) add_aaaa[qhostname] = "akamai";
             if (fastly.check_for_fastly_hostname(qhostname)) add_aaaa[qhostname] = "fastly";

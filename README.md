@@ -199,6 +199,13 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: Unknown
 * Usability: Unknown
 
+# INWX
+
+* Test domains: inwx.com
+* IPv6 Type: Unicast
+* Coverage: Some Domains+Only on Aggressive mode.
+* Usability: Unknown
+
 ## Github.io (Fastly)
 
 * Test domains: willettjf.com
