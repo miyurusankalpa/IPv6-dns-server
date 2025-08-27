@@ -48,7 +48,7 @@ Change the `dns_resolver` variable in the `config.json` file.
 
 ### Temporarily disable AAAA records for a domain
 
-If the domain gives a system error, append `_noaaaa` to the domain and the doamin with be IPv4 only for the rest of the session.
+If the domain gives a system error, append `_noaaaa` to the domain and the domain with be IPv4 only for the rest of the session.
 
 ### Disable IPv6 for a domain permanently
 
