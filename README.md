@@ -68,11 +68,15 @@ Change the `aggressive_v6` variable to true in the `config.json` file. See indiv
 
 ### Enable DNS64 support
 
-Change the `dns64` variable to true in the `config.json` file. If the prefix is diffrent from the default, one change the `dns64_range` as well.
+Change the `dns64` variable to true in the `config.json` file. If the prefix is diffrent from the default, change the `dns64_range` as well.
 
 ### Turn on IPv6 only mode
 
 Change the `v6_only` variable to true in the `config.json` file.
+
+### Disable Happy Eyeballs
+
+Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. This will remove the A record only if a AAAA record exists.
 
 # Testing if DNS proxy is working
 
