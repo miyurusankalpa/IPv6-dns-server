@@ -214,11 +214,12 @@ function proxy(question, response, cb) {
             var ll;
             var oss;
             var ali;
-            var msi;
+            //var msi;
             var shp;
             var net;
             var bear;
             var inx;
+            var wef;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -279,6 +280,9 @@ function proxy(question, response, cb) {
                         break;
                     case 'shopify':
                         shp = true;
+                        break;
+                    case 'webflow':
+                        wef = true;
                         break;
                     case 'netlify':
                         net = true;
@@ -498,6 +502,13 @@ function proxy(question, response, cb) {
                 return;
             }
 
+            if (!wef) wef = cloudflare.check_for_webflow_hostname(last_hostname);
+            if (wef) {
+                matched = true;
+                handleResponse(last_type, response, generate_aaaa(last_hostname, cloudflare.getwebflowv6address()), cb);
+                return;
+            }
+
             if (aggressive_v6 & inx) {
                 matched = true;
                 //console.log('ptr', inwx_ptr);
@@ -650,6 +661,17 @@ function proxy(question, response, cb) {
                 cb();
                 return;
             }
+
+            if (cloudflare.check_for_webflow_ip(ansaddr) === true) {
+                //console.log("added to webflow object");
+                add_aaaa[qhostname] = "webflow";
+                response.answer.forEach(function (item, index) {
+                    response.answer[index].ttl = 0;
+                });
+                cb();
+                return;
+            }
+
 
             if(aggressive_v6 && inwx.check_for_inwx_ip(ansaddr) === true) {
                 //console.log("added to inwx ip");

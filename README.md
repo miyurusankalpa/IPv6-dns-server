@@ -228,6 +228,13 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 * Coverage: All
 * Usability: Unknown
 
+## Webflow (Cloudflare)
+
+* Test domains: www.visma.com, theaterfreunde-wiesbaden.de
+* IPv6 Type: Anycast
+* Coverage: All
+* Usability: Unknown
+
 ## msidentity (Microsoft) [DISABLED]
 
 * Test domains: login.live.com (#10)
