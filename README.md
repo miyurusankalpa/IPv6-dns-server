@@ -12,6 +12,10 @@ Build the project
 
 	npm install
 
+Copy the sample config
+
+	cp config.json.sample config.json
+	
 Starting the server
 
 	npm start
