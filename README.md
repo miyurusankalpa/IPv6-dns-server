@@ -1,6 +1,6 @@
 # Introduction
 
-A simple Node DNS Server proxy based on [Peteris Rocks tutorial](https://peteris.rocks/blog/dns-proxy-server-in-node-js-with-ui/), which serves IPv6 records if a CDN is matched.
+A simple Node DNS proxy Server based on [Peteris Rocks tutorial](https://peteris.rocks/blog/dns-proxy-server-in-node-js-with-ui/), which serves IPv6 records if a CDN is matched.
 
 ## Running locally
 
@@ -46,7 +46,11 @@ Get the container IP: `docker inspect -f '{{.NetworkSettings.Networks.bridge.Glo
 
 ## Config Options
 
-### Changing DNS Resolvers
+### Changing DNS Proxy IP and Port
+
+Change the `self_resolver` and `self_port` variables in the `config.json` file. By default it listens to [::1]:53
+
+### Changing Upstream DNS Resolvers
 
 Change the `dns_resolver` variable in the `config.json` file.
 
