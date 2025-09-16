@@ -31,6 +31,7 @@ var alicdn = require('./providers/alicdn');
 var netlify = require('./providers/netlify');
 var bearblog = require('./providers/bearblog');
 var inwx = require('./providers/inwx');
+var blazingcdn = require('./providers/blazingcdn');
 
 const {
     Resolver
@@ -220,6 +221,7 @@ function proxy(question, response, cb) {
             var bear;
             var inx;
             var wef;
+            var blz;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -289,6 +291,9 @@ function proxy(question, response, cb) {
                         break;
                     case 'bearblog':
                         bear = true;
+                        break;
+                    case 'blazingcdn':
+                        blz = true;
                         break;
                     case 'inwx':
                         inx = true;
@@ -435,6 +440,14 @@ function proxy(question, response, cb) {
             if (bun) {
                 matched = true;
                 var bv6address = bunnycdn.getbunnycdnv6address(resolver, localStorageMemory);
+                handleResponse(last_type, response, generate_aaaa(last_hostname, bv6address), cb);
+                return;
+            }
+
+            if (!blz) blz = blazingcdn.check_for_blazingcdn_hostname(last_hostname);
+            if (blz) {
+                matched = true;
+                var bv6address = blazingcdn.getblazingcdnv6address(resolver, localStorageMemory);
                 handleResponse(last_type, response, generate_aaaa(last_hostname, bv6address), cb);
                 return;
             }
@@ -717,6 +730,7 @@ function proxy(question, response, cb) {
             if (netlify.check_for_netlify_hostname(qhostname)) add_aaaa[qhostname] = "netlify";
             if (cloudfront.check_for_cloudfront_hostname(qhostname)) add_aaaa[qhostname] = "cloudfront";
             if (bunnycdn.check_for_bunnycdn_hostname(qhostname)) add_aaaa[qhostname] = "bunnycdn";
+            if (blazingcdn.check_for_blazingcdn_hostname(qhostname)) add_aaaa[qhostname] = "blazingcdn";
             if (highwinds.check_for_highwinds_hostname(qhostname)) add_aaaa[qhostname] = "highwinds";
             if (alicdn.check_for_alicdn_hostname(qhostname)) add_aaaa[qhostname] = "alicdn";
 

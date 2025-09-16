@@ -148,6 +148,13 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 * Coverage: All
 * Usability: Stable
 
+## BlazingCDN
+
+* Test domains: player.h-cdn.com
+* IPv6 Type: Anycast
+* Coverage: All
+* Usability: Stable
+
 ## Microsoft Edge
 
 * Test domains: onedrive.live.com
