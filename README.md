@@ -155,6 +155,13 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 * Coverage: All
 * Usability: Stable
 
+## GcoreCDN
+
+* Test domains: v58.tiktokcdn.com
+* IPv6 Type: Unicast
+* Coverage: All
+* Usability: Stable
+
 ## Microsoft Edge
 
 * Test domains: onedrive.live.com
