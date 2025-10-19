@@ -15,7 +15,7 @@ Build the project
 Copy the sample config
 
 	cp config.json.sample config.json
-	
+
 Starting the server
 
 	npm start
@@ -230,6 +230,13 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 * Test domains: inwx.com
 * IPv6 Type: Unicast
 * Coverage: Some Domains+Only on Aggressive mode.
+* Usability: Unknown
+
+# Azure websites
+
+* Test domains: ibwc.azurewebsites.net
+* IPv6 Type: Unicast
+* Coverage: Partial. (www.ibwc.gov is not matched)
 * Usability: Unknown
 
 ## Github.io (Fastly)

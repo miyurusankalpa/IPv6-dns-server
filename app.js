@@ -33,6 +33,7 @@ var bearblog = require('./providers/bearblog');
 var inwx = require('./providers/inwx');
 var blazingcdn = require('./providers/blazingcdn');
 var gcorecdn = require('./providers/gcorecdn');
+var azurewebsites = require('./providers/azurewebsites')
 
 const {
     Resolver
@@ -181,15 +182,20 @@ function proxy(question, response, cb) {
 
         if (question.type === 28) //AAAA records
         {
-            var last_hostname;
+            var last_hostname, matched_hostname;
             var last_type;
             var matched = false;
 
-            for (const a of msg.answer) {
-                last_hostname = a.data;
-                last_type = a.type;
-                response.answer.push(a);
-            }
+            msg.answer.forEach(aaaa => {
+                response.answer.push(aaaa);
+                //console.log('remote DNS response: ', aaaa)
+                last_hostname = aaaa.data;
+                last_type = aaaa.type;
+
+                if (aaaa.data && aaaa.data.includes('.azurewebsites.windows.net')) { //dirty hack to give the domain to process for azure websites
+                    matched_hostname = aaaa.data;
+                }
+            });
 
             if (last_type === 28) { //skip if there are AAAA records
                 cb();
@@ -224,6 +230,7 @@ function proxy(question, response, cb) {
             var wef;
             var blz;
             var gco;
+            var azw;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -300,6 +307,9 @@ function proxy(question, response, cb) {
                     case 'gcorecdn':
                         gco = true;
                         break;
+                    case 'azureweb':
+                        azw = true;
+                        break;
                     case 'inwx':
                         inx = true;
                         var inwx_ptr = providers[1];
@@ -324,12 +334,21 @@ function proxy(question, response, cb) {
                 last_type = 5;
             }
 
-            //console.log('lh', last_hostname);
+            console.log('lh', last_hostname);
 
             if (!ak) ak = akamai.check_for_akamai_hostname(last_hostname);
             if (ak) {
                 matched = true;
                 resolver.resolve6(ak, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
+                });
+                return;
+            }
+
+            if (!azw) azw = azurewebsites.check_for_azureweb_hostname(matched_hostname);
+            if (azw) {
+                matched = true;
+                resolver.resolve6(azw, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
                 });
                 return;
