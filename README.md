@@ -1,6 +1,6 @@
 # Introduction
 
-A simple Node DNS Server proxy based on [Peteris Rocks tutorial](https://peteris.rocks/blog/dns-proxy-server-in-node-js-with-ui/), which serves IPv6 records if a CDN is matched.
+A simple Node DNS proxy Server based on [Peteris Rocks tutorial](https://peteris.rocks/blog/dns-proxy-server-in-node-js-with-ui/), which serves IPv6 records if a CDN is matched.
 
 ## Running locally
 
@@ -12,6 +12,10 @@ Build the project
 
 	npm install
 
+Copy the sample config
+
+	cp config.json.sample config.json
+	
 Starting the server
 
 	npm start
@@ -42,13 +46,17 @@ Get the container IP: `docker inspect -f '{{.NetworkSettings.Networks.bridge.Glo
 
 ## Config Options
 
-### Changing DNS Resolvers
+### Changing DNS Proxy IP and Port
+
+Change the `self_resolver` and `self_port` variables in the `config.json` file. By default it listens to [::1]:53
+
+### Changing Upstream DNS Resolvers
 
 Change the `dns_resolver` variable in the `config.json` file.
 
 ### Temporarily disable AAAA records for a domain
 
-If the domain gives a system error, append `_noaaaa` to the domain and the doamin with be IPv4 only for the rest of the session.
+If the domain gives a system error, append `_noaaaa` to the domain and the domain with be IPv4 only for the rest of the session.
 
 ### Disable IPv6 for a domain permanently
 
@@ -58,17 +66,21 @@ Add the domain to `no_aaaa` array in the `config.json` file.
 
 Add the domain to `add_aaaa` object with IPv6 address in the `config.json` file.
 
-### Turn On aggressive mode
+### Turn on **Aggressive Mode**
 
 Change the `aggressive_v6` variable to true in the `config.json` file. See individual services below to see what aggressive mode does.
 
 ### Enable DNS64 support
 
-Change the `dns64` variable to true in the `config.json` file. If the prefix is diffrent from the default, one change the `dns64_range` as well.
+Change the `dns64` variable to true in the `config.json` file. If the prefix is diffrent from the default, change the `dns64_range` as well.
 
 ### Turn on IPv6 only mode
 
 Change the `v6_only` variable to true in the `config.json` file.
+
+### Disable Happy Eyeballs
+
+Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. This will remove the A record only if a AAAA record exists.
 
 # Testing if DNS proxy is working
 
@@ -122,7 +134,7 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: All from alicdn.com
 * Usability: Unknown
 
-## Bunnycdn
+## Bunny CDN
 
 * Test domains: cdn-b-east.streamable.com
 * IPv6 Type: Unicast
@@ -133,6 +145,20 @@ Change the `v6_only` variable to true in the `config.json` file.
 
 * Test domains: map2.hwcdn.net
 * IPv6 Type: Anycast
+* Coverage: All
+* Usability: Stable
+
+## BlazingCDN
+
+* Test domains: player.h-cdn.com
+* IPv6 Type: Anycast
+* Coverage: All
+* Usability: Stable
+
+## Gcore CDN
+
+* Test domains: v58.tiktokcdn.com
+* IPv6 Type: Unicast
 * Coverage: All
 * Usability: Stable
 
@@ -192,7 +218,7 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: All
 * Usability: Stable
 
-## Wordpress VIP
+## WordPress VIP
 
 * Test domains: wpvip.com, nielsen.com
 * IPv6 Type: Anycast
@@ -220,6 +246,13 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: All
 * Usability: Unknown
 
+## Webflow (Cloudflare)
+
+* Test domains: www.visma.com, theaterfreunde-wiesbaden.de
+* IPv6 Type: Anycast
+* Coverage: All
+* Usability: Unknown
+
 ## msidentity (Microsoft) [DISABLED]
 
 * Test domains: login.live.com (#10)
@@ -227,10 +260,10 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: Some Domains+Only on Aggressive mode.
 * Usability: Unusable, HTTP 400
 
-## AAAA WWW check (Experniment)
+## AAAA WWW Check (Experimental)
 
 * Test domains: live.com (#24)
-* IPv6 Type: NA
+* IPv6 Type: N/A
 * Coverage: Only on Aggressive mode.
 * Usability: Unknown
 
@@ -247,7 +280,7 @@ For that we use the following information
 
 The next part is getting IPv6 address, for this below methods are used
 
-- Synthesize the IPv6 from IPv4 adddress (fastlly)
+- Synthesize the IPv6 from IPv4 adddress (Fastly)
 - Use known IPv6 addresss - (MSEDGE)
 - Use any IPv6 address -  (Cloudfront)
 - Generate IPv6 enabled hostname (Akamai)
