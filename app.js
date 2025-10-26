@@ -31,6 +31,9 @@ var alicdn = require('./providers/alicdn');
 var netlify = require('./providers/netlify');
 var bearblog = require('./providers/bearblog');
 var inwx = require('./providers/inwx');
+var blazingcdn = require('./providers/blazingcdn');
+var gcorecdn = require('./providers/gcorecdn');
+var azurewebsites = require('./providers/azurewebsites')
 
 const {
     Resolver
@@ -179,15 +182,20 @@ function proxy(question, response, cb) {
 
         if (question.type === 28) //AAAA records
         {
-            var last_hostname;
+            var last_hostname, matched_hostname;
             var last_type;
             var matched = false;
 
-            for (const a of msg.answer) {
-                last_hostname = a.data;
-                last_type = a.type;
-                response.answer.push(a);
-            }
+            msg.answer.forEach(aaaa => {
+                response.answer.push(aaaa);
+                //console.log('remote DNS response: ', aaaa)
+                last_hostname = aaaa.data;
+                last_type = aaaa.type;
+
+                if (aaaa.data && aaaa.data.includes('.azurewebsites.windows.net')) { //dirty hack to give the domain to process for azure websites
+                    matched_hostname = aaaa.data;
+                }
+            });
 
             if (last_type === 28) { //skip if there are AAAA records
                 cb();
@@ -214,11 +222,15 @@ function proxy(question, response, cb) {
             var ll;
             var oss;
             var ali;
-            var msi;
+            //var msi;
             var shp;
             var net;
             var bear;
             var inx;
+            var wef;
+            var blz;
+            var gco;
+            var azw;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -280,11 +292,23 @@ function proxy(question, response, cb) {
                     case 'shopify':
                         shp = true;
                         break;
+                    case 'webflow':
+                        wef = true;
+                        break;
                     case 'netlify':
                         net = true;
                         break;
                     case 'bearblog':
                         bear = true;
+                        break;
+                    case 'blazingcdn':
+                        blz = true;
+                        break;
+                    case 'gcorecdn':
+                        gco = true;
+                        break;
+                    case 'azureweb':
+                        azw = true;
                         break;
                     case 'inwx':
                         inx = true;
@@ -310,12 +334,21 @@ function proxy(question, response, cb) {
                 last_type = 5;
             }
 
-            //console.log('lh', last_hostname);
+            console.log('lh', last_hostname);
 
             if (!ak) ak = akamai.check_for_akamai_hostname(last_hostname);
             if (ak) {
                 matched = true;
                 resolver.resolve6(ak, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
+                });
+                return;
+            }
+
+            if (!azw) azw = azurewebsites.check_for_azureweb_hostname(matched_hostname);
+            if (azw) {
+                matched = true;
+                resolver.resolve6(azw, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
                 });
                 return;
@@ -435,6 +468,22 @@ function proxy(question, response, cb) {
                 return;
             }
 
+            if (!blz) blz = blazingcdn.check_for_blazingcdn_hostname(last_hostname);
+            if (blz) {
+                matched = true;
+                var bv6address = blazingcdn.getblazingcdnv6address(resolver, localStorageMemory);
+                handleResponse(last_type, response, generate_aaaa(last_hostname, bv6address), cb);
+                return;
+            }
+
+            if (!gco) gco = gcorecdn.check_for_gcorecdn_hostname(last_hostname);
+            if (gco) {
+                matched = true;
+                var gv6address = gcorecdn.getgcorecdnv6address(resolver, localStorageMemory);
+                handleResponse(last_type, response, generate_aaaa(last_hostname, gv6address), cb);
+                return;
+            }
+
             if (!c77 && aggressive_v6) c77 = cdn77.check_for_cdn77_a(authority);
             if (!c77 && aggressive_v6) c77 = cdn77.check_for_cdn77_hostname(last_hostname);
             if (c77) {
@@ -495,6 +544,13 @@ function proxy(question, response, cb) {
             if (shp) {
                 matched = true;
                 handleResponse(last_type, response, generate_aaaa(last_hostname, cloudflare.getshopifyv6address()), cb);
+                return;
+            }
+
+            if (!wef) wef = cloudflare.check_for_webflow_hostname(last_hostname);
+            if (wef) {
+                matched = true;
+                handleResponse(last_type, response, generate_aaaa(last_hostname, cloudflare.getwebflowv6address()), cb);
                 return;
             }
 
@@ -651,6 +707,17 @@ function proxy(question, response, cb) {
                 return;
             }
 
+            if (cloudflare.check_for_webflow_ip(ansaddr) === true) {
+                //console.log("added to webflow object");
+                add_aaaa[qhostname] = "webflow";
+                response.answer.forEach(function (item, index) {
+                    response.answer[index].ttl = 0;
+                });
+                cb();
+                return;
+            }
+
+
             if(aggressive_v6 && inwx.check_for_inwx_ip(ansaddr) === true) {
                 //console.log("added to inwx ip");
 
@@ -695,6 +762,8 @@ function proxy(question, response, cb) {
             if (netlify.check_for_netlify_hostname(qhostname)) add_aaaa[qhostname] = "netlify";
             if (cloudfront.check_for_cloudfront_hostname(qhostname)) add_aaaa[qhostname] = "cloudfront";
             if (bunnycdn.check_for_bunnycdn_hostname(qhostname)) add_aaaa[qhostname] = "bunnycdn";
+            if (blazingcdn.check_for_blazingcdn_hostname(qhostname)) add_aaaa[qhostname] = "blazingcdn";
+            if (gcorecdn.check_for_gcorecdn_hostname(qhostname)) add_aaaa[qhostname] = "gcorecdn";
             if (highwinds.check_for_highwinds_hostname(qhostname)) add_aaaa[qhostname] = "highwinds";
             if (alicdn.check_for_alicdn_hostname(qhostname)) add_aaaa[qhostname] = "alicdn";
 

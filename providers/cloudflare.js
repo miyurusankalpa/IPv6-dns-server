@@ -58,4 +58,29 @@ module.exports = {
   getshopifyv6address: function () {
     return "2620:127:f00f::";
   },
+  check_for_webflow_hostname: function (hostname) {
+    if (!hostname) return false;
+    var sdomains = hostname.split(".");
+    sdomains.reverse();
+    var dp1 = sdomains.indexOf("com");
+    var dp2 = sdomains.indexOf("webflow");
+
+    if (dp1 === 0 && dp2 == 1) {
+      //console.log("webflow matched");
+      return hostname;
+    } else return false;
+  },
+  check_for_webflow_ip: function (ipv4) {
+    //console.log('webflow ip check', ipv4);
+    if (!ipv4) return false;
+
+    return ipRangeCheck(ipv4, [
+      "198.202.211.0/24",
+      "75.2.70.75/32", //aacb0a264e514dd48.awsglobalaccelerator.com
+      "99.83.190.102/32", //aacb0a264e514dd48.awsglobalaccelerator.com
+    ]);
+  },
+  getwebflowv6address: function () {
+    return "2620:cb:2000::1";
+  },
 };

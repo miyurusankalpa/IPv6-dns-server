@@ -232,6 +232,13 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 * Coverage: Some Domains+Only on Aggressive mode.
 * Usability: Unknown
 
+# Azure websites
+
+* Test domains: ibwc.azurewebsites.net
+* IPv6 Type: Unicast
+* Coverage: Partial. (www.ibwc.gov is not matched)
+* Usability: Unknown
+
 ## Github.io (Fastly)
 
 * Test domains: willettjf.com

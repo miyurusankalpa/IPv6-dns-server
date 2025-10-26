@@ -1,7 +1,7 @@
 module.exports = {
   getbunnycdnv6address: function (resolver, localStorageMemory) {
-    //crtlblog ipv6 enabled domain
-    var aaaa_bunny_domain = "ctrl.b-cdn.net";
+    //bunnyfonts ipv6 enabled domain
+    var aaaa_bunny_domain = "bunnyfonts.b-cdn.net";
     var v6adddy = localStorageMemory.getItem("bunnycdnv6addy");
     var bunny_fixed_address = "2400:52e0:1e01::883:1"; //bunnycdn AMS POP IP
 
