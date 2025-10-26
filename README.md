@@ -15,7 +15,7 @@ Build the project
 Copy the sample config
 
 	cp config.json.sample config.json
-
+	
 Starting the server
 
 	npm start
@@ -66,7 +66,7 @@ Add the domain to `no_aaaa` array in the `config.json` file.
 
 Add the domain to `add_aaaa` object with IPv6 address in the `config.json` file.
 
-### Turn On aggressive mode
+### Turn on **Aggressive Mode**
 
 Change the `aggressive_v6` variable to true in the `config.json` file. See individual services below to see what aggressive mode does.
 
@@ -134,7 +134,7 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 * Coverage: All from alicdn.com
 * Usability: Unknown
 
-## Bunnycdn
+## Bunny CDN
 
 * Test domains: cdn-b-east.streamable.com
 * IPv6 Type: Unicast
@@ -155,7 +155,7 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 * Coverage: All
 * Usability: Stable
 
-## GcoreCDN
+## Gcore CDN
 
 * Test domains: v58.tiktokcdn.com
 * IPv6 Type: Unicast
@@ -218,7 +218,7 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 * Coverage: All
 * Usability: Stable
 
-## Wordpress VIP
+## WordPress VIP
 
 * Test domains: wpvip.com, nielsen.com
 * IPv6 Type: Anycast
@@ -267,10 +267,10 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 * Coverage: Some Domains+Only on Aggressive mode.
 * Usability: Unusable, HTTP 400
 
-## AAAA WWW check (Experniment)
+## AAAA WWW Check (Experimental)
 
 * Test domains: live.com (#24)
-* IPv6 Type: NA
+* IPv6 Type: N/A
 * Coverage: Only on Aggressive mode.
 * Usability: Unknown
 
@@ -287,7 +287,7 @@ For that we use the following information
 
 The next part is getting IPv6 address, for this below methods are used
 
-- Synthesize the IPv6 from IPv4 adddress (fastlly)
+- Synthesize the IPv6 from IPv4 adddress (Fastly)
 - Use known IPv6 addresss - (MSEDGE)
 - Use any IPv6 address -  (Cloudfront)
 - Generate IPv6 enabled hostname (Akamai)
