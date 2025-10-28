@@ -479,12 +479,13 @@ function proxy(question, response, cb) {
                 return;
             }
 
-            if (!c77 && aggressive_v6) c77 = cdn77.check_for_cdn77_a(authority);
-            if (!c77 && aggressive_v6) c77 = cdn77.check_for_cdn77_hostname(last_hostname);
+            if (!c77) c77 = cdn77.check_for_cdn77_a(authority);
+            if (!c77) c77 = cdn77.check_for_cdn77_hostname(last_hostname);
             if (c77) {
                 matched = true;
-                var cv6address = cdn77.get_cdn77_v6address(resolver, localStorageMemory);
-                handleResponse(last_type, response, last_hostname, cv6address, cb);
+                cdn77.get_cdn77_v6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });;
                 return;
             }
 

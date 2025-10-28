@@ -192,9 +192,9 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 
 ## CDN77
 
-* Test domains: img-b.udemycdn.com
+* Test domains: streaming-s1free.sport1.de
 * IPv6 Type: Unicast
-* Coverage: All+Only on Aggressive mode.
+* Coverage: Unknown.
 * Usability: Some protected content may not work.
 
 ## Netlify
