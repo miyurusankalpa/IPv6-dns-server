@@ -527,8 +527,9 @@ function proxy(question, response, cb) {
 
             if (sui) {
                 matched = true;
-                var sv6address = sucuri.getsucuriv6address(resolver, localStorageMemory);
-                handleResponse(last_type, response, last_hostname, sv6address, cb);
+                sucuri.getsucuriv6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });;
                 return;
             }
 
