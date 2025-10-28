@@ -1,23 +1,31 @@
 var ipRangeCheck = require("ip-range-check");
 
 module.exports = {
-  getnetlifyv6address: function (resolver, localStorageMemory) {
+  getnetlifyv6address: function (resolver, localStorageMemory, callback) {
     var aaaa_netlify_domain = "www.netlify.com";
-    var v6adddy = localStorageMemory.getItem("netlifyv6addy");
+    const CACHE_KEY = "netlifyv6addy";
 
-    if (!v6adddy) {
-      //console.log("not cached");
-      try {
-        resolver.resolve6(aaaa_netlify_domain, (err, addresses) => {
-          var v6adddy = addresses[0];
-          //if (typeof bv6address == "undefined")
-          localStorageMemory.setItem("netlifyv6addy", v6adddy);
-          return v6adddy;
-        });
-      } catch (error) {
-        //console.error(error);
+    // Check cache first
+    const cachedV6List = localStorageMemory.getItem(CACHE_KEY);
+    if (cachedV6List) {
+      const addresses = Array.isArray(cachedV6List) ? cachedV6List : JSON.parse(cachedV6List);
+      // Call callback asynchronously to maintain consistent behavior
+      setImmediate(() => callback(null, addresses));
+      return;
+    }
+
+    // Resolve IPv6 addresses
+    resolver.resolve6(aaaa_netlify_domain, (err, addresses) => {
+      if (err) {
+        console.error("Failed to resolve IPv6 addresses:", err);
+        callback(err, []);
+        return;
       }
-    } else return v6adddy;
+
+      // Cache the result
+      localStorageMemory.setItem(CACHE_KEY, JSON.stringify(addresses));
+      callback(null, addresses);
+    });
   },
   check_for_netlify_hostname: function (hostname) {
     if (!hostname) return false;

@@ -536,8 +536,9 @@ function proxy(question, response, cb) {
             if (!net) net = netlify.check_for_netlify_hostname(last_hostname);
             if (net) {
                 matched = true;
-
-                handleResponse(last_type, response, last_hostname, netlify.getnetlifyv6address(resolver, localStorageMemory), cb);
+                netlify.getnetlifyv6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });;
                 return;
             }
 
