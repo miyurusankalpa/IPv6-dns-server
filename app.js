@@ -34,10 +34,12 @@ var inwx = require('./providers/inwx');
 var blazingcdn = require('./providers/blazingcdn');
 var gcorecdn = require('./providers/gcorecdn');
 var azurewebsites = require('./providers/azurewebsites')
+var awsglb = require('./providers/awsglobalaccelerator');
 
 const {
     Resolver
 } = require('dns');
+const awsglobalaccelerator = require('./providers/awsglobalaccelerator');
 
 const resolver = new Resolver();
 const resolver_own = new Resolver();
@@ -231,6 +233,7 @@ function proxy(question, response, cb) {
             var blz;
             var gco;
             var azw;
+            var awsglb;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -309,6 +312,9 @@ function proxy(question, response, cb) {
                         break;
                     case 'azureweb':
                         azw = true;
+                        break;
+                    case 'awsglb':
+                        awsglb = true;
                         break;
                     case 'inwx':
                         inx = true;
@@ -490,6 +496,16 @@ function proxy(question, response, cb) {
                 matched = true;
                 var cv6address = cdn77.get_cdn77_v6address(resolver, localStorageMemory);
                 handleResponse(last_type, response, generate_aaaa(last_hostname, cv6address), cb);
+                return;
+            }
+
+            if (!awsglb) awsglb = awsglobalaccelerator.check_for_awsglb_hostname(last_hostname);
+            if (awsglb) {
+                matched = true;
+                resolver.resolve6(awsglb, (err, addresses) => {
+                    //console.log('awsglb', addresses);
+                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else { cb(); return; }
+                });
                 return;
             }
 
