@@ -3,21 +3,29 @@ var ipRangeCheck = require("ip-range-check");
 module.exports = {
   getbearblogv6address: function (resolver, localStorageMemory) {
     var aaaa_bearblog_domain = "domain-proxy.bearblog.dev";
-    var v6adddy = localStorageMemory.getItem("bearblogv6addy");
+    const CACHE_KEY = "bearblogv6addy";
 
-    if (!v6adddy) {
-      //console.log("not cached");
-      try {
-        resolver.resolve6(aaaa_bearblog_domain, (err, addresses) => {
-          var v6adddy = addresses[0];
-          //if (typeof bv6address == "undefined")
-          localStorageMemory.setItem("bearblogv6addy", v6adddy);
-          return v6adddy;
-        });
-      } catch (error) {
-        //console.error(error);
+    // Check cache first
+    const cachedV6List = localStorageMemory.getItem(CACHE_KEY);
+    if (cachedV6List) {
+      const addresses = Array.isArray(cachedV6List) ? cachedV6List : JSON.parse(cachedV6List);
+      // Call callback asynchronously to maintain consistent behavior
+      setImmediate(() => callback(null, addresses));
+      return;
+    }
+
+    // Resolve IPv6 addresses
+    resolver.resolve6(aaaa_bearblog_domain, (err, addresses) => {
+      if (err) {
+        console.error("Failed to resolve IPv6 addresses:", err);
+        callback(err, []);
+        return;
       }
-    } else return v6adddy;
+
+      // Cache the result
+      localStorageMemory.setItem(CACHE_KEY, JSON.stringify(addresses));
+      callback(null, addresses);
+    });
   },
   check_for_bearblog_ip: function (ipv4) {
     //console.log("bearblog ip check", ipv4);

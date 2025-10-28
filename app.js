@@ -529,7 +529,7 @@ function proxy(question, response, cb) {
                 matched = true;
                 sucuri.getsucuriv6address(resolver, localStorageMemory, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
-                });;
+                });
                 return;
             }
 
@@ -538,13 +538,15 @@ function proxy(question, response, cb) {
                 matched = true;
                 netlify.getnetlifyv6address(resolver, localStorageMemory, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
-                });;
+                });
                 return;
             }
 
             if(bear) {
                 matched = true;
-                handleResponse(last_type, response, last_hostname, bearblog.getbearblogv6address(resolver, localStorageMemory), cb);
+                bearblog.getbearblogv6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });
                 return;
             }
 
