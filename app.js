@@ -323,11 +323,11 @@ function proxy(question, response, cb) {
                     default: {
                     //matched = true;
                     if (ipaddr.isValid(provider_name) && ipaddr.parse(provider_name).kind() === 'ipv6') {
-                        handleResponse(5, response, generate_aaaa(question.name, provider_name), cb); // only ipv6 address
+                        handleResponse(5, response, question.name, provider_name, cb); // only ipv6 address
                     } else {
                         resolver.resolve6(provider_name, (err, addresses) => {
                             if (addresses && addresses.length > 0) {
-                                handleResponse(5, response, generate_aaaa(question.name, addresses[0]), cb);
+                                handleResponse(5, response, question.name, addresses, cb);
                             }
                         });
                     }
@@ -340,13 +340,13 @@ function proxy(question, response, cb) {
                 last_type = 5;
             }
 
-            console.log('lh', last_hostname);
+            //console.log('lh', last_hostname);
 
             if (!ak) ak = akamai.check_for_akamai_hostname(last_hostname);
             if (ak) {
                 matched = true;
                 resolver.resolve6(ak, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else{ cb(); return; }
                 });
                 return;
             }
@@ -355,7 +355,7 @@ function proxy(question, response, cb) {
             if (azw) {
                 matched = true;
                 resolver.resolve6(azw, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else{ cb(); return; }
                 });
                 return;
             }
@@ -365,7 +365,7 @@ function proxy(question, response, cb) {
             if (msi) {
                 matched = true;
                 resolver.resolve6(msi, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else{ cb(); return; }
                 });
                 return;
             }*/
@@ -375,7 +375,7 @@ function proxy(question, response, cb) {
             if (s3) {
                 matched = true;
                 resolver.resolve6(s3, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else{ cb(); return; }
                 });
                 return;
             }
@@ -384,7 +384,7 @@ function proxy(question, response, cb) {
             if (oss) {
                 matched = true;
                 resolver.resolve6(oss, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else{ cb(); return; }
                 });
                 return;
             }
@@ -393,7 +393,7 @@ function proxy(question, response, cb) {
             if (hw) {
                 matched = true;
                 var hwv6address = highwinds.gethighwindv6address();
-                handleResponse(last_type, response, generate_aaaa(last_hostname, hwv6address), cb);
+                handleResponse(last_type, response, last_hostname, hwv6address, cb);
                 return;
             }
 
@@ -420,7 +420,7 @@ function proxy(question, response, cb) {
                         //return;
                     }
 
-                    handleResponse(last_type, response, generate_aaaa(last_hostname, fv6), cb);
+                    handleResponse(last_type, response, last_hostname, fv6, cb);
                 });
                 return;
             }
@@ -434,7 +434,7 @@ function proxy(question, response, cb) {
                 if (fsta1 && fsta1[0] == "d") { //check for "d"ualstack in the hostname
                     matched = true; fsta = fsta1;
                     resolver.resolve6(fsta1, (err, addresses) => {
-                        if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else { cb(); return; }
+                        if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
                     });
                     return;
                 }
@@ -452,7 +452,7 @@ function proxy(question, response, cb) {
                         return;
                     }
 
-                    handleResponse(last_type, response, generate_aaaa(last_hostname, mv6), cb);
+                    handleResponse(last_type, response, last_hostname, mv6, cb);
                     return;
                 });
 
@@ -462,7 +462,7 @@ function proxy(question, response, cb) {
             if (cfr) {
                 matched = true;
 
-                handleResponse(last_type, response, generate_aaaa(last_hostname, cloudfront.getcloudfrontv6address(resolver, localStorageMemory)), cb);
+                handleResponse(last_type, response, last_hostname, cloudfront.getcloudfrontv6address(resolver, localStorageMemory), cb);
                 return;
             }
 
@@ -470,7 +470,7 @@ function proxy(question, response, cb) {
             if (bun) {
                 matched = true;
                 var bv6address = bunnycdn.getbunnycdnv6address(resolver, localStorageMemory);
-                handleResponse(last_type, response, generate_aaaa(last_hostname, bv6address), cb);
+                handleResponse(last_type, response, last_hostname, bv6address, cb);
                 return;
             }
 
@@ -478,7 +478,7 @@ function proxy(question, response, cb) {
             if (blz) {
                 matched = true;
                 var bv6address = blazingcdn.getblazingcdnv6address(resolver, localStorageMemory);
-                handleResponse(last_type, response, generate_aaaa(last_hostname, bv6address), cb);
+                handleResponse(last_type, response, last_hostname, bv6address, cb);
                 return;
             }
 
@@ -486,7 +486,7 @@ function proxy(question, response, cb) {
             if (gco) {
                 matched = true;
                 var gv6address = gcorecdn.getgcorecdnv6address(resolver, localStorageMemory);
-                handleResponse(last_type, response, generate_aaaa(last_hostname, gv6address), cb);
+                handleResponse(last_type, response, last_hostname, gv6address, cb);
                 return;
             }
 
@@ -495,7 +495,7 @@ function proxy(question, response, cb) {
             if (c77) {
                 matched = true;
                 var cv6address = cdn77.get_cdn77_v6address(resolver, localStorageMemory);
-                handleResponse(last_type, response, generate_aaaa(last_hostname, cv6address), cb);
+                handleResponse(last_type, response, last_hostname, cv6address, cb);
                 return;
             }
 
@@ -504,7 +504,7 @@ function proxy(question, response, cb) {
                 matched = true;
                 resolver.resolve6(awsglb, (err, addresses) => {
                     //console.log('awsglb', addresses);
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else { cb(); return; }
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
                 });
                 return;
             }
@@ -513,7 +513,7 @@ function proxy(question, response, cb) {
             if (wb) {
                 matched = true;
                 var wbv6address = weebly.getweeblyv6address();
-                handleResponse(last_type, response, generate_aaaa(last_hostname, wbv6address), cb);
+                handleResponse(last_type, response, last_hostname, wbv6address, cb);
                 return;
             }
 
@@ -521,7 +521,7 @@ function proxy(question, response, cb) {
             if (v0c) {
                 matched = true;
                 resolver.resolve6(v0c, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else return;
                 });
                 return;
             }
@@ -530,7 +530,7 @@ function proxy(question, response, cb) {
             if (ll) {
                 matched = true;
                 resolver.resolve6(ll, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else return;
                 });
                 return;
             }
@@ -538,7 +538,7 @@ function proxy(question, response, cb) {
             if (sui) {
                 matched = true;
                 var sv6address = sucuri.getsucuriv6address(resolver, localStorageMemory);
-                handleResponse(last_type, response, generate_aaaa(last_hostname, sv6address), cb);
+                handleResponse(last_type, response, last_hostname, sv6address, cb);
                 return;
             }
 
@@ -546,27 +546,27 @@ function proxy(question, response, cb) {
             if (net) {
                 matched = true;
 
-                handleResponse(last_type, response, generate_aaaa(last_hostname, netlify.getnetlifyv6address(resolver, localStorageMemory)), cb);
+                handleResponse(last_type, response, last_hostname, netlify.getnetlifyv6address(resolver, localStorageMemory), cb);
                 return;
             }
 
             if(bear) {
                 matched = true;
-                handleResponse(last_type, response, generate_aaaa(last_hostname, bearblog.getbearblogv6address(resolver, localStorageMemory)), cb);
+                handleResponse(last_type, response, last_hostname, bearblog.getbearblogv6address(resolver, localStorageMemory), cb);
                 return;
             }
 
             if (!shp) shp = cloudflare.check_for_shopify_hostname(last_hostname);
             if (shp) {
                 matched = true;
-                handleResponse(last_type, response, generate_aaaa(last_hostname, cloudflare.getshopifyv6address()), cb);
+                handleResponse(last_type, response, last_hostname, cloudflare.getshopifyv6address(), cb);
                 return;
             }
 
             if (!wef) wef = cloudflare.check_for_webflow_hostname(last_hostname);
             if (wef) {
                 matched = true;
-                handleResponse(last_type, response, generate_aaaa(last_hostname, cloudflare.getwebflowv6address()), cb);
+                handleResponse(last_type, response, last_hostname, cloudflare.getwebflowv6address(), cb);
                 return;
             }
 
@@ -575,7 +575,7 @@ function proxy(question, response, cb) {
                 //console.log('ptr', inwx_ptr);
 
                 resolver.resolve6(inwx_ptr, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else return;
                 });
                 return;
             }
@@ -584,7 +584,7 @@ function proxy(question, response, cb) {
             if (!cfl) cfl = cloudflare.check_for_cloudflare_hostname(last_hostname);
             if (cfl) {
                 matched = true;
-                handleResponse(last_type, response, generate_aaaa(last_hostname, cloudflare.getcloudflarev6address()), cb);
+                handleResponse(last_type, response, last_hostname, cloudflare.getcloudflarev6address(), cb);
                 return;
             }
 
@@ -592,7 +592,7 @@ function proxy(question, response, cb) {
             if (ali) {
                 matched = true;
 
-                handleResponse(last_type, response, generate_aaaa(last_hostname, alicdn.getalicdnv6address(resolver, localStorageMemory)), cb);
+                handleResponse(last_type, response, last_hostname, alicdn.getalicdnv6address(resolver, localStorageMemory), cb);
                 return;
             }
 
@@ -605,7 +605,7 @@ function proxy(question, response, cb) {
                         return;
                     } else {
                         matched = true;
-                        handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb);
+                        handleResponse(last_type, response, last_hostname, addresses, cb);
                         return;
                     }
                 });
@@ -621,7 +621,7 @@ function proxy(question, response, cb) {
                         var mapaddr = (ipaddr.parse('::ffff:' + addresses[0])).toString();
                         //console.log(mapaddr);
 
-                        handleResponse(last_type, response, generate_aaaa(last_hostname, mapaddr.replace("::ffff:", dns64_range)), cb);
+                        handleResponse(last_type, response, last_hostname, mapaddr.replace("::ffff:", dns64_range), cb);
                         return;
                     }
                 });
@@ -821,12 +821,16 @@ function proxy(question, response, cb) {
 
 }
 
-function handleResponse(last_type, response, aaaaresponse, cb) {
-    //console.log('lt', last_type);
-    //console.log('cachekey', response.question[0].name);
-    if ((last_type === 5) && (aaaaresponse)) { //cname
-        response.answer.push(aaaaresponse);
-        //localStorageMemory.setItem(response.question[0].name, JSON.stringify(response.answer));
+function handleResponse(last_type, response, hostname, ipv6address, cb) {
+    if ((last_type === 5) && (ipv6address)) { //cname
+
+        //for each ipv6 genrate answer
+        if (Array.isArray(ipv6address)) {
+            ipv6address.forEach(ipv6 => {
+                var aaaaresponse = generate_aaaa(hostname, ipv6);
+                response.answer.push(aaaaresponse);
+            });
+        }
         //console.log('remote DNS response: ', aaaaresponse);
         cb();
     }
