@@ -473,8 +473,9 @@ function proxy(question, response, cb) {
             if (!gco) gco = gcorecdn.check_for_gcorecdn_hostname(last_hostname);
             if (gco) {
                 matched = true;
-                var gv6address = gcorecdn.getgcorecdnv6address(resolver, localStorageMemory);
-                handleResponse(last_type, response, last_hostname, gv6address, cb);
+                gcorecdn.getgcorecdnv6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });;
                 return;
             }
 
