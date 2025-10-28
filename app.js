@@ -464,8 +464,9 @@ function proxy(question, response, cb) {
             if (!blz) blz = blazingcdn.check_for_blazingcdn_hostname(last_hostname);
             if (blz) {
                 matched = true;
-                var bv6address = blazingcdn.getblazingcdnv6address(resolver, localStorageMemory);
-                handleResponse(last_type, response, last_hostname, bv6address, cb);
+                blazingcdn.getblazingcdnv6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });
                 return;
             }
 
