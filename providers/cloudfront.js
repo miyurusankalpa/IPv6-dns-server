@@ -13,23 +13,32 @@ module.exports = {
       return true;
     } else return false;
   },
-  getcloudfrontv6address: function (resolver, localStorageMemory) {
-    //twitch ipv6 enabled cloudfront domain
-    var aaaa_cloudfront_domain = "static.twitchcdn.net";
-    var v6range = localStorageMemory.getItem("cloudfrontv6range");
+  getcloudfrontv6address: function (resolver, localStorageMemory, callback) {
+    // Twitch IPv6 enabled CloudFront domain
+    const AAAA_CLOUDFRONT_DOMAIN = "static.twitchcdn.net";
+    const CACHE_KEY = "cloudfrontv6range";
 
-    if (!v6range) {
-      //console.log("not cached");
-      resolver.resolve6(aaaa_cloudfront_domain, (err, addresses) => {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        var v6range = addresses[0].slice(0, -4);
-        localStorageMemory.setItem("cloudfrontv6range", v6range);
-        return v6range + rand_hex();
-      });
-    } else return v6range + rand_hex();
+    // Check cache first
+    const cachedV6List = localStorageMemory.getItem(CACHE_KEY);
+    if (cachedV6List) {
+      const addresses = Array.isArray(cachedV6List) ? cachedV6List : JSON.parse(cachedV6List);
+      // Call callback asynchronously to maintain consistent behavior
+      setImmediate(() => callback(null, addresses));
+      return;
+    }
+
+    // Resolve IPv6 addresses
+    resolver.resolve6(AAAA_CLOUDFRONT_DOMAIN, (err, addresses) => {
+      if (err) {
+        console.error("Failed to resolve IPv6 addresses:", err);
+        callback(err, []);
+        return;
+      }
+
+      // Cache the result
+      localStorageMemory.setItem(CACHE_KEY, JSON.stringify(addresses));
+      callback(null, addresses);
+    });
   },
   check_for_cloudfront_ip: function (ipv4) {
     //console.log('cloudfront ip check', ipv4);
@@ -206,6 +215,4 @@ const cloudfrontiplist = {
   ],
 };
 
-function rand_hex() {
-  return Math.random().toString(16).slice(2, 6);
-}
+

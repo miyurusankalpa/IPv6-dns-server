@@ -461,9 +461,9 @@ function proxy(question, response, cb) {
             if (!cfr) cfr = cloudfront.check_for_cloudfront_hostname(last_hostname);
             if (cfr) {
                 matched = true;
-
-                handleResponse(last_type, response, last_hostname, cloudfront.getcloudfrontv6address(resolver, localStorageMemory), cb);
-                return;
+                cloudfront.getcloudfrontv6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });
             }
 
             if (!bun) bun = bunnycdn.check_for_bunnycdn_hostname(last_hostname);
