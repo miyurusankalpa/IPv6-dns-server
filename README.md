@@ -220,9 +220,9 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 
 # INWX
 
-* Test domains: inwx.com
+* Test domains: www.domainprivacyprotect.info
 * IPv6 Type: Unicast
-* Coverage: Some Domains+Only on Aggressive mode.
+* Coverage: Some Domains (Partial IP range).
 * Usability: Unknown
 
 # Azure websites

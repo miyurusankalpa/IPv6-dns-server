@@ -564,7 +564,7 @@ function proxy(question, response, cb) {
                 return;
             }
 
-            if (aggressive_v6 & inx) {
+            if (inx) {
                 matched = true;
                 //console.log('ptr', inwx_ptr);
 
@@ -728,7 +728,7 @@ function proxy(question, response, cb) {
             }
 
 
-            if(aggressive_v6 && inwx.check_for_inwx_ip(ansaddr) === true) {
+            if(inwx.check_for_inwx_ip(ansaddr) === true) {
                 //console.log("added to inwx ip");
 
                 var ptrdoamin = ansaddr.split('.').reverse().join('.') + ".in-addr.arpa";
