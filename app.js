@@ -17,7 +17,6 @@ var awss3 = require('./providers/awss3');
 var cloudflare = require('./providers/cloudflare');
 var cloudfront = require('./providers/cloudfront');
 var msedge = require('./providers/msedge');
-var highwinds = require('./providers/highwinds');
 var edgecast_windows = require('./providers/edgecast_windows');
 var limelight = require('./providers/limelight');
 var bunnycdn = require('./providers/bunnycdn');
@@ -216,7 +215,6 @@ function proxy(question, response, cb) {
             var cfr;
             var mse;
             var gio;
-            var hw;
             var bun;
             var sui;
             var wb;
@@ -261,9 +259,6 @@ function proxy(question, response, cb) {
                         break;
                     case 'githubio':
                         gio = true;
-                        break;
-                    case 'highwinds':
-                        hw = true;
                         break;
                     case 'edgecast_windows':
                         v0c = true;
@@ -386,14 +381,6 @@ function proxy(question, response, cb) {
                 resolver.resolve6(oss, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else{ cb(); return; }
                 });
-                return;
-            }
-
-            if (!hw) hw = highwinds.check_for_highwinds_hostname(last_hostname);
-            if (hw) {
-                matched = true;
-                var hwv6address = highwinds.gethighwindv6address();
-                handleResponse(last_type, response, last_hostname, hwv6address, cb);
                 return;
             }
 
@@ -780,7 +767,6 @@ function proxy(question, response, cb) {
             if (bunnycdn.check_for_bunnycdn_hostname(qhostname)) add_aaaa[qhostname] = "bunnycdn";
             if (blazingcdn.check_for_blazingcdn_hostname(qhostname)) add_aaaa[qhostname] = "blazingcdn";
             if (gcorecdn.check_for_gcorecdn_hostname(qhostname)) add_aaaa[qhostname] = "gcorecdn";
-            if (highwinds.check_for_highwinds_hostname(qhostname)) add_aaaa[qhostname] = "highwinds";
             if (alicdn.check_for_alicdn_hostname(qhostname)) add_aaaa[qhostname] = "alicdn";
 
             cb();
