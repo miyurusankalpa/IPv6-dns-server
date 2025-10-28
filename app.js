@@ -585,8 +585,9 @@ function proxy(question, response, cb) {
             if (!ali) ali = alicdn.check_for_alicdn_hostname(last_hostname);
             if (ali) {
                 matched = true;
-
-                handleResponse(last_type, response, last_hostname, alicdn.getalicdnv6address(resolver, localStorageMemory), cb);
+                alicdn.getalicdnv6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });
                 return;
             }
 
