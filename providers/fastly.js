@@ -1,55 +1,103 @@
 var ipRangeCheck = require("ip-range-check");
 
 module.exports = {
-  getfastlyv6address: function (customer, resolver, localStorageMemory) {
-    if (customer == "github") return "2606:50c0:8000::";
+  getfastlyv6address: function (
+    customer,
+    resolver,
+    localStorageMemory,
+    callback
+  ) {
+    const DOMAIN =
+      customer === "github"
+        ? "dualstack.github.io"
+        : "dualstack.g.shared.global.fastly.net";
 
-    var aaaa_fastly_domain = "dualstack.g.shared.global.fastly.net";
-    var v6range = localStorageMemory.getItem("fastlyv6range");
+    const CACHE_KEY = customer + "fastlyv6range";
 
-    if (!v6range) {
-      //console.log("not cached");
-      resolver.resolve6(aaaa_fastly_domain, (err, addresses) => {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        var v6range = addresses[0].slice(0, -3);
-        //console.log(v6range);
-        localStorageMemory.setItem("fastlyv6range", v6range);
-        return v6range;
-      });
-    } else return v6range;
-  },
-  fastlyv4tov6: function (ipv4, resolver, localStorageMemory) {
-    //console.log('f', ipv4);
-    if (!ipv4 || !ipv4[0]) return false;
-
-    if (module.exports.check_for_fastly_ip(ipv4[0])) var cust = "fastly";
-    if (module.exports.check_for_githubpages_ip(ipv4[0])) var cust = "github";
-
-    if (!cust) return false;
-
-    var octets = ipv4[0].split(".");
-
-    //console.log('octets', octets);
-
-    var v6_range = module.exports.getfastlyv6address(
-      cust,
-      resolver,
-      localStorageMemory
-    );
-    var v6hex;
-
-    if (cust == "github") {
-      v6hex = octets[3];
-    } else if (ipv4.length == 2) {
-      v6hex = (octets[2] % 4) * 256 + octets[3] * 1;
-    } else {
-      v6hex = (octets[2] % 64) * 256 + octets[3] * 1; //huge thanks @tambry for this expression
+    // Check cache first
+    const cachedData = localStorageMemory.getItem(CACHE_KEY);
+    if (cachedData) {
+      try {
+        const addresses = Array.isArray(cachedData)
+          ? cachedData
+          : JSON.parse(cachedData);
+        callback(null, addresses);
+        return;
+      } catch (error) {
+        // Continue to resolve if cache is corrupted
+      }
     }
 
-    return v6_range + v6hex;
+    // Resolve IPv6 addresses from domain
+    resolver.resolve6(DOMAIN, (err, addresses) => {
+      if (err) {
+        callback(err, null);
+        return;
+      }
+
+      // Process addresses: slice to remove last 3 chars from each IP
+      const slicedAddresses = addresses.map((ip) => ip.slice(0, -3));
+
+      // Cache the sliced addresses
+      try {
+        localStorageMemory.setItem(CACHE_KEY, JSON.stringify(slicedAddresses));
+      } catch (error) {
+        // Silently handle cache error, still return results
+      }
+
+      // Return the sliced addresses via callback
+      callback(null, slicedAddresses);
+    });
+  },
+  fastlyv4tov6: function (ipv4, resolver, localStorageMemory) {
+    return new Promise((resolve, reject) => {
+      //console.log('f', ipv4);
+      if (!ipv4 || !ipv4[0]) {
+        resolve(false);
+        return;
+      }
+
+      var cust;
+      if (module.exports.check_for_fastly_ip(ipv4[0])) cust = "fastly";
+      if (module.exports.check_for_githubpages_ip(ipv4[0])) cust = "github";
+
+      if (!cust) {
+        resolve(false);
+        return;
+      }
+
+      var octets = ipv4[0].split(".");
+      //console.log('octets', octets);
+
+      module.exports.getfastlyv6address(
+        cust,
+        resolver,
+        localStorageMemory,
+        (err, addresses) => {
+          if (err || !addresses || !Array.isArray(addresses)) {
+            resolve(false);
+            return;
+          }
+
+          var v6hex;
+          //console.log("v6_range", addresses);
+          if (cust == "github") {
+            v6hex = octets[3];
+          } else if (ipv4.length == 2) {
+            v6hex = (octets[2] % 4) * 256 + octets[3] * 1;
+          } else {
+            v6hex = (octets[2] % 64) * 256 + octets[3] * 1;
+          }
+
+          var iplist = [];
+          addresses.forEach((ipv6, index) => {
+            iplist[index] = ipv6 + v6hex;
+          });
+          //console.log(iplist);
+          resolve(iplist);
+        }
+      );
+    });
   },
   check_for_fastly_a: function (authority) {
     //console.log('a', authority);

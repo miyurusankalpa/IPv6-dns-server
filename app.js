@@ -99,10 +99,7 @@ function isApexDomain(domainName) {
     // 3. An apex domain should split into exactly two parts,
     //    and neither part should be empty.
     return parts.length === 2 && parts[0].length > 0 && parts[1].length > 0;
-  }
-
-//cache fastly range on starup
-fastly.getfastlyv6address('fastly', resolver, localStorageMemory);
+}
 
 function handleRequest(request, response) {
     var question = request.question[0];
@@ -396,14 +393,17 @@ function proxy(question, response, cb) {
             if (!fsta) fsta = fastly.check_for_fastly_a(authority);
             if (fsta) {
                 matched = true;
-                resolver.resolve4(last_hostname, (err, v4addresses) => {
+                resolver.resolve4(last_hostname, async (err, v4addresses) => {
+                    if (err) {
+                        cb();
+                        return;
+                    }
                     //console.log(v4addresses);
-                    var fv6 = fastly.fastlyv4tov6(v4addresses, resolver, localStorageMemory);
+                    var fv6 = await fastly.fastlyv4tov6(v4addresses, resolver, localStorageMemory);
 
                     if (!fv6) {
-                        fastly_fallback();
-                        //cb();
-                        //return;
+                        cb();
+                        return;
                     }
 
                     handleResponse(last_type, response, last_hostname, fv6, cb);
@@ -416,14 +416,17 @@ function proxy(question, response, cb) {
             function fastly_fallback() {
                 var fsta1 = fastly.check_for_fastly_hostname(last_hostname);
                 //console.log(fsta1);
-
-                if (fsta1 && fsta1[0] == "d") { //check for "d"ualstack in the hostname
-                    matched = true; fsta = fsta1;
+                    resolver.resolve6(fsta1, (err, addresses) => {
+                        if (err || !addresses) {
+                            cb();
+                            return;
+                        }
+                        handleResponse(last_type, response, last_hostname, addresses, cb);
+                    });
                     resolver.resolve6(fsta1, (err, addresses) => {
                         if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
                     });
                     return;
-                }
             }
 
             if (!mse) mse = msedge.check_for_microsoftedge_a(authorityname);
