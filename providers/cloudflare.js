@@ -26,7 +26,12 @@ module.exports = {
     //console.log('cloudflare ip check', ipv4);
     if (!ipv4) return false;
 
-    return ipRangeCheck(ipv4, ["104.16.0.0/12", "162.159.128.0/17"]);
+    return ipRangeCheck(ipv4, [
+      "104.16.0.0/12",
+      "162.159.128.0/17",
+      "216.198.53.0/24", //zendesk
+      "216.198.54.0/24" //zendesk
+    ]);
   },
   getcloudflarev6address: function () {
     return "2606:4700::6810:bad"; //will give SSL_ERROR_NO_CYPHER_OVERLAP on non cloudflare sites on aggressive mode
