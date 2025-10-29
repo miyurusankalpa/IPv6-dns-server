@@ -33,12 +33,11 @@ var inwx = require('./providers/inwx');
 var blazingcdn = require('./providers/blazingcdn');
 var gcorecdn = require('./providers/gcorecdn');
 var azurewebsites = require('./providers/azurewebsites')
-var awsglb = require('./providers/awsglobalaccelerator');
+var awsglobalaccelerator = require('./providers/awsglobalaccelerator');
 
 const {
     Resolver
 } = require('dns');
-const awsglobalaccelerator = require('./providers/awsglobalaccelerator');
 
 const resolver = new Resolver();
 const resolver_own = new Resolver();
@@ -316,7 +315,7 @@ function proxy(question, response, cb) {
                         var inwx_ptr = providers[1];
                         break;
                     default: {
-                    //matched = true;
+                    matched = true;
                     if (ipaddr.isValid(provider_name) && ipaddr.parse(provider_name).kind() === 'ipv6') {
                         handleResponse(5, response, question.name, provider_name, cb); // only ipv6 address
                     } else {
@@ -824,7 +823,11 @@ function handleResponse(last_type, response, hostname, ipv6address, cb) {
                 var aaaaresponse = generate_aaaa(hostname, ipv6);
                 response.answer.push(aaaaresponse);
             });
+        } else {
+            var aaaaresponse = generate_aaaa(hostname, ipv6address);
+            response.answer.push(aaaaresponse);
         }
+
         //console.log('remote DNS response: ', aaaaresponse);
         cb();
     }
