@@ -30,7 +30,10 @@ module.exports = {
       "104.16.0.0/12",
       "162.159.128.0/17",
       "216.198.53.0/24", //zendesk
-      "216.198.54.0/24" //zendesk
+      "216.198.54.0/24", //zendesk
+      "141.193.213.0/24", //wpengine
+      "94.247.142.0/24", //servdc
+      "103.133.1.0/24", //laravel cloud
     ]);
   },
   getcloudflarev6address: function () {

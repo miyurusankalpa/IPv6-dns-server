@@ -267,6 +267,27 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 * Coverage: All
 * Usability: Unknown
 
+## WP Engine (Cloudflare)
+
+* Test domains: wp.wpenginepowered.com
+* IPv6 Type: Anycast
+* Coverage: All
+* Usability: Unknown
+
+## servd (Cloudflare)
+
+* Test domains: e360.yale.edu
+* IPv6 Type: Anycast
+* Coverage: All
+* Usability: Unknown
+
+## Laravel Cloud (Cloudflare)
+
+* Test domains: aimyze-dev.com
+* IPv6 Type: Anycast
+* Coverage: All
+* Usability: Unknown
+
 ## msidentity (Microsoft) [DISABLED]
 
 * Test domains: login.live.com (#10)
