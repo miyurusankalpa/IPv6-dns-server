@@ -322,3 +322,12 @@ The next part is getting IPv6 address, for this below methods are used
 
 # Credits
 * [Pēteris Ņikiforovs](https://peteris.rocks/)
+
+# Similar Projects
+* [DeLegacy IPv6 RPZ Project](https://codeberg.org/IPv6-Monostack/delegacy-rpz/)
+
+# My other projects
+* [v6check](https://v6check.miyuru.lk/)
+* [v6monitor](https://v6monitor.com/)
+* [Random Projects](https://www.miyuru.lk/tools)
+
