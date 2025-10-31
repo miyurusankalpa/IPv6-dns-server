@@ -232,7 +232,7 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 * Coverage: Partial. (www.ibwc.gov is not matched)
 * Usability: Unknown
 
-# AWS Blobal Accelerator
+# AWS Global Accelerator
 
 * Test domains: eu-central-1.console.aws.amazon.com
 * IPv6 Type: Anycast
