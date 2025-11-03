@@ -1,4 +1,5 @@
-var ipRangeCheck = require("ip-range-check");
+const ipRangeCheck = require("ip-range-check");
+const net = require('net');
 
 module.exports = {
   getfastlyv6address: function (
@@ -91,8 +92,10 @@ module.exports = {
 
           var iplist = [];
           addresses.forEach((ipv6, index) => {
-            iplist[index] = ipv6 + v6hex;
+            var gen_ipv6address =  ipv6 + v6hex;
+            if(net.isIPv6(gen_ipv6address)) iplist[index] = ipv6 + v6hex;
           });
+
           //console.log(iplist);
           resolve(iplist);
         }
