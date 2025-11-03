@@ -130,9 +130,6 @@ module.exports = {
 
     return ipRangeCheck(ipv4, [
       "151.101.0.0/16",
-      "199.232.0.0/16",
-      "146.75.0.0/17",
-      "167.82.0.0/17",
     ]);
   },
   check_for_githubpages_ip: function (ipv4) {
