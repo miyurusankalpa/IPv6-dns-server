@@ -612,7 +612,14 @@ function proxy(question, response, cb) {
                         return;
                     } else {
                         matched = true;
-                        var mapaddr = ipv4ToIPv6Hex(dns64_range, addresses[0]);
+
+                        // Map all IPv4 addresses to IPv6 using DNS64
+                        let mapaddr;
+                        if (Array.isArray(addresses)) {
+                            mapaddr = addresses.map(ipv4 => ipv4ToIPv6Hex(dns64_range, ipv4));
+                        } else {
+                            mapaddr = [ipv4ToIPv6Hex(dns64_range, addresses)];
+                        }
                         //console.log(mapaddr);
 
                         handleResponse(last_type, response, last_hostname, mapaddr, cb);
