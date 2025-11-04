@@ -100,11 +100,12 @@ module.exports = {
     let v6hex;
     if (cust === "github") {
       v6hex = octets[3];
-    } else if (ipv4.length === 2) {
-      v6hex = (octets[2] % 4) * 256 + Number(octets[3]);
-    } else {
+    } else if (octets[0] === 151) {
       v6hex = (octets[2] % 64) * 256 + Number(octets[3]);
+    } else {
+      v6hex = (octets[2] % 4) * 256 + Number(octets[3]);
     }
+
     return v6hex;
   },
   check_for_fastly_a: function (authority) {
@@ -138,6 +139,8 @@ module.exports = {
 
     return ipRangeCheck(ipv4, [
       "151.101.0.0/16",
+      "199.232.0.0/16",
+      "146.75.0.0/17",
     ]);
   },
   check_for_githubpages_ip: function (ipv4) {
