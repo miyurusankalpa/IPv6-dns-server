@@ -222,7 +222,7 @@ function proxy(question, response, cb) {
             var ali;
             //var msi;
             var shp;
-            var net;
+            var nety;
             var bear;
             var inx;
             var wef;
@@ -292,7 +292,7 @@ function proxy(question, response, cb) {
                         wef = true;
                         break;
                     case 'netlify':
-                        net = true;
+                        nety = true;
                         break;
                     case 'bearblog':
                         bear = true;
@@ -532,8 +532,8 @@ function proxy(question, response, cb) {
                 return;
             }
 
-            if (!net) net = netlify.check_for_netlify_hostname(last_hostname);
-            if (net) {
+            if (!nety) nety = netlify.check_for_netlify_hostname(last_hostname);
+            if (nety) {
                 matched = true;
                 netlify.getnetlifyv6address(resolver, localStorageMemory, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
