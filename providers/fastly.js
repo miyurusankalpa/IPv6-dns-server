@@ -67,9 +67,6 @@ module.exports = {
         return;
       }
 
-      var octets = ipv4[0].split(".");
-      //console.log('octets', octets);
-
       module.exports.getfastlyv6address(
         cust,
         resolver,
@@ -80,15 +77,8 @@ module.exports = {
             return;
           }
 
-          var v6hex;
-          //console.log("v6_range", addresses);
-          if (cust == "github") {
-            v6hex = octets[3];
-          } else if (ipv4.length == 2) {
-            v6hex = (octets[2] % 4) * 256 + octets[3] * 1;
-          } else {
-            v6hex = (octets[2] % 64) * 256 + octets[3] * 1;
-          }
+          // Use the getV6HexFromIPv4 utility function
+          var v6hex = module.exports.getV6HexFromIPv4(ipv4, cust);
 
           var iplist = [];
           addresses.forEach((ipv6, index) => {
@@ -101,6 +91,21 @@ module.exports = {
         }
       );
     });
+  },
+  // Extracts the v6hex value from IPv4 octets based on customer type
+  getV6HexFromIPv4: function (ipv4, cust) {
+    var octets = ipv4[0].split(".");
+    //console.log('octets', octets);
+
+    let v6hex;
+    if (cust === "github") {
+      v6hex = octets[3];
+    } else if (ipv4.length === 2) {
+      v6hex = (octets[2] % 4) * 256 + Number(octets[3]);
+    } else {
+      v6hex = (octets[2] % 64) * 256 + Number(octets[3]);
+    }
+    return v6hex;
   },
   check_for_fastly_a: function (authority) {
     //console.log('a', authority);
