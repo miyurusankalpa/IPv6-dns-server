@@ -8,8 +8,9 @@ var dns_resolver = config.dns_resolver;
 let dns = require('native-dns');
 let async = require('async');
 let localStorageMemory = require('localstorage-memory');
-let ipaddr = require('ipaddr.js');
 let ipRangeCheck = require("ip-range-check");
+
+const net = require('net');
 
 var akamai = require('./providers/akamai');
 var fastly = require('./providers/fastly');
@@ -314,7 +315,7 @@ function proxy(question, response, cb) {
                         break;
                     default: {
                     matched = true;
-                    if (ipaddr.isValid(provider_name) && ipaddr.parse(provider_name).kind() === 'ipv6') {
+                    if (net.isIPv6(provider_name)) {
                         handleResponse(5, response, question.name, provider_name, cb); // only ipv6 address
                     } else {
                         resolver.resolve6(provider_name, (err, addresses) => {
@@ -611,10 +612,10 @@ function proxy(question, response, cb) {
                         return;
                     } else {
                         matched = true;
-                        var mapaddr = (ipaddr.parse('::ffff:' + addresses[0])).toString();
+                        var mapaddr = ipv4ToIPv6Hex(dns64_range, addresses[0]);
                         //console.log(mapaddr);
 
-                        handleResponse(last_type, response, last_hostname, mapaddr.replace("::ffff:", dns64_range), cb);
+                        handleResponse(last_type, response, last_hostname, mapaddr, cb);
                         return;
                     }
                 });
@@ -847,3 +848,10 @@ function generate_aaaa(hostname, ipv6) {
     return newaaaa;
 }
 
+
+function ipv4ToIPv6Hex(ipv6prefix='::ffff:',ipv4) {
+    const parts = ipv4.split('.').map(Number);
+    const hex1 = parts[0].toString(16).padStart(2, '0') + parts[1].toString(16).padStart(2, '0');
+    const hex2 = parts[2].toString(16).padStart(2, '0') + parts[3].toString(16).padStart(2, '0');
+    return `${ipv6prefix}${hex1}:${hex2}`;
+}
