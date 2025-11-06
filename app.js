@@ -141,14 +141,14 @@ function handleRequest(request, response) {
             }*/
         }
 
-        if (question.type === 1) //A records
+        /*if (question.type === 1) //A records
         {
             if (v6_only) {
                 response.header.rcode = 0;
                 response.send();
                 return;
             }
-        }
+        }*/
 
         f.push(cb => proxy(question, response, cb));
     });
@@ -644,93 +644,74 @@ function proxy(question, response, cb) {
             qhostname = question.name;
 
             if (fastly.check_for_fastly_ip(ansaddr) === true) {
-                //console.log("added to fastly object");
+                console.log("added to fastly object");
                 add_aaaa[qhostname] = "fastly";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if (cloudfront.check_for_cloudfront_ip(ansaddr) === true) {
                 //console.log("added to cloudfront object");
                 add_aaaa[qhostname] = "cloudfront";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if (sucuri.check_for_sucuri_ip(ansaddr) === true) {
                 //console.log("added to sucuri object");
                 add_aaaa[qhostname] = "sucuri";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if (weebly.check_for_weebly_ip(ansaddr) === true) {
                 //console.log("added to weebly object");
                 add_aaaa[qhostname] = "weebly";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if ((fastly.check_for_githubpages_ip(ansaddr) === true)) {
                 //console.log("added to github.io object");
                 add_aaaa[qhostname] = "githubio";
-
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if (netlify.check_for_netlify_ip(ansaddr) === true) {
                 //console.log("added to netify ip");
                 add_aaaa[qhostname] = "netlify";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if(bearblog.check_for_bearblog_ip(ansaddr) === true) {
                 //console.log("added to bearblog ip");
                 add_aaaa[qhostname] = "bearblog";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if (cloudflare.check_for_shopify_ip(ansaddr) === true) {
                 //console.log("added to shopify object");
                 add_aaaa[qhostname] = "shopify";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if (cloudflare.check_for_webflow_ip(ansaddr) === true) {
                 //console.log("added to webflow object");
                 add_aaaa[qhostname] = "webflow";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
@@ -745,20 +726,16 @@ function proxy(question, response, cb) {
                     if (addresses != undefined) add_aaaa[qhostname] = "inwx|"+addresses; else return;
                 });
 
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if (cloudflare.check_for_cloudflare_ip(ansaddr) === true) {
                 //console.log("added to cloudflare object");
                 add_aaaa[qhostname] = "cloudflare";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
@@ -766,10 +743,8 @@ function proxy(question, response, cb) {
                 //console.log("added to wordpressvip ip");
 
                 add_aaaa[qhostname] = wpvip.wpvipv4to6(ansaddr);
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
@@ -782,6 +757,8 @@ function proxy(question, response, cb) {
             if (blazingcdn.check_for_blazingcdn_hostname(qhostname)) add_aaaa[qhostname] = "blazingcdn";
             if (gcorecdn.check_for_gcorecdn_hostname(qhostname)) add_aaaa[qhostname] = "gcorecdn";
             if (alicdn.check_for_alicdn_hostname(qhostname)) add_aaaa[qhostname] = "alicdn";
+
+            if (handleV6Only(v6_only, response)) return;
 
             cb();
         } else {
@@ -861,4 +838,23 @@ function ipv4ToIPv6Hex(ipv6prefix='::ffff:',ipv4) {
     const hex1 = parts[0].toString(16).padStart(2, '0') + parts[1].toString(16).padStart(2, '0');
     const hex2 = parts[2].toString(16).padStart(2, '0') + parts[3].toString(16).padStart(2, '0');
     return `${ipv6prefix}${hex1}:${hex2}`;
+}
+
+// Helper function for repetitive tasks
+function resetTTLAndCallback(response, cb) {
+    response.answer.forEach(function (item, index) {
+        response.answer[index].ttl = 0;
+    });
+    cb();
+}
+
+// Helper function to handle v6_only mode
+function handleV6Only(v6_only, response) {
+    if (v6_only) {
+        response.answer = [];
+        response.header.rcode = 0;
+        response.send();
+        return true;
+    }
+    return false;
 }
