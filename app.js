@@ -30,11 +30,12 @@ var alicdn = require('./providers/alicdn');
 //var msidentity = require('./providers/msidentity');
 var netlify = require('./providers/netlify');
 var bearblog = require('./providers/bearblog');
-var inwx = require('./providers/inwx');
 var blazingcdn = require('./providers/blazingcdn');
 var gcorecdn = require('./providers/gcorecdn');
 var azurewebsites = require('./providers/azurewebsites')
 var awsglobalaccelerator = require('./providers/awsglobalaccelerator');
+
+var ptrcheck = require('./ptrcheck');
 
 const {
     Resolver
@@ -224,12 +225,13 @@ function proxy(question, response, cb) {
             var shp;
             var nety;
             var bear;
-            var inx;
             var wef;
             var blz;
             var gco;
             var azw;
             var awsglb;
+
+            var ptr;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -309,9 +311,9 @@ function proxy(question, response, cb) {
                     case 'awsglb':
                         awsglb = true;
                         break;
-                    case 'inwx':
-                        inx = true;
-                        var inwx_ptr = providers[1];
+                    case 'ipptr':
+                        ptr = true;
+                        var ip2ptr = providers[1];
                         break;
                     default: {
                     matched = true;
@@ -563,11 +565,11 @@ function proxy(question, response, cb) {
                 return;
             }
 
-            if (inx) {
+            if (ptr) {
                 matched = true;
-                //console.log('ptr', inwx_ptr);
+                //console.log('ptr', ip2ptr);
 
-                resolver.resolve6(inwx_ptr, (err, addresses) => {
+                resolver.resolve6(ip2ptr, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else return;
                 });
                 return;
@@ -716,14 +718,14 @@ function proxy(question, response, cb) {
             }
 
 
-            if(inwx.check_for_inwx_ip(ansaddr) === true) {
-                //console.log("added to inwx ip");
+            if(ptrcheck.check_for_ptr_ip(ansaddr) === true) {
+                //console.log("added to ptr ip");
 
                 var ptrdoamin = ansaddr.split('.').reverse().join('.') + ".in-addr.arpa";
 
                 resolver.resolvePtr(ptrdoamin, (err, addresses) => {
                     //console.log('ptr', addresses);
-                    if (addresses != undefined) add_aaaa[qhostname] = "inwx|"+addresses; else return;
+                    if (addresses != undefined) add_aaaa[qhostname] = "ipptr|"+addresses; else return;
                 });
 
                 if (handleV6Only(v6_only, response)) return;

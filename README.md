@@ -218,13 +218,6 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 * Coverage: Unknown
 * Usability: Unknown
 
-# INWX
-
-* Test domains: www.domainprivacyprotect.info
-* IPv6 Type: Unicast
-* Coverage: Some Domains (Partial IP range).
-* Usability: Unknown
-
 # Azure websites
 
 * Test domains: ibwc.azurewebsites.net
@@ -294,6 +287,13 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 * IPv6 Type: Unicast
 * Coverage: Some Domains+Only on Aggressive mode.
 * Usability: Unusable, HTTP 400
+
+# AAAA records on IPv4 PTR
+
+* Test domains: www.domainprivacyprotect.info (INWX)
+* IPv6 Type: Unicast
+* Coverage: Only on matched IPv4 ranges.
+* Usability: Unknown (Sometimes it will not match on first AAAA request, since A records are processed separately)
 
 ## AAAA WWW Check (Experimental)
 
