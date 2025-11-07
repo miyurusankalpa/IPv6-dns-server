@@ -56,7 +56,7 @@ Change the `dns_resolver` variable in the `config.json` file.
 
 ### Temporarily disable AAAA records for a domain
 
-If the domain gives a system error, append `_noaaaa` to the domain and the domain with be IPv4 only for the rest of the session.
+If the domain gives a system error, append `_noaaaa.` to the domain and the domain with be IPv4 only for the rest of the session.
 
 ### Disable IPv6 for a domain permanently
 
@@ -290,7 +290,7 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 
 # AAAA records on IPv4 PTR
 
-* Test domains: www.domainprivacyprotect.info (INWX)
+* Test domains: www.domainprivacyprotect.info (INWX), www.asciinema.org(Brightbox)
 * IPv6 Type: Unicast
 * Coverage: Only on matched IPv4 ranges.
 * Usability: Unknown (Sometimes it will not match on first AAAA request, since A records are processed separately)
