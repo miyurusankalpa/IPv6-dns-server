@@ -81,12 +81,18 @@ no_aaaa.push("ipv4.icanhazip.com"); //add this to no list, since it can mess wit
 
 if (aggressive_v6) {
     add_aaaa["store.steampowered.com"] = "akamai|e11698.b.akamai.net";
+    add_aaaa["android.clients.google.com"] = "2404:6800:4003:c01::65"; //todo: find a domain that resolves to this
 }
 
-// Block AAAA records for www.jbl.com and *.jbl.com subdomains: for #15
+//fix broken domains in non aggesive mode
+if (!aggressive_v6) {
+    no_aaaa.push("i.imgur.com");
+    no_aaaa.push("api.x.com");
+}
+
 function isBlockedDomain(name) {
     if (name === "www.jbl.com") return true;
-    if (/^[a-z]{2}\.jbl\.com$/.test(name)) return true;
+    if (/^[a-z]{2}\.jbl\.com$/.test(name)) return true; //*.jbl.com subdomains: for #15
     return false;
 }
 
