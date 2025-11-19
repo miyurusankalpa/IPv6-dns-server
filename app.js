@@ -652,7 +652,7 @@ function proxy(question, response, cb) {
             qhostname = question.name;
 
             if (fastly.check_for_fastly_ip(ansaddr) === true) {
-                console.log("added to fastly object");
+                //console.log("added to fastly object");
                 add_aaaa[qhostname] = "fastly";
                 if (handleV6Only(v6_only, response)) return;
                 resetTTLAndCallback(response, cb);
@@ -821,7 +821,7 @@ function handleResponse(last_type, response, hostname, ipv6address, cb) {
             response.answer.push(aaaaresponse);
         }
 
-        //console.log('remote DNS response: ', aaaaresponse);
+        //console.log('remote DNS response: ', ipv6address);
         cb();
     }
 }
