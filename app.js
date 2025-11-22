@@ -77,10 +77,15 @@ var dns64 = config.dns64;
 var dns64_range = config.dns64_range; // "/96 CIDR assumed by default"
 
 add_aaaa["scholar.google.com"] = "scholar.googleusercontent.com"; //Thanks @Mynacol https://codeberg.org/IPv6-Monostack/delegacy-rpz/pulls/53
+add_aaaa["cdn.akamai.steamstatic.com"] = "a248.dsce.akamai.net";
+
 no_aaaa.push("ipv4.icanhazip.com"); //add this to no list, since it can mess with ipvfoo NAT detection
 
 if (aggressive_v6) {
-    add_aaaa["store.steampowered.com"] = "akamai|e11698.b.akamai.net";
+    add_aaaa["store.steampowered.com"] = "2a02:26f0:fe00:3bd::2db2";
+    add_aaaa["store.steampowered.com"] = "2a02:26f0:fe00:3bd::2db2";
+    add_aaaa["api.steampowered.com"] = "2a02:26f0:fe00:3bd::2db2";
+    add_aaaa["underlords.com"] = "2a02:26f0:fe00:3bd::2db2";
     add_aaaa["android.clients.google.com"] = "2404:6800:4003:c01::65"; //todo: find a domain that resolves to this
 }
 
