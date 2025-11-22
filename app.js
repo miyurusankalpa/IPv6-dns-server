@@ -209,8 +209,10 @@ function proxy(question, response, cb) {
             }
 
             if (no_aaaa.indexOf(question.name) !== -1) { //handle no AAAA domain correctly
+                matched = true;
                 if(dns64){
                     resolveIPv4AndMap(resolver, question, dns64_range, last_type, response, last_hostname, cb);
+                    return;
                 } else {
                     cb();
                     return;
@@ -334,14 +336,15 @@ function proxy(question, response, cb) {
                     if (net.isIPv6(provider_name)) {
                         matched = true;
                         handleResponse(5, response, question.name, provider_name, cb); // only ipv6 address
-                    } else {
+                        return;
+                    } /*else {
                         resolver.resolve6(provider_name, (err, addresses) => {
                             if (addresses && addresses.length > 0) {
                                 matched = true;
                                 handleResponse(5, response, question.name, addresses, cb);
                             }
                         });
-                    }
+                    }*/
                     }
                 }
             }
