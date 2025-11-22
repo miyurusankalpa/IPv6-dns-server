@@ -98,6 +98,7 @@ if (!aggressive_v6) {
 function isBlockedDomain(name) {
     if (name === "www.jbl.com") return true;
     if (/^[a-z]{2}\.jbl\.com$/.test(name)) return true; //*.jbl.com subdomains: for #15
+    if (/^[a-z]\.x\.com$/.test(name)) return true;
     return false;
 }
 
@@ -134,12 +135,6 @@ function handleRequest(request, response) {
 
             if (question.name.startsWith("_noaaaa.")) { //subdomain with _noaaa
                 no_aaaa.push(question.name.substr(8)); //add it to list without noaaaa subdomain
-            }
-
-            if (no_aaaa.indexOf(question.name) !== -1 & !dns64) {
-                response.header.rcode = 0;
-                response.send();
-                return;
             }
 
             //do not serve from cache if we have match from A
@@ -211,6 +206,15 @@ function proxy(question, response, cb) {
             if (last_type === 28) { //skip if there are AAAA records
                 cb();
                 return;
+            }
+
+            if (no_aaaa.indexOf(question.name) !== -1) { //handle no AAAA domain correctly
+                if(dns64){
+                    resolveIPv4AndMap(resolver, question, dns64_range, last_type, response, last_hostname, cb);
+                } else {
+                    cb();
+                    return;
+                }
             }
 
             var getcdn = add_aaaa[question.name];
@@ -327,12 +331,13 @@ function proxy(question, response, cb) {
                         var ip2ptr = providers[1];
                         break;
                     default: {
-                    matched = true;
                     if (net.isIPv6(provider_name)) {
+                        matched = true;
                         handleResponse(5, response, question.name, provider_name, cb); // only ipv6 address
                     } else {
                         resolver.resolve6(provider_name, (err, addresses) => {
                             if (addresses && addresses.length > 0) {
+                                matched = true;
                                 handleResponse(5, response, question.name, addresses, cb);
                             }
                         });
@@ -617,28 +622,7 @@ function proxy(question, response, cb) {
                     }
                 });
             } else if (!matched && dns64) {
-                resolver.resolve4(question.name, (err, addresses) => {
-                    //console.log('a check', addresses);
-
-                    if (addresses === undefined || addresses[0] === undefined) {
-                        cb();
-                        return;
-                    } else {
-                        matched = true;
-
-                        // Map all IPv4 addresses to IPv6 using DNS64
-                        let mapaddr;
-                        if (Array.isArray(addresses)) {
-                            mapaddr = addresses.map(ipv4 => ipv4ToIPv6Hex(dns64_range, ipv4));
-                        } else {
-                            mapaddr = [ipv4ToIPv6Hex(dns64_range, addresses)];
-                        }
-                        //console.log(mapaddr);
-
-                        handleResponse(last_type, response, last_hostname, mapaddr, cb);
-                        return;
-                    }
-                });
+                resolveIPv4AndMap(resolver, question, dns64_range, last_type, response, last_hostname, cb);
             } else if (!matched) cb();
 
         }
@@ -860,6 +844,25 @@ function resetTTLAndCallback(response, cb) {
         response.answer[index].ttl = 0;
     });
     cb();
+}
+
+function resolveIPv4AndMap(resolver, question, dns64_range, last_type, response, last_hostname, cb) {
+    resolver.resolve4(question.name, (err, addresses) => {
+        if (addresses === undefined || addresses[0] === undefined) {
+            cb();
+            return;
+        }
+
+        // Map all IPv4 addresses to IPv6 using DNS64
+        let mapaddr;
+        if (Array.isArray(addresses)) {
+            mapaddr = addresses.map(ipv4 => ipv4ToIPv6Hex(dns64_range, ipv4));
+        } else {
+            mapaddr = [ipv4ToIPv6Hex(dns64_range, addresses)];
+        }
+
+        handleResponse(last_type, response, last_hostname, mapaddr, cb);
+    });
 }
 
 // Helper function to handle v6_only mode
