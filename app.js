@@ -439,9 +439,14 @@ function proxy(question, response, cb) {
             function fastly_fallback() {
                 var fsta1 = fastly.check_for_fastly_hostname(last_hostname);
                 //console.log(fsta1);
-                if(fsta1){
+                if (fsta1) {
+                    matched = true;
                     resolver.resolve6(fsta1, (err, addresses) => {
-                        if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                        if (err || addresses === undefined) {
+                            cb();
+                            return;
+                        }
+                        handleResponse(last_type, response, last_hostname, addresses, cb);
                     });
                     return;
                 }
