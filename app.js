@@ -808,7 +808,7 @@ function handleResponse(last_type, response, hostname, ipv6address, cb) {
 
         //for each ipv6 genrate answer
         if (Array.isArray(ipv6address)) {
-            ipv6address = ipv6address.slice(0, 10); //limit to 10 addresses, since it looks like is crashes the server #42
+            ipv6address = ipv6address.slice(0, 7); //limit to 7 addresses, since it looks like is crashes the server #42
             ipv6address.forEach(ipv6 => {
             var aaaaresponse = generate_aaaa(hostname, ipv6);
             response.answer.push(aaaaresponse);
