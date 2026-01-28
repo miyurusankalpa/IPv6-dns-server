@@ -1,6 +1,6 @@
 # Introduction
 
-A simple Node DNS Server proxy based on [Peteris Rocks tutorial](https://peteris.rocks/blog/dns-proxy-server-in-node-js-with-ui/), which serves IPv6 records if a CDN is matched.
+A simple Node DNS proxy Server based on [Peteris Rocks tutorial](https://peteris.rocks/blog/dns-proxy-server-in-node-js-with-ui/), which serves IPv6 records if a CDN is matched.
 
 ## Running locally
 
@@ -12,6 +12,10 @@ Build the project
 
 	npm install
 
+Copy the sample config
+
+	cp config.json.sample config.json
+	
 Starting the server
 
 	npm start
@@ -42,13 +46,17 @@ Get the container IP: `docker inspect -f '{{.NetworkSettings.Networks.bridge.Glo
 
 ## Config Options
 
-### Changing DNS Resolvers
+### Changing DNS Proxy IP and Port
+
+Change the `self_resolver` and `self_port` variables in the `config.json` file. By default it listens to [::1]:53
+
+### Changing Upstream DNS Resolvers
 
 Change the `dns_resolver` variable in the `config.json` file.
 
 ### Temporarily disable AAAA records for a domain
 
-If the domain gives a system error, append `_noaaaa` to the domain and the doamin with be IPv4 only for the rest of the session.
+If the domain gives a system error, append `_noaaaa.` to the domain and the domain with be IPv4 only for the rest of the session.
 
 ### Disable IPv6 for a domain permanently
 
@@ -58,17 +66,31 @@ Add the domain to `no_aaaa` array in the `config.json` file.
 
 Add the domain to `add_aaaa` object with IPv6 address in the `config.json` file.
 
-### Turn On aggressive mode
+Example:
+
+```
+  "add_aaaa":{
+    "example.com":"2001:db8::1",
+    "www.example.com":"3fff::2"
+  }
+```
+
+
+### Turn on **Aggressive Mode**
 
 Change the `aggressive_v6` variable to true in the `config.json` file. See individual services below to see what aggressive mode does.
 
 ### Enable DNS64 support
 
-Change the `dns64` variable to true in the `config.json` file. If the prefix is diffrent from the default, one change the `dns64_range` as well.
+Change the `dns64` variable to true in the `config.json` file. If the prefix is diffrent from the default, change the `dns64_range` as well.
 
 ### Turn on IPv6 only mode
 
 Change the `v6_only` variable to true in the `config.json` file.
+
+### Disable Happy Eyeballs
+
+Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. This will remove the A record only if a AAAA record exists.
 
 # Testing if DNS proxy is working
 
@@ -122,17 +144,24 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: All from alicdn.com
 * Usability: Unknown
 
-## Bunnycdn
+## Bunny CDN
 
 * Test domains: cdn-b-east.streamable.com
 * IPv6 Type: Unicast
 * Coverage: All
 * Usability: Stable
 
-## Highwinds
+## BlazingCDN
 
-* Test domains: map2.hwcdn.net
+* Test domains: player.h-cdn.com
 * IPv6 Type: Anycast
+* Coverage: All
+* Usability: Stable
+
+## Gcore CDN
+
+* Test domains: v58.tiktokcdn.com
+* IPv6 Type: Unicast
 * Coverage: All
 * Usability: Stable
 
@@ -173,9 +202,9 @@ Change the `v6_only` variable to true in the `config.json` file.
 
 ## CDN77
 
-* Test domains: img-b.udemycdn.com
+* Test domains: streaming-s1free.sport1.de
 * IPv6 Type: Unicast
-* Coverage: All+Only on Aggressive mode.
+* Coverage: Unknown.
 * Usability: Some protected content may not work.
 
 ## Netlify
@@ -192,18 +221,25 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: All
 * Usability: Stable
 
-## Wordpress VIP
+## WordPress VIP
 
 * Test domains: wpvip.com, nielsen.com
 * IPv6 Type: Anycast
 * Coverage: Unknown
 * Usability: Unknown
 
-# INWX
+# Azure websites
 
-* Test domains: inwx.com
+* Test domains: ibwc.azurewebsites.net
 * IPv6 Type: Unicast
-* Coverage: Some Domains+Only on Aggressive mode.
+* Coverage: Partial. (www.ibwc.gov is not matched)
+* Usability: Unknown
+
+# AWS Global Accelerator
+
+* Test domains: eu-central-1.console.aws.amazon.com
+* IPv6 Type: Anycast
+* Coverage: Partial. (no root/ip match)
 * Usability: Unknown
 
 ## Github.io (Fastly)
@@ -220,6 +256,41 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: All
 * Usability: Unknown
 
+## Webflow (Cloudflare)
+
+* Test domains: www.visma.com, theaterfreunde-wiesbaden.de
+* IPv6 Type: Anycast
+* Coverage: All
+* Usability: Unknown
+
+## Zendesk (Cloudflare)
+
+* Test domains: openconnect.zendesk.com
+* IPv6 Type: Anycast
+* Coverage: All
+* Usability: Unknown
+
+## WP Engine (Cloudflare)
+
+* Test domains: wp.wpenginepowered.com
+* IPv6 Type: Anycast
+* Coverage: All
+* Usability: Unknown
+
+## servd (Cloudflare)
+
+* Test domains: e360.yale.edu
+* IPv6 Type: Anycast
+* Coverage: All
+* Usability: Unknown
+
+## Laravel Cloud (Cloudflare)
+
+* Test domains: aimyze-dev.com
+* IPv6 Type: Anycast
+* Coverage: All
+* Usability: Unknown
+
 ## msidentity (Microsoft) [DISABLED]
 
 * Test domains: login.live.com (#10)
@@ -227,10 +298,17 @@ Change the `v6_only` variable to true in the `config.json` file.
 * Coverage: Some Domains+Only on Aggressive mode.
 * Usability: Unusable, HTTP 400
 
-## AAAA WWW check (Experniment)
+# AAAA records on IPv4 PTR
+
+* Test domains: www.domainprivacyprotect.info (INWX), www.asciinema.org(Brightbox)
+* IPv6 Type: Unicast
+* Coverage: Only on matched IPv4 ranges.
+* Usability: Unknown (Sometimes it will not match on first AAAA request, since A records are processed separately)
+
+## AAAA WWW Check (Experimental)
 
 * Test domains: live.com (#24)
-* IPv6 Type: NA
+* IPv6 Type: N/A
 * Coverage: Only on Aggressive mode.
 * Usability: Unknown
 
@@ -247,10 +325,19 @@ For that we use the following information
 
 The next part is getting IPv6 address, for this below methods are used
 
-- Synthesize the IPv6 from IPv4 adddress (fastlly)
+- Synthesize the IPv6 from IPv4 adddress (Fastly)
 - Use known IPv6 addresss - (MSEDGE)
 - Use any IPv6 address -  (Cloudfront)
 - Generate IPv6 enabled hostname (Akamai)
 
 # Credits
 * [Pēteris Ņikiforovs](https://peteris.rocks/)
+
+# Similar Projects
+* [DeLegacy IPv6 RPZ Project](https://codeberg.org/IPv6-Monostack/delegacy-rpz/)
+
+# My other projects
+* [v6check](https://v6check.miyuru.lk/)
+* [v6monitor](https://v6monitor.com/)
+* [Random Projects](https://www.miyuru.lk/tools)
+
