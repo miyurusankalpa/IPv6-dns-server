@@ -157,8 +157,8 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 
 ## CacheFly
 
-* Test domains: www.cachefly.com, cachefly.cachefly.net
-* IPv6 Type: Unicast
+* Test domains: www.cachefly.com, cdn.arstechnica.net
+* IPv6 Type: Anycast, Unicast
 * Coverage: Hostname match for `vip/rvip` under `g.cachefly.net` or `g-anycast1.cachefly.net`, plus IPv4 range `205.234.175.0/24`.
 * Usability: Unknown
 
