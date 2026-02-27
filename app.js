@@ -86,13 +86,14 @@ if (aggressive_v6) {
     add_aaaa["store.steampowered.com"] = "2a02:26f0:fe00:3bd::2db2";
     add_aaaa["api.steampowered.com"] = "2a02:26f0:fe00:3bd::2db2";
     add_aaaa["underlords.com"] = "2a02:26f0:fe00:3bd::2db2";
+    add_aaaa["x.com"] = "fastly";
+    add_aaaa["api.x.com"] = "fastly";
     add_aaaa["android.clients.google.com"] = "2404:6800:4003:c01::65"; //todo: find a domain that resolves to this
 }
 
 //fix broken domains in non aggesive mode
 if (!aggressive_v6) {
     no_aaaa.push("i.imgur.com");
-    no_aaaa.push("api.x.com");
 }
 
 function isBlockedDomain(name) {
