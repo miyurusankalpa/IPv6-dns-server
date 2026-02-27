@@ -34,6 +34,7 @@ var blazingcdn = require('./providers/blazingcdn');
 var gcorecdn = require('./providers/gcorecdn');
 var azurewebsites = require('./providers/azurewebsites')
 var awsglobalaccelerator = require('./providers/awsglobalaccelerator');
+var cachefly = require('./providers/cachefly');
 
 var ptrcheck = require('./ptrcheck');
 
@@ -248,6 +249,7 @@ function proxy(question, response, cb) {
             var gco;
             var azw;
             var awsglb;
+            var cfly;
 
             var ptr;
 
@@ -328,6 +330,9 @@ function proxy(question, response, cb) {
                         break;
                     case 'awsglb':
                         awsglb = true;
+                        break;
+                    case 'cachefly':
+                        cfly = true;
                         break;
                     case 'ipptr':
                         ptr = true;
@@ -502,6 +507,15 @@ function proxy(question, response, cb) {
                 gcorecdn.getgcorecdnv6address(resolver, localStorageMemory, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
                 });;
+                return;
+            }
+
+            if (!cfly) cfly = cachefly.check_for_cachefly_hostname(last_hostname);
+            if (cfly) {
+                matched = true;
+                resolver.resolve6(cfly, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });
                 return;
             }
 
@@ -754,6 +768,14 @@ function proxy(question, response, cb) {
                 return;
             }
 
+            if (cachefly.check_for_cachefly_ip(ansaddr) === true) {
+                //console.log("added to cachefly ip");
+                add_aaaa[qhostname] = cachefly.cacheflyv4to6(ansaddr);
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
+                return;
+            }
+
             if (akamai.check_for_akamai_hostname(qhostname)) add_aaaa[qhostname] = "akamai";
             if (fastly.check_for_fastly_hostname(qhostname)) add_aaaa[qhostname] = "fastly";
             if (weebly.check_for_weebly_hostname(qhostname)) add_aaaa[qhostname] = "weebly";
@@ -763,6 +785,7 @@ function proxy(question, response, cb) {
             if (blazingcdn.check_for_blazingcdn_hostname(qhostname)) add_aaaa[qhostname] = "blazingcdn";
             if (gcorecdn.check_for_gcorecdn_hostname(qhostname)) add_aaaa[qhostname] = "gcorecdn";
             if (alicdn.check_for_alicdn_hostname(qhostname)) add_aaaa[qhostname] = "alicdn";
+            if (cachefly.check_for_cachefly_hostname(qhostname)) add_aaaa[qhostname] = "cachefly";
 
             if (handleV6Only(v6_only, response)) return;
 
