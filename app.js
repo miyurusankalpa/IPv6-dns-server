@@ -87,8 +87,8 @@ if (aggressive_v6) {
     add_aaaa["store.steampowered.com"] = "2a02:26f0:fe00:3bd::2db2";
     add_aaaa["api.steampowered.com"] = "2a02:26f0:fe00:3bd::2db2";
     add_aaaa["underlords.com"] = "2a02:26f0:fe00:3bd::2db2";
-    add_aaaa["x.com"] = "fastly";
-    add_aaaa["api.x.com"] = "fastly";
+    add_aaaa["x.com"] = "2a04:4e42::658";
+    add_aaaa["api.x.com"] = "2a04:4e42::658";
     add_aaaa["android.clients.google.com"] = "2404:6800:4003:c01::65"; //todo: find a domain that resolves to this
 }
 
@@ -332,7 +332,7 @@ function proxy(question, response, cb) {
                         awsglb = true;
                         break;
                     case 'cachefly':
-                        cfly = true;
+                        cfly = cachefly.check_for_cachefly_hostname(question.name);
                         break;
                     case 'ipptr':
                         ptr = true;
