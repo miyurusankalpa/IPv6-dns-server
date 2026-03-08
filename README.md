@@ -165,6 +165,13 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 * Coverage: All
 * Usability: Stable
 
+## CacheFly
+
+* Test domains: www.cachefly.com, cdn.arstechnica.net
+* IPv6 Type: Anycast, Unicast
+* Coverage: Hostname match for `vip/rvip` under `g.cachefly.net` or `g-anycast1.cachefly.net`, plus IPv4 range `205.234.175.0/24`.
+* Usability: Unknown
+
 ## Microsoft Edge
 
 * Test domains: onedrive.live.com
@@ -340,4 +347,3 @@ The next part is getting IPv6 address, for this below methods are used
 * [v6check](https://v6check.miyuru.lk/)
 * [v6monitor](https://v6monitor.com/)
 * [Random Projects](https://www.miyuru.lk/tools)
-

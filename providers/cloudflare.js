@@ -26,7 +26,15 @@ module.exports = {
     //console.log('cloudflare ip check', ipv4);
     if (!ipv4) return false;
 
-    return ipRangeCheck(ipv4, ["104.16.0.0/12", "162.159.128.0/17"]);
+    return ipRangeCheck(ipv4, [
+      "104.16.0.0/12",
+      "162.159.128.0/17",
+      "216.198.53.0/24", //zendesk
+      "216.198.54.0/24", //zendesk
+      "141.193.213.0/24", //wpengine
+      "94.247.142.0/24", //servdc
+      "103.133.1.0/24", //laravel cloud
+    ]);
   },
   getcloudflarev6address: function () {
     return "2606:4700::6810:bad"; //will give SSL_ERROR_NO_CYPHER_OVERLAP on non cloudflare sites on aggressive mode
@@ -57,5 +65,30 @@ module.exports = {
   },
   getshopifyv6address: function () {
     return "2620:127:f00f::";
+  },
+  check_for_webflow_hostname: function (hostname) {
+    if (!hostname) return false;
+    var sdomains = hostname.split(".");
+    sdomains.reverse();
+    var dp1 = sdomains.indexOf("com");
+    var dp2 = sdomains.indexOf("webflow");
+
+    if (dp1 === 0 && dp2 == 1) {
+      //console.log("webflow matched");
+      return hostname;
+    } else return false;
+  },
+  check_for_webflow_ip: function (ipv4) {
+    //console.log('webflow ip check', ipv4);
+    if (!ipv4) return false;
+
+    return ipRangeCheck(ipv4, [
+      "198.202.211.0/24",
+      "75.2.70.75/32", //aacb0a264e514dd48.awsglobalaccelerator.com
+      "99.83.190.102/32", //aacb0a264e514dd48.awsglobalaccelerator.com
+    ]);
+  },
+  getwebflowv6address: function () {
+    return "2620:cb:2000::1";
   },
 };

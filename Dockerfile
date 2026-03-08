@@ -4,8 +4,8 @@ FROM node:lts-alpine
 # Create app directory inside the container
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json files
-COPY package.json package-lock.json* ./
+# Copy package.json file
+COPY package.json ./
 
 # Install dependencies using npm
 RUN npm install

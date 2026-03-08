@@ -19,22 +19,32 @@ module.exports = {
       return true;
     } else return false;
   },
-  get_cdn77_v6address: function (resolver, localStorageMemory) {
+  get_cdn77_v6address: function (resolver, localStorageMemory, callback) {
     var aaaa_cdn77_domain = "www.cdn77.com"; //static content
     //var aaaa_cdn77_domain = 'hls-b.udemycdn.com'; //for video content
 
-    var v6adddy = localStorageMemory.getItem("cdn77v6addy");
+    const CACHE_KEY = "cdn77v6addy";
 
-    if (!v6adddy) {
-      //console.log("not cached");
-      resolver.resolve6(aaaa_cdn77_domain, (err, addresses) => {
-        if (err) {
-          console.log(err);
-        }
-        var v6adddy = addresses[0];
-        localStorageMemory.setItem("cdn77v6addy", v6adddy);
-        return v6adddy;
-      });
-    } else return v6adddy;
+    // Check cache first
+    const cachedV6List = localStorageMemory.getItem(CACHE_KEY);
+    if (cachedV6List) {
+      const addresses = Array.isArray(cachedV6List) ? cachedV6List : JSON.parse(cachedV6List);
+      // Call callback asynchronously to maintain consistent behavior
+      setImmediate(() => callback(null, addresses));
+      return;
+    }
+
+    // Resolve IPv6 addresses
+    resolver.resolve6(aaaa_cdn77_domain, (err, addresses) => {
+      if (err) {
+        console.error("Failed to resolve IPv6 addresses:", err);
+        callback(err, []);
+        return;
+      }
+
+      // Cache the result
+      localStorageMemory.setItem(CACHE_KEY, JSON.stringify(addresses));
+      callback(null, addresses);
+    });
   },
 };

@@ -8,8 +8,9 @@ var dns_resolver = config.dns_resolver;
 let dns = require('native-dns');
 let async = require('async');
 let localStorageMemory = require('localstorage-memory');
-let ipaddr = require('ipaddr.js');
 let ipRangeCheck = require("ip-range-check");
+
+const net = require('net');
 
 var akamai = require('./providers/akamai');
 var fastly = require('./providers/fastly');
@@ -17,7 +18,6 @@ var awss3 = require('./providers/awss3');
 var cloudflare = require('./providers/cloudflare');
 var cloudfront = require('./providers/cloudfront');
 var msedge = require('./providers/msedge');
-var highwinds = require('./providers/highwinds');
 var edgecast_windows = require('./providers/edgecast_windows');
 var limelight = require('./providers/limelight');
 var bunnycdn = require('./providers/bunnycdn');
@@ -30,7 +30,13 @@ var alicdn = require('./providers/alicdn');
 //var msidentity = require('./providers/msidentity');
 var netlify = require('./providers/netlify');
 var bearblog = require('./providers/bearblog');
-var inwx = require('./providers/inwx');
+var blazingcdn = require('./providers/blazingcdn');
+var gcorecdn = require('./providers/gcorecdn');
+var azurewebsites = require('./providers/azurewebsites')
+var awsglobalaccelerator = require('./providers/awsglobalaccelerator');
+var cachefly = require('./providers/cachefly');
+
+var ptrcheck = require('./ptrcheck');
 
 const {
     Resolver
@@ -72,15 +78,29 @@ var dns64 = config.dns64;
 var dns64_range = config.dns64_range; // "/96 CIDR assumed by default"
 
 add_aaaa["scholar.google.com"] = "scholar.googleusercontent.com"; //Thanks @Mynacol https://codeberg.org/IPv6-Monostack/delegacy-rpz/pulls/53
+add_aaaa["cdn.akamai.steamstatic.com"] = "a248.dsce.akamai.net";
+
+no_aaaa.push("ipv4.icanhazip.com"); //add this to no list, since it can mess with ipvfoo NAT detection
 
 if (aggressive_v6) {
-    add_aaaa["store.steampowered.com"] = "akamai|e11698.b.akamai.net";
+    add_aaaa["store.steampowered.com"] = "2a02:26f0:fe00:3bd::2db2";
+    add_aaaa["store.steampowered.com"] = "2a02:26f0:fe00:3bd::2db2";
+    add_aaaa["api.steampowered.com"] = "2a02:26f0:fe00:3bd::2db2";
+    add_aaaa["underlords.com"] = "2a02:26f0:fe00:3bd::2db2";
+    add_aaaa["x.com"] = "fastly";
+    add_aaaa["api.x.com"] = "fastly";
+    add_aaaa["android.clients.google.com"] = "2404:6800:4003:c01::65"; //todo: find a domain that resolves to this
 }
 
-// Block AAAA records for www.jbl.com and *.jbl.com subdomains: for #15
+//fix broken domains in non aggesive mode
+if (!aggressive_v6) {
+    no_aaaa.push("i.imgur.com");
+}
+
 function isBlockedDomain(name) {
     if (name === "www.jbl.com") return true;
-    if (/^[a-z]{2}\.jbl\.com$/.test(name)) return true;
+    if (/^[a-z]{2}\.jbl\.com$/.test(name)) return true; //*.jbl.com subdomains: for #15
+    if (/^[a-z]\.x\.com$/.test(name)) return true;
     return false;
 }
 
@@ -96,10 +116,7 @@ function isApexDomain(domainName) {
     // 3. An apex domain should split into exactly two parts,
     //    and neither part should be empty.
     return parts.length === 2 && parts[0].length > 0 && parts[1].length > 0;
-  }
-
-//cache fastly range on starup
-fastly.getfastlyv6address('fastly', resolver, localStorageMemory);
+}
 
 function handleRequest(request, response) {
     var question = request.question[0];
@@ -122,12 +139,6 @@ function handleRequest(request, response) {
                 no_aaaa.push(question.name.substr(8)); //add it to list without noaaaa subdomain
             }
 
-            if (no_aaaa.indexOf(question.name) !== -1 & !dns64) {
-                response.header.rcode = 0;
-                response.send();
-                return;
-            }
-
             //do not serve from cache if we have match from A
             /*if(!add_aaaa[question.name]) var cachedaaaaresponse = JSON.parse(localStorageMemory.getItem(question.name));
 
@@ -139,14 +150,14 @@ function handleRequest(request, response) {
             }*/
         }
 
-        if (question.type === 1) //A records
+        /*if (question.type === 1) //A records
         {
             if (v6_only) {
                 response.header.rcode = 0;
                 response.send();
                 return;
             }
-        }
+        }*/
 
         f.push(cb => proxy(question, response, cb));
     });
@@ -179,19 +190,35 @@ function proxy(question, response, cb) {
 
         if (question.type === 28) //AAAA records
         {
-            var last_hostname;
+            var last_hostname, matched_hostname;
             var last_type;
             var matched = false;
 
-            for (const a of msg.answer) {
-                last_hostname = a.data;
-                last_type = a.type;
-                response.answer.push(a);
-            }
+            msg.answer.forEach(aaaa => {
+                response.answer.push(aaaa);
+                //console.log('remote DNS response: ', aaaa)
+                last_hostname = aaaa.data;
+                last_type = aaaa.type;
+
+                if (aaaa.data && aaaa.data.includes('.azurewebsites.windows.net')) { //dirty hack to give the domain to process for azure websites
+                    matched_hostname = aaaa.data;
+                }
+            });
 
             if (last_type === 28) { //skip if there are AAAA records
                 cb();
                 return;
+            }
+
+            if (no_aaaa.indexOf(question.name) !== -1) { //handle no AAAA domain correctly
+                matched = true;
+                if(dns64){
+                    resolveIPv4AndMap(resolver, question, dns64_range, last_type, response, last_hostname, cb);
+                    return;
+                } else {
+                    cb();
+                    return;
+                }
             }
 
             var getcdn = add_aaaa[question.name];
@@ -206,7 +233,6 @@ function proxy(question, response, cb) {
             var cfr;
             var mse;
             var gio;
-            var hw;
             var bun;
             var sui;
             var wb;
@@ -214,11 +240,18 @@ function proxy(question, response, cb) {
             var ll;
             var oss;
             var ali;
-            var msi;
+            //var msi;
             var shp;
-            var net;
+            var nety;
             var bear;
-            var inx;
+            var wef;
+            var blz;
+            var gco;
+            var azw;
+            var awsglb;
+            var cfly;
+
+            var ptr;
 
             if (getcdn) {
                 var providers = add_aaaa[question.name].split("|");
@@ -246,9 +279,6 @@ function proxy(question, response, cb) {
                         break;
                     case 'githubio':
                         gio = true;
-                        break;
-                    case 'highwinds':
-                        hw = true;
                         break;
                     case 'edgecast_windows':
                         v0c = true;
@@ -280,27 +310,47 @@ function proxy(question, response, cb) {
                     case 'shopify':
                         shp = true;
                         break;
+                    case 'webflow':
+                        wef = true;
+                        break;
                     case 'netlify':
-                        net = true;
+                        nety = true;
                         break;
                     case 'bearblog':
                         bear = true;
                         break;
-                    case 'inwx':
-                        inx = true;
-                        var inwx_ptr = providers[1];
+                    case 'blazingcdn':
+                        blz = true;
+                        break;
+                    case 'gcorecdn':
+                        gco = true;
+                        break;
+                    case 'azureweb':
+                        azw = true;
+                        break;
+                    case 'awsglb':
+                        awsglb = true;
+                        break;
+                    case 'cachefly':
+                        cfly = true;
+                        break;
+                    case 'ipptr':
+                        ptr = true;
+                        var ip2ptr = providers[1];
                         break;
                     default: {
-                    //matched = true;
-                    if (ipaddr.isValid(provider_name) && ipaddr.parse(provider_name).kind() === 'ipv6') {
-                        handleResponse(5, response, generate_aaaa(question.name, provider_name), cb); // only ipv6 address
-                    } else {
+                    if (net.isIPv6(provider_name)) {
+                        matched = true;
+                        handleResponse(5, response, question.name, provider_name, cb); // only ipv6 address
+                        return;
+                    } /*else {
                         resolver.resolve6(provider_name, (err, addresses) => {
                             if (addresses && addresses.length > 0) {
-                                handleResponse(5, response, generate_aaaa(question.name, addresses[0]), cb);
+                                matched = true;
+                                handleResponse(5, response, question.name, addresses, cb);
                             }
                         });
-                    }
+                    }*/
                     }
                 }
             }
@@ -316,7 +366,16 @@ function proxy(question, response, cb) {
             if (ak) {
                 matched = true;
                 resolver.resolve6(ak, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else{ cb(); return; }
+                });
+                return;
+            }
+
+            if (!azw) azw = azurewebsites.check_for_azureweb_hostname(matched_hostname);
+            if (azw) {
+                matched = true;
+                resolver.resolve6(azw, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else{ cb(); return; }
                 });
                 return;
             }
@@ -326,7 +385,7 @@ function proxy(question, response, cb) {
             if (msi) {
                 matched = true;
                 resolver.resolve6(msi, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else{ cb(); return; }
                 });
                 return;
             }*/
@@ -336,7 +395,7 @@ function proxy(question, response, cb) {
             if (s3) {
                 matched = true;
                 resolver.resolve6(s3, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else{ cb(); return; }
                 });
                 return;
             }
@@ -345,16 +404,8 @@ function proxy(question, response, cb) {
             if (oss) {
                 matched = true;
                 resolver.resolve6(oss, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else{ cb(); return; }
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else{ cb(); return; }
                 });
-                return;
-            }
-
-            if (!hw) hw = highwinds.check_for_highwinds_hostname(last_hostname);
-            if (hw) {
-                matched = true;
-                var hwv6address = highwinds.gethighwindv6address();
-                handleResponse(last_type, response, generate_aaaa(last_hostname, hwv6address), cb);
                 return;
             }
 
@@ -371,17 +422,20 @@ function proxy(question, response, cb) {
             if (!fsta) fsta = fastly.check_for_fastly_a(authority);
             if (fsta) {
                 matched = true;
-                resolver.resolve4(last_hostname, (err, v4addresses) => {
+                resolver.resolve4(last_hostname, async (err, v4addresses) => {
+                    if (err) {
+                        cb();
+                        return;
+                    }
                     //console.log(v4addresses);
-                    var fv6 = fastly.fastlyv4tov6(v4addresses, resolver, localStorageMemory);
+                    var fv6 = await fastly.fastlyv4tov6(v4addresses, resolver, localStorageMemory);
 
                     if (!fv6) {
-                        fastly_fallback();
-                        //cb();
-                        //return;
+                        cb();
+                        return;
                     }
 
-                    handleResponse(last_type, response, generate_aaaa(last_hostname, fv6), cb);
+                    handleResponse(last_type, response, last_hostname, fv6, cb);
                 });
                 return;
             }
@@ -391,11 +445,14 @@ function proxy(question, response, cb) {
             function fastly_fallback() {
                 var fsta1 = fastly.check_for_fastly_hostname(last_hostname);
                 //console.log(fsta1);
-
-                if (fsta1 && fsta1[0] == "d") { //check for "d"ualstack in the hostname
-                    matched = true; fsta = fsta1;
+                if (fsta1) {
+                    matched = true;
                     resolver.resolve6(fsta1, (err, addresses) => {
-                        if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else { cb(); return; }
+                        if (err || addresses === undefined) {
+                            cb();
+                            return;
+                        }
+                        handleResponse(last_type, response, last_hostname, addresses, cb);
                     });
                     return;
                 }
@@ -413,7 +470,7 @@ function proxy(question, response, cb) {
                         return;
                     }
 
-                    handleResponse(last_type, response, generate_aaaa(last_hostname, mv6), cb);
+                    handleResponse(last_type, response, last_hostname, mv6, cb);
                     return;
                 });
 
@@ -422,25 +479,63 @@ function proxy(question, response, cb) {
             if (!cfr) cfr = cloudfront.check_for_cloudfront_hostname(last_hostname);
             if (cfr) {
                 matched = true;
-
-                handleResponse(last_type, response, generate_aaaa(last_hostname, cloudfront.getcloudfrontv6address(resolver, localStorageMemory)), cb);
-                return;
+                cloudfront.getcloudfrontv6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });
             }
 
             if (!bun) bun = bunnycdn.check_for_bunnycdn_hostname(last_hostname);
             if (bun) {
                 matched = true;
                 var bv6address = bunnycdn.getbunnycdnv6address(resolver, localStorageMemory);
-                handleResponse(last_type, response, generate_aaaa(last_hostname, bv6address), cb);
+                handleResponse(last_type, response, last_hostname, bv6address, cb);
                 return;
             }
 
-            if (!c77 && aggressive_v6) c77 = cdn77.check_for_cdn77_a(authority);
-            if (!c77 && aggressive_v6) c77 = cdn77.check_for_cdn77_hostname(last_hostname);
+            if (!blz) blz = blazingcdn.check_for_blazingcdn_hostname(last_hostname);
+            if (blz) {
+                matched = true;
+                blazingcdn.getblazingcdnv6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });
+                return;
+            }
+
+            if (!gco) gco = gcorecdn.check_for_gcorecdn_hostname(last_hostname);
+            if (gco) {
+                matched = true;
+                gcorecdn.getgcorecdnv6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });;
+                return;
+            }
+
+            if (!cfly) cfly = cachefly.check_for_cachefly_hostname(last_hostname);
+            if (cfly) {
+                matched = true;
+                resolver.resolve6(cfly, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });
+                return;
+            }
+
+            if (!c77) c77 = cdn77.check_for_cdn77_a(authority);
+            if (!c77) c77 = cdn77.check_for_cdn77_hostname(last_hostname);
             if (c77) {
                 matched = true;
-                var cv6address = cdn77.get_cdn77_v6address(resolver, localStorageMemory);
-                handleResponse(last_type, response, generate_aaaa(last_hostname, cv6address), cb);
+                cdn77.get_cdn77_v6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });;
+                return;
+            }
+
+            if (!awsglb) awsglb = awsglobalaccelerator.check_for_awsglb_hostname(last_hostname);
+            if (awsglb) {
+                matched = true;
+                resolver.resolve6(awsglb, (err, addresses) => {
+                    //console.log('awsglb', addresses);
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });
                 return;
             }
 
@@ -448,7 +543,7 @@ function proxy(question, response, cb) {
             if (wb) {
                 matched = true;
                 var wbv6address = weebly.getweeblyv6address();
-                handleResponse(last_type, response, generate_aaaa(last_hostname, wbv6address), cb);
+                handleResponse(last_type, response, last_hostname, wbv6address, cb);
                 return;
             }
 
@@ -456,7 +551,7 @@ function proxy(question, response, cb) {
             if (v0c) {
                 matched = true;
                 resolver.resolve6(v0c, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else return;
                 });
                 return;
             }
@@ -465,45 +560,56 @@ function proxy(question, response, cb) {
             if (ll) {
                 matched = true;
                 resolver.resolve6(ll, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else return;
                 });
                 return;
             }
 
             if (sui) {
                 matched = true;
-                var sv6address = sucuri.getsucuriv6address(resolver, localStorageMemory);
-                handleResponse(last_type, response, generate_aaaa(last_hostname, sv6address), cb);
+                sucuri.getsucuriv6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });
                 return;
             }
 
-            if (!net) net = netlify.check_for_netlify_hostname(last_hostname);
-            if (net) {
+            if (!nety) nety = netlify.check_for_netlify_hostname(last_hostname);
+            if (nety) {
                 matched = true;
-
-                handleResponse(last_type, response, generate_aaaa(last_hostname, netlify.getnetlifyv6address(resolver, localStorageMemory)), cb);
+                netlify.getnetlifyv6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });
                 return;
             }
 
             if(bear) {
                 matched = true;
-                handleResponse(last_type, response, generate_aaaa(last_hostname, bearblog.getbearblogv6address(resolver, localStorageMemory)), cb);
+                bearblog.getbearblogv6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });
                 return;
             }
 
             if (!shp) shp = cloudflare.check_for_shopify_hostname(last_hostname);
             if (shp) {
                 matched = true;
-                handleResponse(last_type, response, generate_aaaa(last_hostname, cloudflare.getshopifyv6address()), cb);
+                handleResponse(last_type, response, last_hostname, cloudflare.getshopifyv6address(), cb);
                 return;
             }
 
-            if (aggressive_v6 & inx) {
+            if (!wef) wef = cloudflare.check_for_webflow_hostname(last_hostname);
+            if (wef) {
                 matched = true;
-                //console.log('ptr', inwx_ptr);
+                handleResponse(last_type, response, last_hostname, cloudflare.getwebflowv6address(), cb);
+                return;
+            }
 
-                resolver.resolve6(inwx_ptr, (err, addresses) => {
-                    if (addresses != undefined) handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb); else return;
+            if (ptr) {
+                matched = true;
+                //console.log('ptr', ip2ptr);
+
+                resolver.resolve6(ip2ptr, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else return;
                 });
                 return;
             }
@@ -512,15 +618,16 @@ function proxy(question, response, cb) {
             if (!cfl) cfl = cloudflare.check_for_cloudflare_hostname(last_hostname);
             if (cfl) {
                 matched = true;
-                handleResponse(last_type, response, generate_aaaa(last_hostname, cloudflare.getcloudflarev6address()), cb);
+                handleResponse(last_type, response, last_hostname, cloudflare.getcloudflarev6address(), cb);
                 return;
             }
 
             if (!ali) ali = alicdn.check_for_alicdn_hostname(last_hostname);
             if (ali) {
                 matched = true;
-
-                handleResponse(last_type, response, generate_aaaa(last_hostname, alicdn.getalicdnv6address(resolver, localStorageMemory)), cb);
+                alicdn.getalicdnv6address(resolver, localStorageMemory, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else { cb(); return; }
+                });
                 return;
             }
 
@@ -533,26 +640,12 @@ function proxy(question, response, cb) {
                         return;
                     } else {
                         matched = true;
-                        handleResponse(last_type, response, generate_aaaa(last_hostname, addresses[0]), cb);
+                        handleResponse(last_type, response, last_hostname, addresses, cb);
                         return;
                     }
                 });
             } else if (!matched && dns64) {
-                resolver.resolve4(question.name, (err, addresses) => {
-                    //console.log('a check', addresses);
-
-                    if (addresses === undefined || addresses[0] === undefined) {
-                        cb();
-                        return;
-                    } else {
-                        matched = true;
-                        var mapaddr = (ipaddr.parse('::ffff:' + addresses[0])).toString();
-                        //console.log(mapaddr);
-
-                        handleResponse(last_type, response, generate_aaaa(last_hostname, mapaddr.replace("::ffff:", dns64_range)), cb);
-                        return;
-                    }
-                });
+                resolveIPv4AndMap(resolver, question, dns64_range, last_type, response, last_hostname, cb);
             } else if (!matched) cb();
 
         }
@@ -573,108 +666,96 @@ function proxy(question, response, cb) {
             if (fastly.check_for_fastly_ip(ansaddr) === true) {
                 //console.log("added to fastly object");
                 add_aaaa[qhostname] = "fastly";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if (cloudfront.check_for_cloudfront_ip(ansaddr) === true) {
                 //console.log("added to cloudfront object");
                 add_aaaa[qhostname] = "cloudfront";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if (sucuri.check_for_sucuri_ip(ansaddr) === true) {
                 //console.log("added to sucuri object");
                 add_aaaa[qhostname] = "sucuri";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if (weebly.check_for_weebly_ip(ansaddr) === true) {
                 //console.log("added to weebly object");
                 add_aaaa[qhostname] = "weebly";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if ((fastly.check_for_githubpages_ip(ansaddr) === true)) {
                 //console.log("added to github.io object");
                 add_aaaa[qhostname] = "githubio";
-
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if (netlify.check_for_netlify_ip(ansaddr) === true) {
                 //console.log("added to netify ip");
                 add_aaaa[qhostname] = "netlify";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if(bearblog.check_for_bearblog_ip(ansaddr) === true) {
                 //console.log("added to bearblog ip");
                 add_aaaa[qhostname] = "bearblog";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if (cloudflare.check_for_shopify_ip(ansaddr) === true) {
                 //console.log("added to shopify object");
                 add_aaaa[qhostname] = "shopify";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
-            if(aggressive_v6 && inwx.check_for_inwx_ip(ansaddr) === true) {
-                //console.log("added to inwx ip");
+            if (cloudflare.check_for_webflow_ip(ansaddr) === true) {
+                //console.log("added to webflow object");
+                add_aaaa[qhostname] = "webflow";
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
+                return;
+            }
+
+
+            if(ptrcheck.check_for_ptr_ip(ansaddr) === true) {
+                //console.log("added to ptr ip");
 
                 var ptrdoamin = ansaddr.split('.').reverse().join('.') + ".in-addr.arpa";
 
                 resolver.resolvePtr(ptrdoamin, (err, addresses) => {
                     //console.log('ptr', addresses);
-                    if (addresses != undefined) add_aaaa[qhostname] = "inwx|"+addresses; else return;
+                    if (addresses != undefined) add_aaaa[qhostname] = "ipptr|"+addresses; else return;
                 });
 
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
             if (cloudflare.check_for_cloudflare_ip(ansaddr) === true) {
                 //console.log("added to cloudflare object");
                 add_aaaa[qhostname] = "cloudflare";
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
@@ -682,10 +763,16 @@ function proxy(question, response, cb) {
                 //console.log("added to wordpressvip ip");
 
                 add_aaaa[qhostname] = wpvip.wpvipv4to6(ansaddr);
-                response.answer.forEach(function (item, index) {
-                    response.answer[index].ttl = 0;
-                });
-                cb();
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
+                return;
+            }
+
+            if (cachefly.check_for_cachefly_ip(ansaddr) === true) {
+                //console.log("added to cachefly ip");
+                add_aaaa[qhostname] = cachefly.cacheflyv4to6(ansaddr);
+                if (handleV6Only(v6_only, response)) return;
+                resetTTLAndCallback(response, cb);
                 return;
             }
 
@@ -695,8 +782,12 @@ function proxy(question, response, cb) {
             if (netlify.check_for_netlify_hostname(qhostname)) add_aaaa[qhostname] = "netlify";
             if (cloudfront.check_for_cloudfront_hostname(qhostname)) add_aaaa[qhostname] = "cloudfront";
             if (bunnycdn.check_for_bunnycdn_hostname(qhostname)) add_aaaa[qhostname] = "bunnycdn";
-            if (highwinds.check_for_highwinds_hostname(qhostname)) add_aaaa[qhostname] = "highwinds";
+            if (blazingcdn.check_for_blazingcdn_hostname(qhostname)) add_aaaa[qhostname] = "blazingcdn";
+            if (gcorecdn.check_for_gcorecdn_hostname(qhostname)) add_aaaa[qhostname] = "gcorecdn";
             if (alicdn.check_for_alicdn_hostname(qhostname)) add_aaaa[qhostname] = "alicdn";
+            if (cachefly.check_for_cachefly_hostname(qhostname)) add_aaaa[qhostname] = "cachefly";
+
+            if (handleV6Only(v6_only, response)) return;
 
             cb();
         } else {
@@ -736,13 +827,22 @@ function proxy(question, response, cb) {
 
 }
 
-function handleResponse(last_type, response, aaaaresponse, cb) {
-    //console.log('lt', last_type);
-    //console.log('cachekey', response.question[0].name);
-    if ((last_type === 5) && (aaaaresponse)) { //cname
-        response.answer.push(aaaaresponse);
-        //localStorageMemory.setItem(response.question[0].name, JSON.stringify(response.answer));
-        //console.log('remote DNS response: ', aaaaresponse);
+function handleResponse(last_type, response, hostname, ipv6address, cb) {
+    if ((last_type === 5) && (ipv6address)) { //cname
+
+        //for each ipv6 genrate answer
+        if (Array.isArray(ipv6address)) {
+            ipv6address = ipv6address.slice(0, 7); //limit to 7 addresses, since it looks like is crashes the server #42
+            ipv6address.forEach(ipv6 => {
+            var aaaaresponse = generate_aaaa(hostname, ipv6);
+            response.answer.push(aaaaresponse);
+            });
+        } else {
+            var aaaaresponse = generate_aaaa(hostname, ipv6address);
+            response.answer.push(aaaaresponse);
+        }
+
+        //console.log('remote DNS response: ', ipv6address);
         cb();
     }
 }
@@ -762,3 +862,48 @@ function generate_aaaa(hostname, ipv6) {
     return newaaaa;
 }
 
+
+function ipv4ToIPv6Hex(ipv6prefix='::ffff:',ipv4) {
+    const parts = ipv4.split('.').map(Number);
+    const hex1 = parts[0].toString(16).padStart(2, '0') + parts[1].toString(16).padStart(2, '0');
+    const hex2 = parts[2].toString(16).padStart(2, '0') + parts[3].toString(16).padStart(2, '0');
+    return `${ipv6prefix}${hex1}:${hex2}`;
+}
+
+// Helper function for repetitive tasks
+function resetTTLAndCallback(response, cb) {
+    response.answer.forEach(function (item, index) {
+        response.answer[index].ttl = 0;
+    });
+    cb();
+}
+
+function resolveIPv4AndMap(resolver, question, dns64_range, last_type, response, last_hostname, cb) {
+    resolver.resolve4(question.name, (err, addresses) => {
+        if (addresses === undefined || addresses[0] === undefined) {
+            cb();
+            return;
+        }
+
+        // Map all IPv4 addresses to IPv6 using DNS64
+        let mapaddr;
+        if (Array.isArray(addresses)) {
+            mapaddr = addresses.map(ipv4 => ipv4ToIPv6Hex(dns64_range, ipv4));
+        } else {
+            mapaddr = [ipv4ToIPv6Hex(dns64_range, addresses)];
+        }
+
+        handleResponse(last_type, response, last_hostname, mapaddr, cb);
+    });
+}
+
+// Helper function to handle v6_only mode
+function handleV6Only(v6_only, response) {
+    if (v6_only) {
+        response.answer = [];
+        response.header.rcode = 0;
+        response.send();
+        return true;
+    }
+    return false;
+}

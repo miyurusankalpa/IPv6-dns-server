@@ -1,9 +1,8 @@
-var ipRangeCheck = require("ip-range-check");
-
 module.exports = {
-  getnetlifyv6address: function (resolver, localStorageMemory, callback) {
-    var aaaa_netlify_domain = "www.netlify.com";
-    const CACHE_KEY = "netlifyv6addy";
+  getblazingcdnv6address: function (resolver, localStorageMemory, callback) {
+    const AAAA_BLAZING_DOMAIN = "cdn59455242.blazingcdn.net";
+    const CACHE_KEY = "blazingcdnv6addy";
+    const BLAZING_FIXED_ADDRESS = "2a02:b48:9000::1"; // BlazingCDN anycast IP
 
     // Check cache first
     const cachedV6List = localStorageMemory.getItem(CACHE_KEY);
@@ -15,36 +14,32 @@ module.exports = {
     }
 
     // Resolve IPv6 addresses
-    resolver.resolve6(aaaa_netlify_domain, (err, addresses) => {
+    resolver.resolve6(AAAA_BLAZING_DOMAIN, (err, addresses) => {
       if (err) {
         console.error("Failed to resolve IPv6 addresses:", err);
         callback(err, []);
         return;
       }
 
-      // Cache the result
       localStorageMemory.setItem(CACHE_KEY, JSON.stringify(addresses));
+      // If no addresses found, use the fixed address
+      if (!addresses || addresses.length === 0) {
+        console.warn("No IPv6 addresses found for BlazingCDN, using fallback address.");
+        addresses = [BLAZING_FIXED_ADDRESS];
+      }
       callback(null, addresses);
     });
   },
-  check_for_netlify_hostname: function (hostname) {
+
+  check_for_blazingcdn_hostname: function (hostname) {
     if (!hostname) return false;
     var sdomains = hostname.split(".");
     sdomains.reverse();
-    var dp1 = sdomains.indexOf("com");
-    var dp2 = sdomains.indexOf("netlify");
-
-    //console.log(sdomains);
+    var dp1 = sdomains.indexOf("net");
+    var dp2 = sdomains.indexOf("blazingcdn");
 
     if (dp1 === 0 && dp2 == 1) {
-      console.log("netlify matched");
-      return hostname;
+      return true;
     } else return false;
-  },
-  check_for_netlify_ip: function (ipv4) {
-    //console.log("netlify ip check", ipv4);
-    if (!ipv4) return false;
-
-    return ipRangeCheck(ipv4, ["75.2.60.5/32", "99.83.231.61/32"]);
   },
 };

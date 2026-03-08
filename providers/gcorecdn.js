@@ -1,9 +1,8 @@
-var ipRangeCheck = require("ip-range-check");
-
 module.exports = {
-  getnetlifyv6address: function (resolver, localStorageMemory, callback) {
-    var aaaa_netlify_domain = "www.netlify.com";
-    const CACHE_KEY = "netlifyv6addy";
+  getgcorecdnv6address: function (resolver, localStorageMemory, callback) {
+    // ipv6 enabled domain
+    const aaaa_gcore_domain = "d.gcdn.co"; //https://codeberg.org/IPv6-Monostack/delegacy-rpz/src/commit/48fdd433336cd6009e751677b131bbd1718d5573/dnsconfig.js#L2244
+    const CACHE_KEY = localStorageMemory.getItem("gcorecdnv6addy");
 
     // Check cache first
     const cachedV6List = localStorageMemory.getItem(CACHE_KEY);
@@ -15,7 +14,7 @@ module.exports = {
     }
 
     // Resolve IPv6 addresses
-    resolver.resolve6(aaaa_netlify_domain, (err, addresses) => {
+    resolver.resolve6(aaaa_gcore_domain, (err, addresses) => {
       if (err) {
         console.error("Failed to resolve IPv6 addresses:", err);
         callback(err, []);
@@ -27,24 +26,16 @@ module.exports = {
       callback(null, addresses);
     });
   },
-  check_for_netlify_hostname: function (hostname) {
+
+  check_for_gcorecdn_hostname: function (hostname) {
     if (!hostname) return false;
     var sdomains = hostname.split(".");
     sdomains.reverse();
-    var dp1 = sdomains.indexOf("com");
-    var dp2 = sdomains.indexOf("netlify");
-
-    //console.log(sdomains);
+    var dp1 = sdomains.indexOf("co");
+    var dp2 = sdomains.indexOf("gcdn");
 
     if (dp1 === 0 && dp2 == 1) {
-      console.log("netlify matched");
-      return hostname;
+      return true;
     } else return false;
-  },
-  check_for_netlify_ip: function (ipv4) {
-    //console.log("netlify ip check", ipv4);
-    if (!ipv4) return false;
-
-    return ipRangeCheck(ipv4, ["75.2.60.5/32", "99.83.231.61/32"]);
   },
 };

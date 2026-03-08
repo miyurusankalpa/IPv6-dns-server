@@ -11,22 +11,31 @@ module.exports = {
       return true;
     } else return false;
   },
-  getalicdnv6address: function (resolver, localStorageMemory) {
+  getalicdnv6address: function (resolver, localStorageMemory, callback) {
     //ipv6 enabled alicdn domain
     var aaaa_alicdn_domain = "t.alicdn.com";
-    var v6addy = localStorageMemory.getItem("alicdnv6addy");
+    const CACHE_KEY = "alicdnv6addy";
 
-    if (!v6addy) {
-      //console.log("not cached");
-      resolver.resolve6(aaaa_alicdn_domain, (err, addresses) => {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        var v6addy = addresses[0].slice(0, -4);
-        localStorageMemory.setItem("alicdnv6addy", addresses[0]);
-        return v6addy;
-      });
-    } else return v6addy;
+    // Check cache first
+    const cachedV6List = localStorageMemory.getItem(CACHE_KEY);
+    if (cachedV6List) {
+      const addresses = Array.isArray(cachedV6List) ? cachedV6List : JSON.parse(cachedV6List);
+      // Call callback asynchronously to maintain consistent behavior
+      setImmediate(() => callback(null, addresses));
+      return;
+    }
+
+    // Resolve IPv6 addresses
+    resolver.resolve6(aaaa_alicdn_domain, (err, addresses) => {
+      if (err) {
+        console.error("Failed to resolve IPv6 addresses:", err);
+        callback(err, []);
+        return;
+      }
+
+      // Cache the result
+      localStorageMemory.setItem(CACHE_KEY, JSON.stringify(addresses));
+      callback(null, addresses);
+    });
   },
 };
