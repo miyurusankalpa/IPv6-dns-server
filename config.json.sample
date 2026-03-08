@@ -8,5 +8,8 @@
   "remove_v4_if_v6_exist":false,
   "dns64":false,
   "no_aaaa":[],
-  "add_aaaa":{}
+  "add_aaaa":{
+    "example.com":"2001:db8::1",
+    "www.example.com":"3fff::2"
+  }
 }
