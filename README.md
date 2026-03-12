@@ -66,6 +66,16 @@ Add the domain to `no_aaaa` array in the `config.json` file.
 
 Add the domain to `add_aaaa` object with IPv6 address in the `config.json` file.
 
+Example:
+
+```
+  "add_aaaa":{
+    "example.com":"2001:db8::1",
+    "www.example.com":"3fff::2"
+  }
+```
+
+
 ### Turn on **Aggressive Mode**
 
 Change the `aggressive_v6` variable to true in the `config.json` file. See individual services below to see what aggressive mode does.
