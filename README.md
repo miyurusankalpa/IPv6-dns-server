@@ -96,7 +96,7 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 
 ## Cloudflare
 
-* Test domains: db-ip.com
+* Test domains: db-ip.com, discord.com
 * IPv6 Type: Anycast
 * Usability: Stable
 * Coverage: All
@@ -251,7 +251,7 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 
 # AWS Global Accelerator
 
-* Test domains: eu-central-1.console.aws.amazon.com
+* Test domains: eu-central-1.console.aws.amazon.com, public.ecr.aws
 * IPv6 Type: Anycast
 * Coverage: Partial. (no root/ip match)
 * Usability: Unknown
