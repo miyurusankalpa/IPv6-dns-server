@@ -80,6 +80,7 @@ var dns64_range = config.dns64_range; // "/96 CIDR assumed by default"
 
 add_aaaa["scholar.google.com"] = "scholar.googleusercontent.com"; //Thanks @Mynacol https://codeberg.org/IPv6-Monostack/delegacy-rpz/pulls/53
 add_aaaa["cdn.akamai.steamstatic.com"] = "a248.dsce.akamai.net";
+add_aaaa["avherald.com"] = "2a02:8384:9:6::";
 
 no_aaaa.push("ipv4.icanhazip.com"); //add this to no list, since it can mess with ipvfoo NAT detection
 
