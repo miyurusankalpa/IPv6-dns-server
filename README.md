@@ -123,6 +123,13 @@ Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. T
 * Coverage: *.s3.amazonaws.com and s3 websites hostnames/cnames only.
 * Usability: Stable
 
+## Oracle Object Storage
+
+* Test domains: objectstorage.us-ashburn-1.oci.customer-oci.com, compat.objectstorage.ap-mumbai-1.oraclecloud.com, swiftobjectstorage.us-ashburn-1.oci.customer-oci.com
+* IPv6 Type: Unicast
+* Coverage: Native, S3-compatible, Swift, and legacy `oraclecloud.com` hostnames that can be converted to `ds` endpoints.
+* Usability: Unknown
+
 ## Amazon Cloudfront
 
 * Test domains: www.figma.com, vod-secure.twitch.tv

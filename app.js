@@ -35,6 +35,7 @@ var gcorecdn = require('./providers/gcorecdn');
 var azurewebsites = require('./providers/azurewebsites')
 var awsglobalaccelerator = require('./providers/awsglobalaccelerator');
 var cachefly = require('./providers/cachefly');
+var oracleobjectstorage = require('./providers/oracleobjectstorage');
 
 var ptrcheck = require('./ptrcheck');
 
@@ -221,7 +222,11 @@ function proxy(question, response, cb) {
                 }
             }
 
+            var normalizedQuestionName = question.name.replace(/\.$/, '');
             var getcdn = add_aaaa[question.name];
+            if (!getcdn && normalizedQuestionName !== question.name) {
+                getcdn = add_aaaa[normalizedQuestionName];
+            }
 
             //console.log(add_aaaa);
 
@@ -250,12 +255,13 @@ function proxy(question, response, cb) {
             var azw;
             var awsglb;
             var cfly;
+            var orclobj;
 
             var ptr;
 
             if (getcdn) {
-                var providers = add_aaaa[question.name].split("|");
-                var provider_name = providers[0];
+                var providers = getcdn.split("|");
+                var provider_name = providers[0].trim();
 
                 //console.log('custom', provider_name);
                 switch (provider_name) {
@@ -331,6 +337,9 @@ function proxy(question, response, cb) {
                     case 'awsglb':
                         awsglb = true;
                         break;
+                    case 'oracleobjectstorage':
+                        orclobj = oracleobjectstorage.check_for_oracleobjectstorage_hostname(question.name);
+                        break;
                     case 'cachefly':
                         cfly = cachefly.check_for_cachefly_hostname(question.name);
                         break;
@@ -395,6 +404,16 @@ function proxy(question, response, cb) {
             if (s3) {
                 matched = true;
                 resolver.resolve6(s3, (err, addresses) => {
+                    if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else{ cb(); return; }
+                });
+                return;
+            }
+
+            if (!orclobj) orclobj = oracleobjectstorage.check_for_oracleobjectstorage_hostname(question.name);
+            if (!orclobj && aggressive_v6) orclobj = oracleobjectstorage.check_for_oracleobjectstorage_hostname(last_hostname);
+            if (orclobj) {
+                matched = true;
+                resolver.resolve6(orclobj, (err, addresses) => {
                     if (addresses != undefined) handleResponse(last_type, response, last_hostname, addresses, cb); else{ cb(); return; }
                 });
                 return;
@@ -786,6 +805,7 @@ function proxy(question, response, cb) {
             if (gcorecdn.check_for_gcorecdn_hostname(qhostname)) add_aaaa[qhostname] = "gcorecdn";
             if (alicdn.check_for_alicdn_hostname(qhostname)) add_aaaa[qhostname] = "alicdn";
             if (cachefly.check_for_cachefly_hostname(qhostname)) add_aaaa[qhostname] = "cachefly";
+            if (oracleobjectstorage.check_for_oracleobjectstorage_hostname(qhostname)) add_aaaa[qhostname] = "oracleobjectstorage";
 
             if (handleV6Only(v6_only, response)) return;
 
