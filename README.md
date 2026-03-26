@@ -24,11 +24,11 @@ or with pm2:
 
 	pm2 start app.js
 
-## Use Docker Image [Testing]
-
-Build: `docker build -t miyurulk/ipv6-dns-proxy .`
+## Use Docker Image
 
 Pull: `docker pull miyurulk/ipv6-dns-proxy`
+
+Or Build: `docker build -t miyurulk/ipv6-dns-proxy .`
 
 Change the `self_resolver` to `::` in `config.js`
 
