@@ -656,7 +656,11 @@ function proxy(question, response, cb) {
                     //console.log('aaaa check', addresses);
 
                     if (addresses === undefined || addresses[0] === undefined) {
-                        cb();
+                        if (dns64) {
+                            resolveIPv4AndMap(resolver, question, dns64_range, last_type, response, last_hostname, cb);
+                        } else {
+                            cb();
+                        }
                         return;
                     } else {
                         matched = true;
