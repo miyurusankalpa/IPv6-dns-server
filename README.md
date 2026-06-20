@@ -1,356 +1,209 @@
-# Introduction
+# IPv6 DNS Proxy Server
 
-A simple Node DNS proxy Server based on [Peteris Rocks tutorial](https://peteris.rocks/blog/dns-proxy-server-in-node-js-with-ui/), which serves IPv6 records if a CDN is matched.
+A DNS proxy that adds IPv6 support to CDNs and services that don't offer it natively. Point your DNS to this server and it will synthesize AAAA records for domains behind known CDNs, so IPv6-only networks can reach them.
 
-## Running locally
+Based on [Peteris Nikiforovs' tutorial](https://peteris.rocks/blog/dns-proxy-server-in-node-js-with-ui/).
 
-Clone the repo
+## Quick Start
 
-	git clone https://gitlab.com/miyurusankalpa/IPv6-dns-server.git
-
-Build the project
-
-	pnpm install
-
-Copy the sample config
-
-	cp config.json.sample config.json
-	
-Starting the server
-
-	pnpm start
-
-or with pm2:
-
-	pm2 start app.js
-
-## Use Docker Image
-
-Pull: `docker pull miyurulk/ipv6-dns-proxy`
-
-Or Build: `docker build -t miyurulk/ipv6-dns-proxy .`
-
-Change the `self_resolver` to `::` in `config.js`
-
-Run:
+```bash
+git clone https://gitlab.com/miyurusankalpa/IPv6-dns-server.git
+cd IPv6-dns-server
+pnpm install
+cp config.json.sample config.json
+pnpm start
 ```
+
+Then set your system DNS to `[::1]:533` (or the address/port from your config).
+
+### Docker
+
+```bash
+docker pull miyurulk/ipv6-dns-proxy
+# or build locally
+docker build -t miyurulk/ipv6-dns-proxy .
+```
+
+Make sure `self_resolver` is `::` in `config.json`, then:
+
+```bash
 docker run --privileged \
   -p 53:53/tcp \
   -p 53:53/udp \
   --name ipv6-dns-proxy \
-  -v config.js:/usr/src/app/config.js \
-   miyurulk/ipv6-dns-proxy
+  -v config.json:/usr/src/app/config.json \
+  miyurulk/ipv6-dns-proxy
 ```
 
-Get the container IP: `docker inspect -f '{{.NetworkSettings.Networks.bridge.GlobalIPv6Address}}' ipv6-dns-proxy`
-
-## Config Options
-
-### Changing DNS Proxy IP and Port
-
-Change the `self_resolver` and `self_port` variables in the `config.json` file. By default it listens to [::1]:53
-
-### Changing Upstream DNS Resolvers
-
-Change the `dns_resolver` variable in the `config.json` file.
-
-### Temporarily disable AAAA records for a domain
-
-If the domain gives a system error, append `_noaaaa.` to the domain and the domain with be IPv4 only for the rest of the session.
-
-### Disable IPv6 for a domain permanently
-
-Add the domain to `no_aaaa` array in the `config.json` file.
-
-### Add a custom IPv6 for a domain
-
-Add the domain to `add_aaaa` object with IPv6 address in the `config.json` file.
-
-Example:
-
-```
-  "add_aaaa":{
-    "example.com":"2001:db8::1",
-    "www.example.com":"3fff::2"
-  }
+Get the container's IPv6 address:
+```bash
+docker inspect -f '{{.NetworkSettings.Networks.bridge.GlobalIPv6Address}}' ipv6-dns-proxy
 ```
 
+## Configuration
 
-### Turn on **Aggressive Mode**
+All options go in `config.json`:
 
-Change the `aggressive_v6` variable to true in the `config.json` file. See individual services below to see what aggressive mode does.
+| Option | Default | Description |
+|--------|---------|-------------|
+| `dns_resolver` | `2606:4700:4700::1111` | Upstream DNS resolver (IPv6 address) |
+| `self_resolver` | `::1` | Address to listen on (`::` for all interfaces) |
+| `self_port` | `53` | Port to listen on |
+| `dns64_range` | `64:ff9b::` | DNS64 synthesis prefix |
+| `aggressive_v6` | `false` | Enable extra IPv6 synthesis (see below) |
+| `v6_only` | `false` | Strip A records from all responses |
+| `remove_v4_if_v6_exist` | `false` | Suppress A records when AAAA exists |
+| `dns64` | `false` | Enable DNS64 fallback for domains without AAAA |
+| `dns64_only` | `false` | Force all AAAA through DNS64, ignoring native AAAA |
+| `no_aaaa` | `[]` | Domains to never return AAAA for |
+| `add_aaaa` | `{}` | Explicit domain-to-IPv6 overrides |
+
+### Common Configurations
+
+**Basic proxy** (just add IPv6 where possible):
+```json
+{ "dns_resolver": "2606:4700:4700::1111", "dns64": true }
+```
+
+**IPv6-only network** (hide all IPv4):
+```json
+{ "v6_only": true, "dns64": true, "aggressive_v6": true }
+```
+
+**Force DNS64 for everything** (bypass broken native IPv6 paths):
+```json
+{ "dns64_only": true, "dns64_range": "64:ff9b::" }
+```
+
+### Custom IPv6 Overrides
+
+Force a specific domain to return a given IPv6 address:
+
+```json
+"add_aaaa": {
+  "example.com": "2001:db8::1",
+  "api.example.com": "2001:db8::2"
+}
+```
+
+### Disable IPv6 for a Domain
+
+Add it to `no_aaaa`:
+```json
+"no_aaaa": ["broken-ipv6.example.com"]
+```
+
+Or at runtime, prepend `_noaaaa.` to the domain (e.g., `_noaaaa.example.com`) to disable AAAA for that session.
+
+### Aggressive Mode
+
+When `aggressive_v6` is `true`, the proxy additionally:
+
+- Tries `www.<domain>` AAAA records for apex domains (e.g., `live.com`)
+- Uses SOA authority matching for Fastly and Cloudflare
+- Adds hardcoded IPv6 for Steam, Twitter/X, and Google Android domains
+
+### DNS64 Modes
 
-### Enable DNS64 support
-
-Change the `dns64` variable to true in the `config.json` file. If the prefix is diffrent from the default, change the `dns64_range` as well.
-
-### Turn on IPv6 only mode
-
-Change the `v6_only` variable to true in the `config.json` file.
-
-### Disable Happy Eyeballs
-
-Change the `remove_v4_if_v6_exist` variable to true in the `config.json` file. This will remove the A record only if a AAAA record exists.
-
-# Testing if DNS proxy is working
-
-## Cloudflare
-
-* Test domains: db-ip.com, discord.com
-* IPv6 Type: Anycast
-* Usability: Stable
-* Coverage: All
-* Aggressive mode: All cloudflare services which uses their **DNS service**, regardless of cloudflare proxy has been disabled(grey cloud) will get a Cloudflare IPv6 address.
-
-## Akamai
-
-* Test domains: www.nvidia.com, www.amd.com
-* IPv6 Type: Unicast
-* Coverage: All
-* Usability: Stable
-
-## Fastly
-
-* Test domains: imgur.com, www.twitch.tv
-* IPv6 Type: Anycast, Unicast
-* Coverage: All
-* Usability: Stable
-
-## Amazon S3
-
-* Test domains: s3.amazonaws.com, github-production-release-asset-2e65be.s3.amazonaws.com
-* IPv6 Type: Unicast
-* Coverage: *.s3.amazonaws.com and s3 websites hostnames/cnames only.
-* Usability: Stable
-
-## Oracle Object Storage
-
-* Test domains: objectstorage.us-ashburn-1.oci.customer-oci.com, compat.objectstorage.ap-mumbai-1.oraclecloud.com, swiftobjectstorage.us-ashburn-1.oci.customer-oci.com
-* IPv6 Type: Unicast
-* Coverage: Native, S3-compatible, Swift, and legacy `oraclecloud.com` hostnames that can be converted to `ds` endpoints.
-* Usability: Unknown
-
-## Amazon Cloudfront
-
-* Test domains: www.figma.com, vod-secure.twitch.tv
-* IPv6 Type: Unicast
-* Coverage: All
-* Usability: Stable
-
-## Alibaba OSS
-
-* Test domains: oss.aliyuncs.com, alicloud-common.oss-ap-southeast-1.aliyuncs.com, docs-aliyun.cn-hangzhou.oss.aliyun-inc.com
-* IPv6 Type: Unicast
-* Coverage: All from aliyuncs.com and aliyun-inc.com
-* Usability: Stable
-
-## AliCDN
-
-* Test domains: gd1.alicdn.com
-* IPv6 Type: Unicast
-* Coverage: All from alicdn.com
-* Usability: Unknown
-
-## Bunny CDN
-
-* Test domains: cdn-b-east.streamable.com
-* IPv6 Type: Unicast
-* Coverage: All
-* Usability: Stable
-
-## BlazingCDN
-
-* Test domains: player.h-cdn.com
-* IPv6 Type: Anycast
-* Coverage: All
-* Usability: Stable
-
-## Gcore CDN
-
-* Test domains: v58.tiktokcdn.com
-* IPv6 Type: Unicast
-* Coverage: All
-* Usability: Stable
-
-## CacheFly
-
-* Test domains: www.cachefly.com, cdn.arstechnica.net
-* IPv6 Type: Anycast, Unicast
-* Coverage: Hostname match for `vip/rvip` under `g.cachefly.net` or `g-anycast1.cachefly.net`, plus IPv4 range `205.234.175.0/24`.
-* Usability: Unknown
-
-## Microsoft Edge
-
-* Test domains: onedrive.live.com
-* IPv6 Type: Anycast
-* Coverage: Only on some services
-* Usability: Stable
-
-## Microsoft Windows (Edgecast)
-
-* Test domains: software-download.microsoft.com
-* IPv6 Type: Unicast
-* Coverage: Only on some services
-* Usability: Unknown
-
-## Limelight Networks
-
-* Test domains: fota-ll-dn.ospserver.net, dmotion.s.llnwi.net
-* IPv6 Type: Unicast
-* Coverage: Only on some services
-* Usability: Unknown
-
-## Sucuri
-
-* Test domains: www.exploit-db.com
-* IPv6 Type: Anycast
-* Coverage: Only on some services
-* Usability: Unknown
-
-## Weebly
-
-* Test domains: www.weebly.com
-* IPv6 Type: Unicast
-* Coverage: Unknown
-* Usability: Unknown
-
-## CDN77
-
-* Test domains: streaming-s1free.sport1.de
-* IPv6 Type: Unicast
-* Coverage: Unknown.
-* Usability: Some protected content may not work.
-
-## Netlify
-
-* Test domains: apex-loadbalancer.netlify.com, 10minutetimers.com
-* IPv6 Type: Unicast
-* Coverage: Unknown
-* Usability: Unknown
-
-## Bearblog
-
-* Test domains: hypr.moe
-* IPv6 Type: Unicast
-* Coverage: All
-* Usability: Stable
-
-## WordPress VIP
-
-* Test domains: wpvip.com, nielsen.com
-* IPv6 Type: Anycast
-* Coverage: Unknown
-* Usability: Unknown
-
-# Azure websites
-
-* Test domains: ibwc.azurewebsites.net
-* IPv6 Type: Unicast
-* Coverage: Partial. (www.ibwc.gov is not matched)
-* Usability: Unknown
-
-# AWS Global Accelerator
-
-* Test domains: eu-central-1.console.aws.amazon.com, public.ecr.aws
-* IPv6 Type: Anycast
-* Coverage: Partial. (no root/ip match)
-* Usability: Unknown
-
-## Github.io (Fastly)
-
-* Test domains: willettjf.com
-* IPv6 Type: Anycast
-* Coverage: Only IPv4 match
-* Usability: Stable
-
-## Shopify (Cloudflare)
-
-* Test domains: shopify.com, shopify-debug.com
-* IPv6 Type: Anycast
-* Coverage: All
-* Usability: Unknown
-
-## Webflow (Cloudflare)
-
-* Test domains: www.visma.com, theaterfreunde-wiesbaden.de
-* IPv6 Type: Anycast
-* Coverage: All
-* Usability: Unknown
-
-## Zendesk (Cloudflare)
-
-* Test domains: openconnect.zendesk.com
-* IPv6 Type: Anycast
-* Coverage: All
-* Usability: Unknown
-
-## WP Engine (Cloudflare)
-
-* Test domains: wp.wpenginepowered.com
-* IPv6 Type: Anycast
-* Coverage: All
-* Usability: Unknown
-
-## servd (Cloudflare)
-
-* Test domains: e360.yale.edu
-* IPv6 Type: Anycast
-* Coverage: All
-* Usability: Unknown
-
-## Laravel Cloud (Cloudflare)
-
-* Test domains: aimyze-dev.com
-* IPv6 Type: Anycast
-* Coverage: All
-* Usability: Unknown
-
-## msidentity (Microsoft) [DISABLED]
-
-* Test domains: login.live.com (#10)
-* IPv6 Type: Unicast
-* Coverage: Some Domains+Only on Aggressive mode.
-* Usability: Unusable, HTTP 400
-
-# AAAA records on IPv4 PTR
-
-* Test domains: www.domainprivacyprotect.info (INWX), www.asciinema.org(Brightbox)
-* IPv6 Type: Unicast
-* Coverage: Only on matched IPv4 ranges.
-* Usability: Unknown (Sometimes it will not match on first AAAA request, since A records are processed separately)
-
-## AAAA WWW Check (Experimental)
-
-* Test domains: live.com (#24)
-* IPv6 Type: N/A
-* Coverage: Only on Aggressive mode.
-* Usability: Unknown
-
-# How does this work
-
-One thing this app does is use only the DNS data returned by the DNS provider to synthesize the requests.
-
-For that we use the following information
-
-- A - IPv4 records, match known provider IP
-- Hostname - CDN usually have a domain they provide the users which we can use to detect the provider
-- DNS Authority - Some CDN providers provide their own DNS, which we can use to detect the provider.
-
-
-The next part is getting IPv6 address, for this below methods are used
-
-- Synthesize the IPv6 from IPv4 adddress (Fastly)
-- Use known IPv6 addresss - (MSEDGE)
-- Use any IPv6 address -  (Cloudfront)
-- Generate IPv6 enabled hostname (Akamai)
-
-# Credits
-* [Pēteris Ņikiforovs](https://peteris.rocks/)
-
-# Similar Projects
-* [DeLegacy IPv6 RPZ Project](https://codeberg.org/IPv6-Monostack/delegacy-rpz/)
-
-# My other projects
-* [v6check](https://v6check.miyuru.lk/)
-* [v6monitor](https://v6monitor.com/)
-* [Random Projects](https://www.miyuru.lk/tools)
+- **`dns64: true`** — Synthesizes AAAA records via DNS64 only for domains that have no native AAAA. Uses the prefix in `dns64_range` (default `64:ff9b::`).
+- **`dns64_only: true`** — Synthesizes AAAA for ALL domains, even those with native AAAA. Useful when the native IPv6 path is broken or filtered. Explicit `add_aaaa` IPv6 overrides still take precedence.
+
+## How It Works
+
+The proxy intercepts AAAA (IPv6) DNS queries and tries to synthesize responses when the upstream DNS doesn't return any. It detects CDNs using three signals:
+
+1. **Hostname patterns** — e.g., `*.cdn.cloudflare.net` identifies Cloudflare, `*.cloudfront.net` identifies CloudFront
+2. **IP ranges** — When resolving A records, the returned IPv4 is checked against known CDN IP ranges
+3. **SOA authority** — The DNS authority record (e.g., `dns.cloudflare.com`) identifies the CDN's DNS
+
+Once a CDN is detected, the proxy generates an IPv6 address using one of:
+
+| Method | Used by | How |
+|--------|---------|-----|
+| **Hostname rewrite** | Akamai, CloudFront, BunnyCDN, etc. | Rewrites the hostname to an IPv6-enabled equivalent (e.g., `dualstack.` prefix) |
+| **v4-to-v6 mapping** | Fastly, MS Edge, WordPress VIP | Deterministically maps the IPv4 address to an IPv6 address |
+| **Static anycast** | Cloudflare, Weebly, Shopify | Returns a known anycast IPv6 address |
+| **DNS resolution** | CloudFront, CDN77, Netlify, etc. | Resolves AAAA for a known IPv6-enabled reference domain |
+
+### Request Flow
+
+```
+Client → AAAA query for example.com
+  → Check add_aaaa overrides (explicit IPv6 or provider tag)
+  → If native AAAA exists from upstream → pass through
+  → If domain is in no_aaaa → suppress or DNS64-map
+  → Run provider detection chain (27 providers, first match wins)
+  → Fallback: try www. prefix (aggressive mode), DNS64 synthesis, or return empty
+```
+
+## Supported CDNs
+
+| Provider | Detection | IPv6 Method | Test Domains |
+|----------|-----------|-------------|--------------|
+| **Cloudflare** | Hostname (`*.cdn.cloudflare.net`), SOA, IP ranges | Static anycast | discord.com, db-ip.com |
+| **Akamai** | Hostname (`*.akamaiedge.net`, `*.akamai.net`) | Hostname rewrite | www.nvidia.com, www.amd.com |
+| **Fastly** | SOA (`hostmaster.fastly.com`), hostname, IP ranges | v4→v6 mapping | imgur.com, www.twitch.tv |
+| **CloudFront** | Hostname (`*.cloudfront.net`), IP ranges | DNS resolution | www.figma.com, vod-secure.twitch.tv |
+| **Amazon S3** | Hostname (`*.s3.amazonaws.com`, etc.) | Hostname rewrite | s3.amazonaws.com |
+| **Azure Websites** | Hostname (`*.azurewebsites.windows.net`) | Hostname rewrite | ibwc.azurewebsites.net |
+| **MS Edge** | SOA (`*msedge.net*`) | v4→v6 mapping | onedrive.live.com |
+| **Edgecast/Verizon** | Hostname (`*.v0cdn.net`) | Hostname rewrite | software-download.microsoft.com |
+| **BunnyCDN** | Hostname (`*.b-cdn.net`) | DNS resolution | cdn-b-east.streamable.com |
+| **BlazingCDN** | Hostname (`*.blazingcdn.net`) | DNS resolution | player.h-cdn.com |
+| **Gcore CDN** | Hostname (`*.gcdn.co`) | DNS resolution | v58.tiktokcdn.com |
+| **CDN77** | SOA (`admin.cdn77.com`), hostname (`*.cdn77.org`) | DNS resolution | streaming-s1free.sport1.de |
+| **CacheFly** | Hostname (`rvip/vip.*.cachefly.net`), IP range | v4→v6 mapping | cdn.arstechnica.net |
+| **Sucuri** | IP range (`192.124.249.0/24`) | DNS resolution | www.exploit-db.com |
+| **Weebly** | Hostname (`*.weebly.com`), IP range | Static | www.weebly.com |
+| **Netlify** | Hostname (`*.netlify.com`), IP range | DNS resolution | 10minutetimers.com |
+| **AliCDN** | Hostname (`*.alicdn.com`) | DNS resolution | gd1.alicdn.com |
+| **Alibaba OSS** | Hostname (`*.aliyuncs.com`, `*.aliyun-inc.com`) | Hostname rewrite | oss.aliyuncs.com |
+| **Oracle Object Storage** | Hostname (`*.oraclecloud.com`, `*.oci.customer-oci.com`) | Hostname rewrite | objectstorage.us-ashburn-1.oci.customer-oci.com |
+| **AWS Global Accelerator** | Hostname (`*.awsglobalaccelerator.com`) | Hostname rewrite | public.ecr.aws |
+| **Limelight** | Hostname (`*.llnwi.net`) | Hostname rewrite | fota-ll-dn.ospserver.net |
+| **Bearblog** | IP range (`159.223.204.176/32`) | DNS resolution | hypr.moe |
+| **WordPress VIP** | IP range (`192.0.66.0/24`) | v4→v6 mapping | wpvip.com, nielsen.com |
+| **GitHub Pages** | IP range (`185.199.108.0/22`) | v4→v6 mapping (via Fastly) | willettjf.com |
+| **Shopify** | Hostname (`*.myshopify.com`, `*.shopify.com`), IP range | Static | shopify.com |
+| **Webflow** | Hostname (`*.webflow.com`), IP range | Static | www.visma.com |
+| **PTR-based** | IP range (INWX, Brightbox) | PTR lookup | www.domainprivacyprotect.info |
+
+### Cloudflare Sub-services
+
+Cloudflare IP ranges also cover: Zendesk, WP Engine, ServDC, and Laravel Cloud.
+
+## Running Tests
+
+```bash
+pnpm test
+```
+
+This runs all provider unit tests and a top-100-domains integration test.
+
+## Architecture
+
+```
+app.js                    Main server (771 lines)
+├── providers/            CDN detection and IPv6 generation (27 modules)
+├── tests/                Unit + integration tests (24 files)
+├── ptrcheck.js           PTR-based IPv6 detection
+└── config.json           Runtime configuration
+```
+
+Provider detection uses data-driven registries (`AAAA_PROVIDERS`, `A_IP_PROVIDERS`, `A_HOSTNAME_PROVIDERS`) with a loop-and-break pattern that eliminates missing-return bugs by design. Adding a new provider requires adding one entry to the appropriate array.
+
+See [AGENTS.md](AGENTS.md) for detailed architecture documentation.
+
+## Credits
+
+- [Peteris Nikiforovs](https://peteris.rocks/) — Original tutorial
+
+## Similar Projects
+
+- [DeLegacy IPv6 RPZ Project](https://codeberg.org/IPv6-Monostack/delegacy-rpz/)
+
+## Author
+
+- [v6check](https://v6check.miyuru.lk/)
+- [v6monitor](https://v6monitor.com/)
+- [More projects](https://www.miyuru.lk/tools)
