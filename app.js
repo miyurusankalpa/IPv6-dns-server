@@ -207,6 +207,18 @@ function proxy(question, response, cb) {
                 }
             });
 
+            var normalizedQuestionName = question.name.replace(/\.$/, '');
+            var getcdn = add_aaaa[question.name];
+            if (!getcdn && normalizedQuestionName !== question.name) {
+                getcdn = add_aaaa[normalizedQuestionName];
+            }
+
+            if (getcdn && net.isIPv6(getcdn)) {
+                response.answer = [];
+                handleResponse(5, response, question.name, getcdn, cb);
+                return;
+            }
+
             if (last_type === 28) { //skip if there are AAAA records
                 cb();
                 return;
@@ -221,12 +233,6 @@ function proxy(question, response, cb) {
                     cb();
                     return;
                 }
-            }
-
-            var normalizedQuestionName = question.name.replace(/\.$/, '');
-            var getcdn = add_aaaa[question.name];
-            if (!getcdn && normalizedQuestionName !== question.name) {
-                getcdn = add_aaaa[normalizedQuestionName];
             }
 
             //console.log(add_aaaa);
