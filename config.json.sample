@@ -7,6 +7,7 @@
   "v6_only":false,
   "remove_v4_if_v6_exist":false,
   "dns64":false,
+  "dns64_only":false,
   "no_aaaa":[],
   "add_aaaa":{
     "example.com":"2001:db8::1",

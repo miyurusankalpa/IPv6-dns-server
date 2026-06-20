@@ -75,6 +75,9 @@ var aggressive_v6 = config.aggressive_v6;
 var v6_only = config.v6_only;
 var remove_v4_if_v6_exist = config.remove_v4_if_v6_exist;
 var dns64 = config.dns64;
+var dns64_only = config.dns64_only;
+
+if (dns64_only) dns64 = true; //dns64_only implies dns64
 
 var dns64_range = config.dns64_range; // "/96 CIDR assumed by default"
 
@@ -447,9 +450,13 @@ function proxy(question, response, cb) {
                 return;
             }
 
-            if (last_type === 28) { //skip if there are AAAA records
+            if (last_type === 28 && !dns64_only) { //skip if there are AAAA records (unless dns64_only)
                 cb();
                 return;
+            }
+
+            if (dns64_only && last_type === 28) {
+                response.answer = []; //clear native AAAA, will synthesize via DNS64
             }
 
             if (no_aaaa.has(question.name)) { //handle no AAAA domain correctly
