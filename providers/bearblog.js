@@ -1,7 +1,7 @@
 var ipRangeCheck = require("ip-range-check");
 
 module.exports = {
-  getbearblogv6address: function (resolver, localStorageMemory) {
+  getbearblogv6address: function (resolver, localStorageMemory, callback) {
     var aaaa_bearblog_domain = "domain-proxy.bearblog.dev";
     const CACHE_KEY = "bearblogv6addy";
 

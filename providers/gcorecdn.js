@@ -2,7 +2,7 @@ module.exports = {
   getgcorecdnv6address: function (resolver, localStorageMemory, callback) {
     // ipv6 enabled domain
     const aaaa_gcore_domain = "d.gcdn.co"; //https://codeberg.org/IPv6-Monostack/delegacy-rpz/src/commit/48fdd433336cd6009e751677b131bbd1718d5573/dnsconfig.js#L2244
-    const CACHE_KEY = localStorageMemory.getItem("gcorecdnv6addy");
+    const CACHE_KEY = "gcorecdnv6addy";
 
     // Check cache first
     const cachedV6List = localStorageMemory.getItem(CACHE_KEY);

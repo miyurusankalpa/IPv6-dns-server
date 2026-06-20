@@ -10,7 +10,7 @@ Clone the repo
 
 Build the project
 
-	npm install
+	pnpm install
 
 Copy the sample config
 
@@ -18,7 +18,7 @@ Copy the sample config
 	
 Starting the server
 
-	npm start
+	pnpm start
 
 or with pm2:
 
