@@ -132,7 +132,7 @@ Client → AAAA query for example.com
   → Check add_aaaa overrides (explicit IPv6 or provider tag)
   → If native AAAA exists from upstream → pass through
   → If domain is in no_aaaa → suppress or DNS64-map
-  → Run provider detection chain (27 providers, first match wins)
+  → Run provider detection chain (28 providers, first match wins)
   → Fallback: try www. prefix (aggressive mode), DNS64 synthesis, or return empty
 ```
 
@@ -160,6 +160,7 @@ Client → AAAA query for example.com
 | **Alibaba OSS** | Hostname (`*.aliyuncs.com`, `*.aliyun-inc.com`) | Hostname rewrite | oss.aliyuncs.com |
 | **Oracle Object Storage** | Hostname (`*.oraclecloud.com`, `*.oci.customer-oci.com`) | Hostname rewrite | objectstorage.us-ashburn-1.oci.customer-oci.com |
 | **AWS Global Accelerator** | Hostname (`*.awsglobalaccelerator.com`) | Hostname rewrite | public.ecr.aws |
+| **AWS IPv6** | Hostname (`*.<region>.amazonaws.com`) | Hostname rewrite (`→ *.api.aws`) | ec2.ap-southeast-1.amazonaws.com, lambda.us-east-1.amazonaws.com |
 | **Limelight** | Hostname (`*.llnwi.net`) | Hostname rewrite | fota-ll-dn.ospserver.net |
 | **Bearblog** | IP range (`159.223.204.176/32`) | DNS resolution | hypr.moe |
 | **WordPress VIP** | IP range (`192.0.66.0/24`) | v4→v6 mapping | wpvip.com, nielsen.com |

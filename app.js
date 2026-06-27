@@ -36,6 +36,7 @@ var azurewebsites = require('./providers/azurewebsites')
 var awsglobalaccelerator = require('./providers/awsglobalaccelerator');
 var cachefly = require('./providers/cachefly');
 var oracleobjectstorage = require('./providers/oracleobjectstorage');
+var awsv6 = require('./providers/awsv6');
 
 var ptrcheck = require('./ptrcheck');
 
@@ -302,6 +303,11 @@ const AAAA_PROVIDERS = [
     { name: 'alicdn',
       detect: (ctx) => ctx.detected.alicdn || alicdn.check_for_alicdn_hostname(ctx.last_hostname),
       resolve: (ctx, _, cb) => asyncDNSAndRespond(ctx, alicdn.getalicdnv6address) },
+
+    // 28. AWS IPv6 (*.amazonaws.com → *.api.aws) — hostname rewrite → resolve6
+    { name: 'awsv6',
+      detect: (ctx) => ctx.detected.awsv6 || awsv6.check_for_awsv6_hostname(ctx.last_hostname),
+      resolve: (ctx, r, cb) => { ctx.matched = true; resolver.resolve6(r, (e, a) => a ? handleResponse(ctx.last_type, ctx.response, ctx.last_hostname, a, ctx.cb) : ctx.cb()); } },
 ];
 
 function processAAAAProviders(ctx) {
@@ -349,6 +355,7 @@ const A_HOSTNAME_PROVIDERS = [
     { check: (h) => alicdn.check_for_alicdn_hostname(h), tag: 'alicdn' },
     { check: (h) => cachefly.check_for_cachefly_hostname(h), tag: 'cachefly' },
     { check: (h) => oracleobjectstorage.check_for_oracleobjectstorage_hostname(h), tag: 'oracleobjectstorage' },
+    { check: (h) => awsv6.check_for_awsv6_hostname(h), tag: 'awsv6' },
 ];
 
 function handleRequest(request, response) {
