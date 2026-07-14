@@ -1,11 +1,18 @@
 var assert = require('assert');
 var cloudflare = require('../providers/cloudflare');
 
-// check_for_cloudflare_hostname
+// check_for_cloudflare_hostname — positive cases (*.cdn.cloudflare.net)
 assert.equal(cloudflare.check_for_cloudflare_hostname("abc.def.cdn.cloudflare.net"), true);
 assert.equal(cloudflare.check_for_cloudflare_hostname("example.cdn.cloudflare.net"), true);
-assert.equal(cloudflare.check_for_cloudflare_hostname("foo.bar.cloudflare.net"), false);
-assert.equal(cloudflare.check_for_cloudflare_hostname("cdn.cloudflare.com"), false);
+assert.equal(cloudflare.check_for_cloudflare_hostname("discord.com.cdn.cloudflare.net"), true);
+assert.equal(cloudflare.check_for_cloudflare_hostname("a.cdn.cloudflare.net"), true);
+assert.equal(cloudflare.check_for_cloudflare_hostname("foo.bar.baz.cdn.cloudflare.net"), true);
+
+// check_for_cloudflare_hostname — negative cases
+assert.equal(cloudflare.check_for_cloudflare_hostname("foo.bar.cloudflare.net"), false); // missing cdn
+assert.equal(cloudflare.check_for_cloudflare_hostname("cdn.cloudflare.com"), false); // .com not .net
+assert.equal(cloudflare.check_for_cloudflare_hostname("cdn.cloudflare.net"), true); // base domain itself matches
+assert.equal(cloudflare.check_for_cloudflare_hostname("example.com"), false);
 assert.equal(cloudflare.check_for_cloudflare_hostname(null), false);
 assert.equal(cloudflare.check_for_cloudflare_hostname(undefined), false);
 
