@@ -40,6 +40,20 @@ Get the container's IPv6 address:
 docker inspect -f '{{.NetworkSettings.Networks.bridge.GlobalIPv6Address}}' ipv6-dns-proxy
 ```
 
+### Interactive Demo (Desktop + Browser)
+
+A self-contained demo image that launches a full XFCE desktop with Chromium, the DNS server running, and IPv6 search pre-configured. Great for trying out the proxy visually.
+
+```bash
+# Build the demo image
+docker build -f demo.Dockerfile -t ipv6-demo .
+
+# Run it (webtop listens on port 3000)
+docker run -p 3000:3000 ipv6-demo
+```
+
+Then open `http://localhost:3000` in your browser. The desktop will load with Chromium already open to [ip6.biz](https://ip6.biz) — a site that shows your IPv6 connectivity status. The DNS proxy runs automatically inside the container, and Chromium has IPv6 Google Search pinned to the toolbar. The [IPvFoo](https://chromewebstore.google.com/detail/ipvfoo/ecanpcehffngcegjmadlcijfolapggal) extension is also pre-installed and pinned, so you can see IPv4 vs IPv6 addresses on every page you visit.
+
 ## Configuration
 
 All options go in `config.json`:
