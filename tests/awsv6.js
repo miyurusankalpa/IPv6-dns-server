@@ -17,7 +17,12 @@ assert.equal(awsv6.check_for_awsv6_hostname("dynamodb.us-east-1.amazonaws.com"),
 assert.equal(awsv6.check_for_awsv6_hostname("s3.ap-south-1.amazonaws.com"), "s3.ap-south-1.api.aws");
 assert.equal(awsv6.check_for_awsv6_hostname("bedrock-runtime.us-east-1.amazonaws.com"), "bedrock-runtime.us-east-1.api.aws");
 
-// Non-matching
+// Non-matching — ELB hostnames (5+ parts, should fall through to DNS64)
+assert.equal(awsv6.check_for_awsv6_hostname("redirect-alb-916028820.eu-central-1.elb.amazonaws.com"), false);
+assert.equal(awsv6.check_for_awsv6_hostname("my-alb-1234567890.us-east-1.elb.amazonaws.com"), false);
+assert.equal(awsv6.check_for_awsv6_hostname("internal-my-nlb-abc123.eu-west-1.elb.amazonaws.com"), false);
+
+// Non-matching — other patterns
 assert.equal(awsv6.check_for_awsv6_hostname("s3.amazonaws.com"), false);
 assert.equal(awsv6.check_for_awsv6_hostname("www.amazonaws.com"), false);
 assert.equal(awsv6.check_for_awsv6_hostname("example.com"), false);

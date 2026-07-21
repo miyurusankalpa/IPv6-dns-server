@@ -9,7 +9,7 @@ module.exports = {
     var dp1 = sdomains.indexOf("com");
     var dp2 = sdomains.indexOf("amazonaws");
 
-    if (dp1 === 0 && dp2 === 1 && sdomains[2] && sdomains[3]) {
+    if (dp1 === 0 && dp2 === 1 && sdomains.length === 4) {
       // Rewrite: <service>.<region>.amazonaws.com → <service>.<region>.api.aws
       // sdomains is reversed: ["com", "amazonaws", "<region>", "<service>"]
       // We want: ["<service>", "<region>", "api", "aws"]
