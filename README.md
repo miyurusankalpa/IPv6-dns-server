@@ -172,7 +172,7 @@ Client → AAAA query for example.com
 | **Netlify** | Hostname (`*.netlify.com`), IP range | DNS resolution | 10minutetimers.com |
 | **AliCDN** | Hostname (`*.alicdn.com`) | DNS resolution | gd1.alicdn.com |
 | **Alibaba OSS** | Hostname (`*.aliyuncs.com`, `*.aliyun-inc.com`) | Hostname rewrite | oss.aliyuncs.com |
-| **Oracle Object Storage** | Hostname (`*.oraclecloud.com`, `*.oci.customer-oci.com`) | Hostname rewrite | objectstorage.us-ashburn-1.oci.customer-oci.com |
+| **Oracle Object Storage** | Hostname (`*.oraclecloud.com`, `*.oci.customer-oci.com`) | Hostname rewrite (→ `.ds.oci.customer-oci.com`) | objectstorage.us-ashburn-1.oraclecloud.com |
 | **AWS Global Accelerator** | Hostname (`*.awsglobalaccelerator.com`) | Hostname rewrite | public.ecr.aws |
 | **AWS IPv6** | Hostname (`*.<region>.amazonaws.com`) | Hostname rewrite (`→ *.api.aws`) | ec2.ap-southeast-1.amazonaws.com, lambda.us-east-1.amazonaws.com |
 | **Limelight** | Hostname (`*.llnwi.net`) | Hostname rewrite | fota-ll-dn.ospserver.net |
