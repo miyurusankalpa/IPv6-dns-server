@@ -37,6 +37,13 @@ assert.equal(awss3.check_for_s3_hostname("web.s3-accesspoint.ap-southeast-1.amaz
 
 assert.equal(awss3.check_for_s3_hostname("download.opencontent.netflix.com.s3.amazonaws.com"), "download.opencontent.netflix.com.s3.dualstack.us-east-1.amazonaws.com");
 
+assert.equal(awss3.check_for_s3_hostname("s3.usw2-wl1-phx1.amazonaws.com"), "s3.dualstack.usw2-wl1-phx1.amazonaws.com");
+assert.equal(awss3.check_for_s3_hostname("my-bucket.s3.usw2-wl1-phx1.amazonaws.com"), "my-bucket.s3.dualstack.usw2-wl1-phx1.amazonaws.com");
+assert.equal(awss3.check_for_s3_hostname("s3.usw2-wl1-phx1-az1.amazonaws.com"), "s3.dualstack.usw2-wl1-phx1-az1.amazonaws.com");
+assert.equal(awss3.check_for_s3_hostname("s3.uw2-wl1-nyc1.amazonaws.com"), "s3.dualstack.uw2-wl1-nyc1.amazonaws.com");
+assert.equal(awss3.check_for_s3_hostname("s3.ape1-wl1-cph1-az1.amazonaws.com"), "s3.dualstack.ape1-wl1-cph1-az1.amazonaws.com");
+assert.equal(awss3.check_for_s3_hostname("web.s3-accesspoint.usw2-wl1-phx1.amazonaws.com"), "web.s3-accesspoint.dualstack.usw2-wl1-phx1.amazonaws.com");
+
 assert.equal(awss3.check_for_s3_hostname("s3.dualstack.us-east-1.amazonaws.com"), false);
 assert.equal(awss3.check_for_s3_hostname("download.opencontent.netflix.com.s3.dualstack.us-east-1.amazonaws.com"), false);
 assert.equal(awss3.check_for_s3_hostname("s3.dualstack.cn-north-1.amazonaws.com.cn"), false);
