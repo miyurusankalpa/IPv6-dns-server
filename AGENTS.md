@@ -12,9 +12,9 @@ These notes capture the patterns and conventions used in this repo so new provid
 
 Provider detection in `app.js` uses three registry arrays:
 
-- **`AAAA_PROVIDERS`** — 27 entries, each with `detect(ctx)` and `resolve(ctx, result, cb)`. The `processAAAAProviders(ctx)` loop iterates these and stops at the first match. This eliminates missing-return bugs by design.
-- **`A_IP_PROVIDERS`** — 13 entries for IP-range detection in A-record responses. Each has `check(ip)` and a `tag` (string or function).
-- **`A_HOSTNAME_PROVIDERS`** — 11 entries for hostname-based detection in A-record responses. Each has `check(hostname)` and a `tag`.
+- **`AAAA_PROVIDERS`** — 30 entries, each with `detect(ctx)` and `resolve(ctx, result, cb)`. The `processAAAAProviders(ctx)` loop iterates these and stops at the first match. This eliminates missing-return bugs by design.
+- **`A_IP_PROVIDERS`** — 14 entries for IP-range detection in A-record responses. Each has `check(ip)` and a `tag` (string or function).
+- **`A_HOSTNAME_PROVIDERS`** — 13 entries for hostname-based detection in A-record responses. Each has `check(hostname)` and a `tag`.
 
 The `add_aaaa` switch statement sets flags on a `detected` object. Provider registry entries check these flags first (`ctx.detected.<name>`) before running auto-detection.
 

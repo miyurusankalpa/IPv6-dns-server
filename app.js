@@ -37,6 +37,7 @@ var awsglobalaccelerator = require('./providers/awsglobalaccelerator');
 var cachefly = require('./providers/cachefly');
 var oracleobjectstorage = require('./providers/oracleobjectstorage');
 var awsv6 = require('./providers/awsv6');
+var vercel = require('./providers/vercel');
 
 var ptrcheck = require('./ptrcheck');
 
@@ -308,6 +309,24 @@ const AAAA_PROVIDERS = [
     { name: 'awsv6',
       detect: (ctx) => ctx.detected.awsv6 || awsv6.check_for_awsv6_hostname(ctx.last_hostname),
       resolve: (ctx, r, cb) => { ctx.matched = true; resolver.resolve6(r, (e, a) => a ? handleResponse(ctx.last_type, ctx.response, ctx.last_hostname, a, ctx.cb) : ctx.cb()); } },
+
+    // 29. Vercel (Vercel-owned domains only) — async DNS of cdn1.vercel-dns.com.
+    // Must stay ahead of vercel_dualstack: *.vercel.com / *.nextjs.org also CNAME
+    // into vercel-dns.com and the cdn1 prefix is verified to serve them, while the
+    // dualstack names have no AAAA published yet.
+    { name: 'vercel',
+      detect: (ctx) => ctx.detected.vercel || vercel.check_for_vercel_owned_hostname(ctx.question.name),
+      resolve: (ctx, _, cb) => asyncDNSAndRespond(ctx, vercel.getvercelv6address) },
+
+    // 30. Vercel dualstack — hostname rewrite (*.vercel-dns[-N].com → *.dualstack.vercel-dns[-N].com) → resolve6
+    { name: 'vercel_dualstack',
+      detect: (ctx) => vercel.check_for_vercel_dualstack_hostname(ctx.last_hostname),
+      resolve: (ctx, r, cb) => { ctx.matched = true; resolver.resolve6(r, (e, a) => {
+        if (a && a[0]) { handleResponse(ctx.last_type, ctx.response, ctx.last_hostname, a, ctx.cb); return; }
+        // dualstack endpoints carry no AAAA until Vercel ships them — keep today's behaviour
+        if (dns64) resolveIPv4AndMap(resolver, ctx.question, dns64_range, ctx.last_type, ctx.response, ctx.last_hostname, ctx.cb);
+        else ctx.cb();
+      }); } },
 ];
 
 function processAAAAProviders(ctx) {
@@ -340,6 +359,7 @@ const A_IP_PROVIDERS = [
     { check: (ip) => cloudflare.check_for_cloudflare_ip(ip), tag: 'cloudflare' },
     { check: (ip) => wpvip.check_for_wordpressvip_ip(ip), tag: (ip) => wpvip.wpvipv4to6(ip) },
     { check: (ip) => cachefly.check_for_cachefly_ip(ip), tag: (ip) => cachefly.cacheflyv4to6(ip) },
+    { check: (ip) => vercel.check_for_vercel_ip(ip), tag: 'vercel' },
 ];
 
 // ---- A Record Hostname Detection Registry ----
@@ -356,6 +376,7 @@ const A_HOSTNAME_PROVIDERS = [
     { check: (h) => cachefly.check_for_cachefly_hostname(h), tag: 'cachefly' },
     { check: (h) => oracleobjectstorage.check_for_oracleobjectstorage_hostname(h), tag: 'oracleobjectstorage' },
     { check: (h) => awsv6.check_for_awsv6_hostname(h), tag: 'awsv6' },
+    { check: (h) => vercel.check_for_vercel_hostname(h), tag: 'vercel' },
 ];
 
 function handleRequest(request, response) {
@@ -565,6 +586,9 @@ function proxy(question, response, cb) {
                         break;
                     case 'cachefly':
                         detected.cachefly = cachefly.check_for_cachefly_hostname(question.name);
+                        break;
+                    case 'vercel':
+                        detected.vercel = vercel.check_for_vercel_owned_hostname(question.name);
                         break;
                     case 'ipptr':
                         detected.ptr = true;
