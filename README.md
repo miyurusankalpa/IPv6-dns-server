@@ -146,7 +146,7 @@ Client → AAAA query for example.com
   → Check add_aaaa overrides (explicit IPv6 or provider tag)
   → If native AAAA exists from upstream → pass through
   → If domain is in no_aaaa → suppress or DNS64-map
-  → Run provider detection chain (28 providers, first match wins)
+  → Run provider detection chain (30 providers, first match wins)
   → Fallback: try www. prefix (aggressive mode), DNS64 synthesis, or return empty
 ```
 
@@ -170,6 +170,7 @@ Client → AAAA query for example.com
 | **Sucuri** | IP range (`192.124.249.0/24`) | DNS resolution | www.exploit-db.com |
 | **Weebly** | Hostname (`*.weebly.com`), IP range | Static | www.weebly.com |
 | **Netlify** | Hostname (`*.netlify.com`), IP range | DNS resolution | 10minutetimers.com |
+| **Vercel** | Hostname (`*.vercel-dns*.com`, `vercel.com`/`nextjs.org`), IP range | DNS resolution of `cdn1.vercel-dns.com` + `dualstack` hostname rewrite | vercel.com, www.hashnode.com |
 | **AliCDN** | Hostname (`*.alicdn.com`) | DNS resolution | gd1.alicdn.com |
 | **Alibaba OSS** | Hostname (`*.aliyuncs.com`, `*.aliyun-inc.com`) | Hostname rewrite | oss.aliyuncs.com |
 | **Oracle Object Storage** | Hostname (`*.oraclecloud.com`, `*.oci.customer-oci.com`) | Hostname rewrite (→ `.ds.oci.customer-oci.com`) | objectstorage.us-ashburn-1.oraclecloud.com |
@@ -195,12 +196,20 @@ pnpm test
 
 This runs all provider unit tests and a top-100-domains integration test.
 
+`tests/vercel.js` also carries a documented corpus of every Vercel hostname that has been verified by hand (served vs. DNS64-only, including `*.vercel.app`, `vercel.sh`, `vercel.dev`, `zeit.co`, `now.sh` and the blob-storage hosts). It is a static regression net, so changing a verdict in `providers/vercel.js` fails the suite instead of silently breaking a domain.
+
+Live DNS checks are limited to Vercel-controlled names. Set `LIVE_TLS=1` to additionally verify that the `2607:db00::/32` edge still completes a verified TLS handshake for `vercel.com`/`nextjs.org` and still rejects `vercel.sh`:
+
+```bash
+LIVE_TLS=1 node tests/vercel.js
+```
+
 ## Architecture
 
 ```
-app.js                    Main server (771 lines)
-├── providers/            CDN detection and IPv6 generation (27 modules)
-├── tests/                Unit + integration tests (24 files)
+app.js                    Main server (809 lines)
+├── providers/            CDN detection and IPv6 generation (26 modules)
+├── tests/                Unit + integration tests (26 files)
 ├── ptrcheck.js           PTR-based IPv6 detection
 └── config.json           Runtime configuration
 ```
