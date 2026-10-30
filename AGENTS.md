@@ -48,13 +48,16 @@ Add to `A_HOSTNAME_PROVIDERS`:
 
 ### Tests
 
-Add tests in `tests/<name>.js` using `assert`. Run with `pnpm test`.
+Add provider tests in `tests/<name>.js` using `assert`. Run with `pnpm test`.
+
+Config-combination tests live in `tests/configmatrix.js`. They spawn `app.js` with a temporary config (via the `IPV6DNS_CONFIG` env var) against a local fake upstream resolver, and assert behaviour for `v6_only`, `dns64`, `dns64_only`, `no_aaaa` and `aggressive_v6`. Run them alone with `pnpm test:config`.
 
 ## Config options
 
 | Option | Type | Description |
 |--------|------|-------------|
 | `dns_resolver` | string | Upstream DNS resolver (IPv6) |
+| `dns_resolver_port` | number | Upstream resolver port (default `53`; used by tests) |
 | `self_resolver` | string | Self-listen address |
 | `self_port` | string | Listen port |
 | `dns64_range` | string | DNS64 synthesis prefix |

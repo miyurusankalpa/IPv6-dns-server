@@ -6,6 +6,7 @@
   "bin": "app.js",
   "scripts": {
     "test": "for f in tests/*.js; do node \"$f\" || exit 1; done",
+    "test:config": "node tests/configmatrix.js",
     "start": "node app.js"
   },
   "keywords": [

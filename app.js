@@ -1,9 +1,15 @@
 'use strict';
 
-const config = require('./config.json');
+const path = require('path');
+
+// IPV6DNS_CONFIG lets tests (and alternate deployments) point at another config file.
+const config = require(process.env.IPV6DNS_CONFIG
+    ? path.resolve(process.env.IPV6DNS_CONFIG)
+    : path.join(__dirname, 'config.json'));
 
 //use a EDNS enabled DNS resolver for best results
 var dns_resolver = config.dns_resolver;
+var dns_resolver_port = config.dns_resolver_port || 53;
 
 let dns = require('native-dns');
 let async = require('async');
@@ -50,7 +56,13 @@ const resolver_own = new Resolver();
 
 const self_server_and_port = "["+config.self_resolver+"]:"+config.self_port;
 
-resolver.setServers([dns_resolver]);
+// Resolver.setServers wants ip:port for non-default ports; IPv6 needs brackets.
+function resolverServer(address, port) {
+    if (!port || Number(port) === 53) return address;
+    return address.indexOf(':') !== -1 ? '[' + address + ']:' + port : address + ':' + port;
+}
+
+resolver.setServers([resolverServer(dns_resolver, dns_resolver_port)]);
 resolver_own.setServers([self_server_and_port]);
 
 let server6 = dns.createServer({
@@ -66,7 +78,7 @@ server6.serve(config.self_port, config.self_resolver);
 
 let authority = {
     address: dns_resolver,
-    port: 53,
+    port: dns_resolver_port,
     type: 'udp6'
 };
 
