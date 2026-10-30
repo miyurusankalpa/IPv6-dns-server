@@ -406,7 +406,12 @@ function handleRequest(request, response) {
     // when done, respond to the request by sending the response
     async.parallel(f, function () {
         //console.log('response', response);
-        response.send();
+        // Never let a malformed answer record crash the whole DNS server.
+        try {
+            response.send();
+        } catch (err) {
+            console.error('failed to send response for', question.name, err.message);
+        }
     });
 }
 
@@ -726,7 +731,8 @@ function handleResponse(last_type, response, hostname, ipv6address, cb) {
 server6.on('request', handleRequest);
 
 function generate_aaaa(hostname, ipv6) {
-    if (!ipv6) return false;
+    // native-dns-packet asserts that every resource record has a name.
+    if (!hostname || !ipv6) return false;
     var newaaaa = {
         name: hostname,
         type: 28,
@@ -769,7 +775,7 @@ function resolveIPv4AndMap(resolver, question, dns64_range, last_type, response,
             mapaddr = [ipv4ToIPv6Hex(dns64_range, addresses)];
         }
 
-        handleResponse(last_type, response, last_hostname, mapaddr, cb);
+        handleResponse(last_type, response, last_hostname || question.name, mapaddr, cb);
     });
 }
 
