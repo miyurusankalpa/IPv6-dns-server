@@ -160,7 +160,7 @@ Client → AAAA query for example.com
 | **CloudFront** | Hostname (`*.cloudfront.net`), IP ranges | DNS resolution | www.figma.com, vod-secure.twitch.tv |
 | **Amazon S3** | Hostname (`*.s3.amazonaws.com`, etc.) | Hostname rewrite | s3.amazonaws.com |
 | **Azure Websites** | Hostname (`*.azurewebsites.windows.net`) | Hostname rewrite | ibwc.azurewebsites.net |
-| **Azure Storage** | CNAME target (`<svc>.<cluster>.store.core.windows.net`) | Hostname rewrite (`→ <svc>-ds.<cluster>.store.core.windows.net`) | azureopendatastorage.blob.core.windows.net |
+| **Azure Storage** | CNAME target (`<svc>.<cluster>.store.core.windows.net`) | Hostname rewrite (`→ <svc>-ds.<cluster>.store.core.windows.net`) | azurestorageteam.z5.web.core.windows.net |
 | **MS Edge** | SOA (`*msedge.net*`) | v4→v6 mapping | onedrive.live.com |
 | **Edgecast/Verizon** | Hostname (`*.v0cdn.net`) | Hostname rewrite | software-download.microsoft.com |
 | **BunnyCDN** | Hostname (`*.b-cdn.net`) | DNS resolution | cdn-b-east.streamable.com |
