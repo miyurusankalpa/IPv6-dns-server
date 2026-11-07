@@ -76,8 +76,11 @@ Config-combination tests live in `tests/configmatrix.js`. They spawn `app.js` wi
 | `remove_v4_if_v6_exist` | boolean | Suppress A when AAAA exists |
 | `dns64` | boolean | Enable DNS64 fallback for domains without AAAA |
 | `dns64_only` | boolean | Force all AAAA through DNS64, even native AAAA |
+| `imperva` | boolean | Enable Imperva AAAA synthesis (opt-in, default `false`) |
 | `no_aaaa` | array | Domains to suppress AAAA for |
 | `add_aaaa` | object | Explicit domain→provider/IPv6 overrides |
+
+`imperva` is off by default: Imperva answers WAF error 36 for protected sites that do not have IPv6 enabled, so only turn it on for a known-good domain list.
 
 ## Notes on code style
 

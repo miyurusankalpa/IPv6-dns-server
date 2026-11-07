@@ -92,6 +92,10 @@ var v6_only = config.v6_only;
 var remove_v4_if_v6_exist = config.remove_v4_if_v6_exist;
 var dns64 = config.dns64;
 var dns64_only = config.dns64_only;
+// Imperva only accepts IPv6 clients for sites with IPv6 enabled in their account;
+// other sites answer the WAF with error 36 ("does not have an IPV6 address").
+// Keep the mapping opt-in until its coverage is reliable.
+var imperva_enabled = config.imperva === true;
 
 if (dns64_only) dns64 = true; //dns64_only implies dns64
 
@@ -351,7 +355,7 @@ const AAAA_PROVIDERS = [
     // 32. Imperva (Incapsula) — CNAME target (*.incapdns.net / *.impervadns.net)
     // → resolve4 → <pop /48>::<last octet hex>
     { name: 'imperva',
-      detect: (ctx) => imperva.check_for_imperva_hostname(ctx.last_hostname),
+      detect: (ctx) => imperva_enabled && imperva.check_for_imperva_hostname(ctx.last_hostname),
       resolve: (ctx, _, cb) => { ctx.matched = true; resolver.resolve4(ctx.last_hostname, (e, a) => {
         var addresses = [];
         if (a && a.length) {
@@ -398,7 +402,7 @@ const A_IP_PROVIDERS = [
     { check: (ip) => wpvip.check_for_wordpressvip_ip(ip), tag: (ip) => wpvip.wpvipv4to6(ip) },
     { check: (ip) => cachefly.check_for_cachefly_ip(ip), tag: (ip) => cachefly.cacheflyv4to6(ip) },
     { check: (ip) => vercel.check_for_vercel_ip(ip), tag: 'vercel' },
-    { check: (ip) => imperva.check_for_imperva_ip(ip), tag: (ip) => imperva.getv6addresses(ip)[0] },
+    { check: (ip) => imperva_enabled && imperva.check_for_imperva_ip(ip), tag: (ip) => imperva.getv6addresses(ip)[0] },
 ];
 
 // ---- A Record Hostname Detection Registry ----

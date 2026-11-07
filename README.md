@@ -69,6 +69,7 @@ All options go in `config.json`:
 | `remove_v4_if_v6_exist` | `false` | Suppress A records when AAAA exists |
 | `dns64` | `false` | Enable DNS64 fallback for domains without AAAA |
 | `dns64_only` | `false` | Force all AAAA through DNS64, ignoring native AAAA |
+| `imperva` | `false` | Enable Imperva (Incapsula) AAAA synthesis (opt-in; see note below) |
 | `no_aaaa` | `[]` | Domains to never return AAAA for |
 | `add_aaaa` | `{}` | Explicit domain-to-IPv6 overrides |
 
@@ -122,6 +123,10 @@ When `aggressive_v6` is `true`, the proxy additionally:
 - **`dns64: true`** — Synthesizes AAAA records via DNS64 only for domains that have no native AAAA. Uses the prefix in `dns64_range` (default `64:ff9b::`).
 - **`dns64_only: true`** — Synthesizes AAAA for ALL domains, even those with native AAAA. Useful when the native IPv6 path is broken or filtered. Explicit `add_aaaa` IPv6 overrides still take precedence.
 
+### Imperva (Incapsula)
+
+Imperva-protected sites only publish A records, but answer on `2a02:e980::/29` as `<pop /48>::<last IPv4 octet in hex>`. Synthesizing those addresses only works for sites that have IPv6 enabled in their Imperva account; all others reject the request with WAF error 36 ("This site does not have an IPV6 address, please use IPV4 instead"). The mapping is therefore **opt-in**: set `"imperva": true` only once you have a reliable per-site allowlist.
+
 ## How It Works
 
 The proxy intercepts AAAA (IPv6) DNS queries and tries to synthesize responses when the upstream DNS doesn't return any. It detects CDNs using three signals:
@@ -161,7 +166,7 @@ Client → AAAA query for example.com
 | **Amazon S3** | Hostname (`*.s3.amazonaws.com`, etc.) | Hostname rewrite | s3.amazonaws.com |
 | **Azure Websites** | Hostname (`*.azurewebsites.windows.net`) | Hostname rewrite | ibwc.azurewebsites.net |
 | **Azure Storage** | CNAME target (`<svc>.<cluster>.store.core.windows.net`) | Hostname rewrite (`→ <svc>-ds.<cluster>.store.core.windows.net`) | azurestorageteam.z5.web.core.windows.net |
-| **Imperva (Incapsula)** | CNAME target (`*.incapdns.net`, `*.impervadns.net`) | PoP mapping (`2a02:e980::/29 → <pop>::<last octet hex>`) | www.singersl.com |
+| **Imperva (Incapsula)** | CNAME target (`*.incapdns.net`, `*.impervadns.net`) | PoP mapping (`2a02:e980::/29 → <pop>::<last octet hex>`; opt-in) | www.singersl.com |
 | **MS Edge** | SOA (`*msedge.net*`) | v4→v6 mapping | onedrive.live.com |
 | **Edgecast/Verizon** | Hostname (`*.v0cdn.net`) | Hostname rewrite | software-download.microsoft.com |
 | **BunnyCDN** | Hostname (`*.b-cdn.net`) | DNS resolution | cdn-b-east.streamable.com |
