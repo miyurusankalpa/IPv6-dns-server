@@ -146,7 +146,7 @@ Client → AAAA query for example.com
   → Check add_aaaa overrides (explicit IPv6 or provider tag)
   → If native AAAA exists from upstream → pass through
   → If domain is in no_aaaa → suppress or DNS64-map
-  → Run provider detection chain (31 providers, first match wins)
+  → Run provider detection chain (32 providers, first match wins)
   → Fallback: try www. prefix (aggressive mode), DNS64 synthesis, or return empty
 ```
 
@@ -161,6 +161,7 @@ Client → AAAA query for example.com
 | **Amazon S3** | Hostname (`*.s3.amazonaws.com`, etc.) | Hostname rewrite | s3.amazonaws.com |
 | **Azure Websites** | Hostname (`*.azurewebsites.windows.net`) | Hostname rewrite | ibwc.azurewebsites.net |
 | **Azure Storage** | CNAME target (`<svc>.<cluster>.store.core.windows.net`) | Hostname rewrite (`→ <svc>-ds.<cluster>.store.core.windows.net`) | azurestorageteam.z5.web.core.windows.net |
+| **Imperva (Incapsula)** | CNAME target (`*.incapdns.net`, `*.impervadns.net`) | PoP mapping (`2a02:e980::/29 → <pop>::<last octet hex>`) | www.singersl.com |
 | **MS Edge** | SOA (`*msedge.net*`) | v4→v6 mapping | onedrive.live.com |
 | **Edgecast/Verizon** | Hostname (`*.v0cdn.net`) | Hostname rewrite | software-download.microsoft.com |
 | **BunnyCDN** | Hostname (`*.b-cdn.net`) | DNS resolution | cdn-b-east.streamable.com |
@@ -209,8 +210,8 @@ LIVE_TLS=1 node tests/vercel.js
 
 ```
 app.js                    Main server (809 lines)
-├── providers/            CDN detection and IPv6 generation (27 modules)
-├── tests/                Unit + integration tests (28 files)
+├── providers/            CDN detection and IPv6 generation (28 modules)
+├── tests/                Unit + integration tests (29 files)
 ├── ptrcheck.js           PTR-based IPv6 detection
 └── config.json           Runtime configuration
 ```

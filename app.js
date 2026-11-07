@@ -40,6 +40,7 @@ var blazingcdn = require('./providers/blazingcdn');
 var gcorecdn = require('./providers/gcorecdn');
 var azurewebsites = require('./providers/azurewebsites')
 var azurestorage = require('./providers/azurestorage');
+var imperva = require('./providers/imperva');
 var awsglobalaccelerator = require('./providers/awsglobalaccelerator');
 var cachefly = require('./providers/cachefly');
 var oracleobjectstorage = require('./providers/oracleobjectstorage');
@@ -346,6 +347,24 @@ const AAAA_PROVIDERS = [
     { name: 'azurestorage',
       detect: (ctx) => azurestorage.check_for_azurestorage_hostname(ctx.last_hostname),
       resolve: (ctx, r, cb) => { ctx.matched = true; resolver.resolve6(r, (e, a) => a ? handleResponse(ctx.last_type, ctx.response, ctx.last_hostname, a, ctx.cb) : ctx.cb()); } },
+
+    // 32. Imperva (Incapsula) — CNAME target (*.incapdns.net / *.impervadns.net)
+    // → resolve4 → <pop /48>::<last octet hex>
+    { name: 'imperva',
+      detect: (ctx) => imperva.check_for_imperva_hostname(ctx.last_hostname),
+      resolve: (ctx, _, cb) => { ctx.matched = true; resolver.resolve4(ctx.last_hostname, (e, a) => {
+        var addresses = [];
+        if (a && a.length) {
+            for (var i = 0; i < a.length; i++) {
+                imperva.getv6addresses(a[i]).forEach(function (v6) {
+                    if (addresses.indexOf(v6) === -1) addresses.push(v6);
+                });
+            }
+        } else {
+            addresses.push(imperva.getdefaultv6address());
+        }
+        handleResponse(ctx.last_type, ctx.response, ctx.last_hostname, addresses, ctx.cb);
+      }); } },
 ];
 
 function processAAAAProviders(ctx) {
@@ -379,6 +398,7 @@ const A_IP_PROVIDERS = [
     { check: (ip) => wpvip.check_for_wordpressvip_ip(ip), tag: (ip) => wpvip.wpvipv4to6(ip) },
     { check: (ip) => cachefly.check_for_cachefly_ip(ip), tag: (ip) => cachefly.cacheflyv4to6(ip) },
     { check: (ip) => vercel.check_for_vercel_ip(ip), tag: 'vercel' },
+    { check: (ip) => imperva.check_for_imperva_ip(ip), tag: (ip) => imperva.getv6addresses(ip)[0] },
 ];
 
 // ---- A Record Hostname Detection Registry ----
