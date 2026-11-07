@@ -39,6 +39,7 @@ var bearblog = require('./providers/bearblog');
 var blazingcdn = require('./providers/blazingcdn');
 var gcorecdn = require('./providers/gcorecdn');
 var azurewebsites = require('./providers/azurewebsites')
+var azurestorage = require('./providers/azurestorage');
 var awsglobalaccelerator = require('./providers/awsglobalaccelerator');
 var cachefly = require('./providers/cachefly');
 var oracleobjectstorage = require('./providers/oracleobjectstorage');
@@ -339,6 +340,12 @@ const AAAA_PROVIDERS = [
         if (dns64) resolveIPv4AndMap(resolver, ctx.question, dns64_range, ctx.last_type, ctx.response, ctx.last_hostname, ctx.cb);
         else ctx.cb();
       }); } },
+
+    // 31. Azure Storage — CNAME target (<svc>.<cluster>.store.core.windows.net
+    // → <svc>-ds.<cluster>.store.core.windows.net) → resolve6
+    { name: 'azurestorage',
+      detect: (ctx) => azurestorage.check_for_azurestorage_hostname(ctx.last_hostname),
+      resolve: (ctx, r, cb) => { ctx.matched = true; resolver.resolve6(r, (e, a) => a ? handleResponse(ctx.last_type, ctx.response, ctx.last_hostname, a, ctx.cb) : ctx.cb()); } },
 ];
 
 function processAAAAProviders(ctx) {
